@@ -1,0 +1,22 @@
+{
+  "name": "apinegocio",
+  "version": "1.0.0",
+  "description": "This is a API logic bussines",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miguelorg12/Api_Negocio_Rondines.git"
+  },
+  "author": "Miguel Villalpando",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miguelorg12/Api_Negocio_Rondines/issues"
+  },
+  "homepage": "https://github.com/miguelorg12/Api_Negocio_Rondines#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
