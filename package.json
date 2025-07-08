@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/miguelorg12/Api_Negocio_Rondines#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^17.1.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
   }
 }
