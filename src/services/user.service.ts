@@ -1,6 +1,6 @@
-import { AppDataSource } from "../configs/data-source";
-import { CreateUserDto } from "../interfaces/dto/user.dto";
-import { User } from "../interfaces/entity/user.entity";
+import { AppDataSource } from "@configs/data-source";
+import { CreateUserDto } from "@dto/user.dto";
+import { User } from "@entities/user.entity";
 import { Repository } from "typeorm";
 
 export class UserService {
@@ -14,7 +14,7 @@ export class UserService {
     return this.userRepository.find();
   }
 
-   async create(user: CreateUserDto): Promise<User> {
+  async create(user: CreateUserDto): Promise<User> {
     return this.userRepository.save(user);
   }
 
