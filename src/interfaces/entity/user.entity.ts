@@ -1,4 +1,6 @@
 import {
+  AfterInsert,
+  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -13,8 +15,9 @@ import { Exclude } from "class-transformer";
 import { Role } from "@entities/role.entity";
 import { Incident } from "@entities/incident.entity";
 import { ReportLog } from "@entities/report_log.entity";
-import { PatrolRecord } from "./patrol_record.entity";
-import { Branch } from "./branch.entity";
+import { PatrolRecord } from "@entities/patrol_record.entity";
+import { Branch } from "@entities/branch.entity";
+import * as bcrypt from "bcryptjs";
 
 @Entity("users")
 export class User {
@@ -67,4 +70,11 @@ export class User {
 
   @DeleteDateColumn({ type: "timestamptz", nullable: true })
   deleted_at?: Date;
+
+  @BeforeInsert()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
 }

@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/miguelorg12/Api_Negocio_Rondines#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "dotenv": "^17.1.0",
     "express": "^5.1.0",

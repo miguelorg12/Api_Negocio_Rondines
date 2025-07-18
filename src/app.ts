@@ -4,6 +4,7 @@ import userRoutes from "../src/routes/user.route";
 import roleRoutes from "../src/routes/role.route";
 import companyRoutes from "../src/routes/company.route";
 import branchRoutes from "../src/routes/branch.router";
+import patrolRoutes from "../src/routes/patrol.router";
 
 const app = express();
 app.use(express.json());
@@ -19,5 +20,6 @@ apiRouter.use("/users", userRoutes);
 apiRouter.use("/roles", roleRoutes);
 apiRouter.use("/companies", companyRoutes);
 apiRouter.use("/branches", branchRoutes);
+apiRouter.use("/patrols", patrolRoutes);
 
 export default app;
