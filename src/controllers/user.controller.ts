@@ -1,30 +1,92 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
-import { CreateUserDto } from "../interfaces/dto/user.dto";
+import {
+  CreateUserDto,
+  PartialCreateUserDto,
+} from "../interfaces/dto/user.dto";
 import { validationResult } from "express-validator";
 
 const userService = new UserService();
 
-export const getAllUsers = async(_req:Request, res:Response) => {
-    const users = await userService.findAll();
-    res.status(200).json(users);
-}
+export const getAllUsers = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
+  const users = await userService.findAll();
+  return res.status(200).json({
+    message: "Usuarios obtenidos correctamente",
+    users,
+  });
+};
 
-export const getUserById = async(req:Request, res:Response) => {
-    const userId = parseInt(req.params.id);
-    if(!userId) {
-        return res.status(400).json({ message: "Invalid user ID" });
-    }
-    const user = await userService.findById(userId);
-    return res.status(200).json(user);
-}
+export const createUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      message: "Error en la validación de datos",
+      errors: errors.array(),
+    });
+  }
+  const userData: CreateUserDto = req.body;
+  const newUser = await userService.create(userData);
+  return res
+    .status(201)
+    .json({ message: "Usuario creado correctamente", user: newUser });
+};
 
-export const createUser = async(req:Request, res:Response) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-    const user = await userService.create(req.body);
-    res.status(201).json(user);
-}
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = parseInt(req.params.id);
+  const user = await userService.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+  return res.status(200).json({ message: "Usuario encontrado", user });
+};
 
+export const updateUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      message: "Error en la validación de datos",
+      errors: errors.array(),
+    });
+  }
+  const userId = parseInt(req.params.id);
+  const userData: PartialCreateUserDto = req.body;
+
+  const user = await userService.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+  const updatedUser = await userService.update(userId, userData);
+
+  return res.status(200).json({
+    message: "Usuario actualizado correctamente",
+    user: updatedUser,
+  });
+};
+
+export const deleteUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = parseInt(req.params.id);
+  let user = await userService.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+  user = await userService.delete(userId);
+
+  return res
+    .status(200)
+    .json({ message: "Usuario eliminado correctamente", user });
+};

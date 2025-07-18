@@ -9,3 +9,5 @@ export class CreateUserDto {
   biometric: string;
   code: string;
 }
+
+export type PartialCreateUserDto = Partial<CreateUserDto>;

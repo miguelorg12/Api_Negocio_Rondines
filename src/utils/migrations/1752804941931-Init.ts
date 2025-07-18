@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1752633520200 implements MigrationInterface {
-    name = 'Init1752633520200'
+export class Init1752804941931 implements MigrationInterface {
+    name = 'Init1752804941931'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -10,21 +10,22 @@ export class Init1752633520200 implements MigrationInterface {
                 "name" character varying(100) NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 CONSTRAINT "PK_c1433d71a4838793a49dcad46ab" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
-            CREATE TABLE "incidents" (
+            CREATE TABLE "companies" (
                 "id" SERIAL NOT NULL,
-                "description" text NOT NULL,
-                "status" character varying NOT NULL,
-                "severity" character varying NOT NULL,
+                "name" character varying(255) NOT NULL,
+                "address" character varying(255) NOT NULL,
+                "email" character varying(255) NOT NULL,
+                "phone" character varying(10) NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "user_id" integer,
-                "checkpoint_id" integer,
-                "branch_id" integer,
-                CONSTRAINT "PK_ccb34c01719889017e2246469f9" PRIMARY KEY ("id")
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
+                CONSTRAINT "UQ_d0af6f5866201d5cb424767744a" UNIQUE ("email"),
+                CONSTRAINT "PK_d4bc3e82a314fa9e29f652c2c22" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
@@ -36,6 +37,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "active" boolean NOT NULL DEFAULT true,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "user_id" integer,
                 "patrol_id" integer,
                 CONSTRAINT "PK_4e7bd5f7716b9451570b5361354" PRIMARY KEY ("id")
@@ -49,8 +51,34 @@ export class Init1752633520200 implements MigrationInterface {
                 "active" boolean NOT NULL DEFAULT true,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "branch_id" integer,
                 CONSTRAINT "PK_e9fc912ea5d187f0130ab4a4cef" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "branches" (
+                "id" SERIAL NOT NULL,
+                "name" character varying(255) NOT NULL,
+                "address" character varying(255) NOT NULL,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
+                "company_id" integer,
+                "user_id" integer,
+                CONSTRAINT "PK_7f37d3b42defea97f1df0d19535" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "plans" (
+                "id" SERIAL NOT NULL,
+                "name" character varying NOT NULL,
+                "image_url" text NOT NULL,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
+                "branch_id" integer,
+                CONSTRAINT "PK_3720521a81c7c24fe9b7202ba61" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
@@ -62,44 +90,24 @@ export class Init1752633520200 implements MigrationInterface {
                 "y" bigint NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "plan_id" integer,
                 CONSTRAINT "PK_dfcc46a91d96ecba8a8dcd8b11c" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
-            CREATE TABLE "plans" (
+            CREATE TABLE "incidents" (
                 "id" SERIAL NOT NULL,
-                "name" character varying NOT NULL,
-                "image_url" text NOT NULL,
+                "description" text NOT NULL,
+                "status" character varying NOT NULL,
+                "severity" character varying NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "branch_id" integer,
-                CONSTRAINT "PK_3720521a81c7c24fe9b7202ba61" PRIMARY KEY ("id")
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TABLE "branches" (
-                "id" SERIAL NOT NULL,
-                "name" character varying(255) NOT NULL,
-                "address" character varying(255) NOT NULL,
-                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "company_id" integer,
-                CONSTRAINT "PK_7f37d3b42defea97f1df0d19535" PRIMARY KEY ("id")
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TABLE "companies" (
-                "id" SERIAL NOT NULL,
-                "name" character varying(255) NOT NULL,
-                "address" character varying(255) NOT NULL,
-                "email" character varying(255) NOT NULL,
-                "phone" character varying(10) NOT NULL,
-                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "user_id" integer,
-                CONSTRAINT "UQ_d0af6f5866201d5cb424767744a" UNIQUE ("email"),
-                CONSTRAINT "PK_d4bc3e82a314fa9e29f652c2c22" PRIMARY KEY ("id")
+                "checkpoint_id" integer,
+                "branch_id" integer,
+                CONSTRAINT "PK_ccb34c01719889017e2246469f9" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
@@ -108,6 +116,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "report_type" character varying NOT NULL,
                 "generated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "user_id" integer,
                 CONSTRAINT "PK_242e8e0f9c2689f09aeaf00e67b" PRIMARY KEY ("id")
             )
@@ -124,6 +133,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "biometric" character varying NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 "role_id" integer,
                 CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"),
                 CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id")
@@ -135,6 +145,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "name" character varying NOT NULL,
                 "start_time" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "end_time" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 CONSTRAINT "PK_84d692e367e4d6cdf045828768c" PRIMARY KEY ("id")
             )
         `);
@@ -144,6 +155,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "patrol_id" integer NOT NULL,
                 "shift_id" integer NOT NULL,
                 "date" date NOT NULL,
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 CONSTRAINT "PK_0cd978da3e5d37bd0ff45b847e1" PRIMARY KEY ("user_id", "patrol_id", "shift_id", "date")
             )
         `);
@@ -154,6 +166,7 @@ export class Init1752633520200 implements MigrationInterface {
                 "read_time" TIMESTAMP WITH TIME ZONE,
                 "correct" boolean,
                 "biometric_verified_at" TIMESTAMP WITH TIME ZONE,
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
                 CONSTRAINT "PK_a7ce32109f5cd59ec65e7df7fce" PRIMARY KEY ("patrol_record_id", "checkpoint_id")
             )
         `);
@@ -171,18 +184,6 @@ export class Init1752633520200 implements MigrationInterface {
             CREATE INDEX "IDX_4683087d2d267f765629f964fe" ON "checkpoints_patrols_patrols" ("patrolsId")
         `);
         await queryRunner.query(`
-            ALTER TABLE "incidents"
-            ADD CONSTRAINT "FK_66f302514887c0a1202dc48c239" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "incidents"
-            ADD CONSTRAINT "FK_9b6aaf5cfae63bf747a42c8ee56" FOREIGN KEY ("checkpoint_id") REFERENCES "checkpoints"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "incidents"
-            ADD CONSTRAINT "FK_42813e59f8d54520d1a38647849" FOREIGN KEY ("branch_id") REFERENCES "branches"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
             ALTER TABLE "patrol_records"
             ADD CONSTRAINT "FK_b1e9d94485eeeb0e5e2475a4ab8" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
@@ -195,20 +196,32 @@ export class Init1752633520200 implements MigrationInterface {
             ADD CONSTRAINT "FK_e854d2c5209da1045aac66cddeb" FOREIGN KEY ("branch_id") REFERENCES "branches"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
-            ALTER TABLE "checkpoints"
-            ADD CONSTRAINT "FK_39b4afa2acd45d30ed9fdb8bacb" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+            ALTER TABLE "branches"
+            ADD CONSTRAINT "FK_5973f79e64a27c506b07cd84b29" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "branches"
+            ADD CONSTRAINT "FK_1359c25adc8fa78046837f7ad60" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
             ALTER TABLE "plans"
             ADD CONSTRAINT "FK_be006c839d804f3dfd261c2fdf2" FOREIGN KEY ("branch_id") REFERENCES "branches"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
-            ALTER TABLE "branches"
-            ADD CONSTRAINT "FK_5973f79e64a27c506b07cd84b29" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+            ALTER TABLE "checkpoints"
+            ADD CONSTRAINT "FK_39b4afa2acd45d30ed9fdb8bacb" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
-            ALTER TABLE "companies"
-            ADD CONSTRAINT "FK_ee0839cba07cb0c52602021ad4b" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+            ALTER TABLE "incidents"
+            ADD CONSTRAINT "FK_66f302514887c0a1202dc48c239" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "incidents"
+            ADD CONSTRAINT "FK_9b6aaf5cfae63bf747a42c8ee56" FOREIGN KEY ("checkpoint_id") REFERENCES "checkpoints"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "incidents"
+            ADD CONSTRAINT "FK_42813e59f8d54520d1a38647849" FOREIGN KEY ("branch_id") REFERENCES "branches"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
             ALTER TABLE "report_logs"
@@ -277,16 +290,25 @@ export class Init1752633520200 implements MigrationInterface {
             ALTER TABLE "report_logs" DROP CONSTRAINT "FK_6b182514d5aeb5ab4fbf361e573"
         `);
         await queryRunner.query(`
-            ALTER TABLE "companies" DROP CONSTRAINT "FK_ee0839cba07cb0c52602021ad4b"
+            ALTER TABLE "incidents" DROP CONSTRAINT "FK_42813e59f8d54520d1a38647849"
         `);
         await queryRunner.query(`
-            ALTER TABLE "branches" DROP CONSTRAINT "FK_5973f79e64a27c506b07cd84b29"
+            ALTER TABLE "incidents" DROP CONSTRAINT "FK_9b6aaf5cfae63bf747a42c8ee56"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "incidents" DROP CONSTRAINT "FK_66f302514887c0a1202dc48c239"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "checkpoints" DROP CONSTRAINT "FK_39b4afa2acd45d30ed9fdb8bacb"
         `);
         await queryRunner.query(`
             ALTER TABLE "plans" DROP CONSTRAINT "FK_be006c839d804f3dfd261c2fdf2"
         `);
         await queryRunner.query(`
-            ALTER TABLE "checkpoints" DROP CONSTRAINT "FK_39b4afa2acd45d30ed9fdb8bacb"
+            ALTER TABLE "branches" DROP CONSTRAINT "FK_1359c25adc8fa78046837f7ad60"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "branches" DROP CONSTRAINT "FK_5973f79e64a27c506b07cd84b29"
         `);
         await queryRunner.query(`
             ALTER TABLE "patrols" DROP CONSTRAINT "FK_e854d2c5209da1045aac66cddeb"
@@ -296,15 +318,6 @@ export class Init1752633520200 implements MigrationInterface {
         `);
         await queryRunner.query(`
             ALTER TABLE "patrol_records" DROP CONSTRAINT "FK_b1e9d94485eeeb0e5e2475a4ab8"
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "incidents" DROP CONSTRAINT "FK_42813e59f8d54520d1a38647849"
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "incidents" DROP CONSTRAINT "FK_9b6aaf5cfae63bf747a42c8ee56"
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "incidents" DROP CONSTRAINT "FK_66f302514887c0a1202dc48c239"
         `);
         await queryRunner.query(`
             DROP INDEX "public"."IDX_4683087d2d267f765629f964fe"
@@ -331,16 +344,16 @@ export class Init1752633520200 implements MigrationInterface {
             DROP TABLE "report_logs"
         `);
         await queryRunner.query(`
-            DROP TABLE "companies"
+            DROP TABLE "incidents"
         `);
         await queryRunner.query(`
-            DROP TABLE "branches"
+            DROP TABLE "checkpoints"
         `);
         await queryRunner.query(`
             DROP TABLE "plans"
         `);
         await queryRunner.query(`
-            DROP TABLE "checkpoints"
+            DROP TABLE "branches"
         `);
         await queryRunner.query(`
             DROP TABLE "patrols"
@@ -349,7 +362,7 @@ export class Init1752633520200 implements MigrationInterface {
             DROP TABLE "patrol_records"
         `);
         await queryRunner.query(`
-            DROP TABLE "incidents"
+            DROP TABLE "companies"
         `);
         await queryRunner.query(`
             DROP TABLE "roles"

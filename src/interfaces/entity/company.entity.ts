@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -28,10 +29,6 @@ export class Company {
   @Column({ length: 10 })
   phone: string;
 
-  @ManyToOne(() => User, (user) => user.company, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "user_id" })
-  user: User;
-
   @OneToMany(() => Branch, (branch) => branch.company)
   branch: Branch[];
 
@@ -40,4 +37,7 @@ export class Company {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updated_at: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", nullable: true })
+  deleted_at?: Date;
 }

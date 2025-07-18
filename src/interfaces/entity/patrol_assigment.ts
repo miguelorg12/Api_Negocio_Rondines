@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column } from "typeorm";
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+  DeleteDateColumn,
+} from "typeorm";
 import { User } from "@entities/user.entity";
 import { Patrol } from "@entities/patrol.entity";
 import { Shift } from "@entities/shift.entity";
@@ -28,4 +35,7 @@ export class PatrolAssignment {
   @ManyToOne(() => Shift, { onDelete: "CASCADE" })
   @JoinColumn({ name: "shift_id" })
   shift: Shift;
+
+  @DeleteDateColumn({ type: "timestamptz", nullable: true })
+  deleted_at?: Date;
 }

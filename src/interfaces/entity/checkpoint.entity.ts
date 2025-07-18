@@ -9,6 +9,7 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { Plan } from "@entities/plan.entity";
 import { Incident } from "@entities/incident.entity";
@@ -47,4 +48,7 @@ export class Checkpoint {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updated_at: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", nullable: true })
+  deleted_at?: Date;
 }

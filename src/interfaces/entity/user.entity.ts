@@ -1,19 +1,20 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Exclude } from "class-transformer";
 import { Role } from "@entities/role.entity";
-import { Company } from "@entities/company.entity";
 import { Incident } from "@entities/incident.entity";
 import { ReportLog } from "@entities/report_log.entity";
 import { PatrolRecord } from "./patrol_record.entity";
+import { Branch } from "./branch.entity";
 
 @Entity("users")
 export class User {
@@ -32,6 +33,7 @@ export class User {
   @Column({ unique: true, length: 100 })
   email: string;
 
+  @Exclude()
   @Column({ length: 100 })
   password: string;
 
@@ -45,8 +47,8 @@ export class User {
   @JoinColumn({ name: "role_id" })
   role: Role;
 
-  @OneToMany(() => Company, (company) => company.user)
-  company: Company;
+  @OneToMany(() => Branch, (branch) => branch.user)
+  branch: Branch[];
 
   @OneToMany(() => Incident, (incident) => incident.user)
   incidents: Incident[];
@@ -62,4 +64,7 @@ export class User {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updated_at: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", nullable: true })
+  deleted_at?: Date;
 }

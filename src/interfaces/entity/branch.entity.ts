@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -12,6 +13,7 @@ import { Company } from "@entities/company.entity";
 import { Plan } from "@entities/plan.entity";
 import { Incident } from "@entities/incident.entity";
 import { Patrol } from "@entities/patrol.entity";
+import { User } from "./user.entity";
 
 @Entity("branches")
 export class Branch {
@@ -30,6 +32,12 @@ export class Branch {
   @JoinColumn({ name: "company_id" })
   company: Company;
 
+  @ManyToOne(() => User, (user) => user.branch, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
   @OneToMany(() => Plan, (plan) => plan.branch)
   plans: Plan[];
 
@@ -44,4 +52,7 @@ export class Branch {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updated_at: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", nullable: true })
+  deleted_at?: Date;
 }
