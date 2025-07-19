@@ -15,7 +15,7 @@ export const getAllUsers = async (
   const users = await userService.findAll();
   return res.status(200).json({
     message: "Usuarios obtenidos correctamente",
-    users,
+    data: users,
   });
 };
 
@@ -34,7 +34,7 @@ export const createUser = async (
   const newUser = await userService.create(userData);
   return res
     .status(201)
-    .json({ message: "Usuario creado correctamente", user: newUser });
+    .json({ message: "Usuario creado correctamente", data: newUser });
 };
 
 export const getUserById = async (
@@ -71,7 +71,7 @@ export const updateUser = async (
 
   return res.status(200).json({
     message: "Usuario actualizado correctamente",
-    user: updatedUser,
+    data: updatedUser,
   });
 };
 
@@ -88,5 +88,5 @@ export const deleteUser = async (
 
   return res
     .status(200)
-    .json({ message: "Usuario eliminado correctamente", user });
+    .json({ message: "Usuario eliminado correctamente", data: user });
 };

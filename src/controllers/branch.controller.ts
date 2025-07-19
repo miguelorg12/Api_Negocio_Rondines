@@ -11,7 +11,7 @@ export const getAllBranches = async (
   const branches = await branchService.findAll();
   return res.status(200).json({
     message: "Sucursales obtenidas correctamente",
-    branches,
+    data: branches,
   });
 };
 
@@ -30,7 +30,7 @@ export const createBranch = async (
   const newBranch = await branchService.create(branchData);
   return res
     .status(201)
-    .json({ message: "Sucursal creada correctamente", branch: newBranch });
+    .json({ message: "Sucursal creada correctamente", data: newBranch });
 };
 
 export const getBranchById = async (
@@ -42,7 +42,7 @@ export const getBranchById = async (
   if (!branch) {
     return res.status(404).json({ message: "Sucursal no encontrada" });
   }
-  return res.status(200).json({ message: "Sucursal encontrada", branch });
+  return res.status(200).json({ message: "Sucursal encontrada", data: branch });
 };
 
 export const updateBranch = async (
@@ -65,7 +65,7 @@ export const updateBranch = async (
   const updatedBranch = await branchService.update(branchId, updateData);
   return res.status(200).json({
     message: "Sucursal actualizada correctamente",
-    branch: updatedBranch,
+    data: updatedBranch,
   });
 };
 
@@ -81,5 +81,5 @@ export const deleteBranch = async (
   await branchService.delete(branchId);
   return res
     .status(200)
-    .json({ message: "Sucursal eliminada correctamente", branch });
+    .json({ message: "Sucursal eliminada correctamente", data: branch });
 };

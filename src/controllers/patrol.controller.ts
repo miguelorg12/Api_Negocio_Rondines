@@ -11,7 +11,7 @@ export const getAllPatrols = async (
   const patrols = await patrolService.getAll();
   return res.status(200).json({
     message: "Rondas obtenidas correctamente",
-    patrols,
+    data: patrols,
   });
 };
 
@@ -30,7 +30,7 @@ export const createPatrol = async (
   const newPatrol = await patrolService.create(patrolData);
   return res
     .status(201)
-    .json({ message: "Ronda creada correctamente", patrol: newPatrol });
+    .json({ message: "Ronda creada correctamente", data: newPatrol });
 };
 
 export const getPatrolById = async (
@@ -42,7 +42,7 @@ export const getPatrolById = async (
   if (!patrol) {
     return res.status(404).json({ message: "Ronda no encontrada" });
   }
-  return res.status(200).json({ message: "Ronda encontrada", patrol });
+  return res.status(200).json({ message: "Ronda encontrada", data: patrol });
 };
 
 export const updatePatrol = async (
@@ -65,7 +65,7 @@ export const updatePatrol = async (
   const updatedPatrol = await patrolService.update(patrolId, patrolData);
   return res.status(200).json({
     message: "Ronda actualizada correctamente",
-    patrol: updatedPatrol,
+    data: updatedPatrol,
   });
 };
 
@@ -81,6 +81,6 @@ export const deletePatrol = async (
   const deletedPatrol = await patrolService.delete(patrolId);
   return res.status(200).json({
     message: "Ronda eliminada correctamente",
-    patrol: deletedPatrol,
+    data: deletedPatrol,
   });
 };

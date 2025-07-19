@@ -2,17 +2,33 @@ import { AppDataSource } from "@configs/data-source";
 import { Patrol } from "@interfaces/entity/patrol.entity";
 import { PatrolDto, PartialPatrolDto } from "@interfaces/dto/patrol.dto";
 import { Repository } from "typeorm";
+import { PlanService } from "./plan.service";
 
 export class PatrolService {
   private patrolRepository: Repository<Patrol>;
-
+  private planService: PlanService;
   constructor() {
     this.patrolRepository = AppDataSource.getRepository(Patrol);
+    this.planService = new PlanService();
   }
 
   async create(patrolDto: PatrolDto): Promise<Patrol> {
-    const patrol = this.patrolRepository.create(patrolDto);
-    return await this.patrolRepository.save(patrol);
+    let patrol = await this.patrolRepository.create(patrolDto);
+
+    if (patrolDto.plan_id) {
+      const plan = await this.planService.findById(patrolDto.plan_id);
+      if (!plan) {
+        throw new Error("Plan not found");
+      }
+      const checkpoints = plan.checkpoints;
+      if (checkpoints && checkpoints.length > 0) {
+        patrol = this.patrolRepository.create({
+          ...patrolDto,
+          checkpoints: checkpoints,
+        });
+      }
+    }
+    return await this.patrolRepository.save(patrolDto);
   }
 
   async getAll(): Promise<Patrol[]> {
@@ -20,7 +36,7 @@ export class PatrolService {
   }
 
   async getById(id: number): Promise<Patrol | null> {
-    return await this.patrolRepository.findOneBy({ id });
+    return await this.patrolRepository.findOne({ where: { id } });
   }
 
   async update(

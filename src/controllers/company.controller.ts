@@ -15,7 +15,7 @@ export const getAllCompanies = async (
   const companies = await companyService.findAll();
   return res.status(200).json({
     message: "Empresas obtenidas correctamente",
-    companies,
+    data: companies,
   });
 };
 
@@ -34,7 +34,7 @@ export const createCompany = async (
   const newCompany = await companyService.create(companyData);
   return res
     .status(201)
-    .json({ message: "Empresa creada correctamente", company: newCompany });
+    .json({ message: "Empresa creada correctamente", data: newCompany });
 };
 
 export const getCompanyById = async (
@@ -46,7 +46,7 @@ export const getCompanyById = async (
   if (!company) {
     return res.status(404).json({ message: "Empresa no encontrada" });
   }
-  return res.status(200).json({ message: "Empresa encontrada", company });
+  return res.status(200).json({ message: "Empresa encontrada", data: company });
 };
 
 export const updateCompany = async (
@@ -69,7 +69,7 @@ export const updateCompany = async (
   const updatedCompany = await companyService.update(companyId, updateData);
   return res.status(200).json({
     message: "Empresa actualizada correctamente",
-    company: updatedCompany,
+    data: updatedCompany,
   });
 };
 
@@ -85,5 +85,5 @@ export const deleteCompany = async (
   await companyService.delete(companyId);
   return res
     .status(200)
-    .json({ message: "Empresa eliminada correctamente", company });
+    .json({ message: "Empresa eliminada correctamente", data: company });
 };

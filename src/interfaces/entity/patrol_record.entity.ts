@@ -25,8 +25,11 @@ export class PatrolRecord {
   @Column({ type: "timestamptz" })
   actual_end: Date;
 
-  @Column({ default: true })
-  active: boolean;
+  @Column({
+    type: "enum",
+    enum: ["completado", "pendiente", "cancelado", "en_progreso"],
+  })
+  status: string;
 
   @ManyToOne(() => User, (user) => user.patrolRecords, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })

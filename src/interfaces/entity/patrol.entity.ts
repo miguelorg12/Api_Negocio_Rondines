@@ -4,6 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import {
 } from "typeorm";
 import { Branch } from "@entities/branch.entity";
 import { PatrolRecord } from "@entities/patrol_record.entity";
+import { Checkpoint } from "@entities/checkpoint.entity";
 
 @Entity("patrols")
 export class Patrol {
@@ -29,6 +31,9 @@ export class Patrol {
   @ManyToOne(() => Branch, (branch) => branch.patrols, { onDelete: "CASCADE" })
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
+
+  @ManyToMany(() => Checkpoint, (checkpoint) => checkpoint.patrols)
+  checkpoints: Checkpoint[];
 
   @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.patrol)
   patrolRecords: PatrolRecord[];

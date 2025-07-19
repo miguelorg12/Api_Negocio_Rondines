@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1752879189227 implements MigrationInterface {
-    name = 'Init1752879189227'
+export class Init1752964331098 implements MigrationInterface {
+    name = 'Init1752964331098'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -29,12 +29,20 @@ export class Init1752879189227 implements MigrationInterface {
             )
         `);
         await queryRunner.query(`
+            CREATE TYPE "public"."patrol_records_status_enum" AS ENUM(
+                'completado',
+                'pendiente',
+                'cancelado',
+                'en_progreso'
+            )
+        `);
+        await queryRunner.query(`
             CREATE TABLE "patrol_records" (
                 "id" SERIAL NOT NULL,
                 "date" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "actual_start" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "actual_end" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "active" boolean NOT NULL DEFAULT true,
+                "status" "public"."patrol_records_status_enum" NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "deleted_at" TIMESTAMP WITH TIME ZONE,
@@ -173,17 +181,17 @@ export class Init1752879189227 implements MigrationInterface {
             )
         `);
         await queryRunner.query(`
-            CREATE TABLE "checkpoints_patrols_patrols" (
-                "checkpointsId" integer NOT NULL,
-                "patrolsId" integer NOT NULL,
-                CONSTRAINT "PK_e86bb4af457b1a47fa4eb35ba0d" PRIMARY KEY ("checkpointsId", "patrolsId")
+            CREATE TABLE "patrol_checkpoints" (
+                "checkpoint_id" integer NOT NULL,
+                "patrol_id" integer NOT NULL,
+                CONSTRAINT "PK_034543387e51ef733f10f5266ce" PRIMARY KEY ("checkpoint_id", "patrol_id")
             )
         `);
         await queryRunner.query(`
-            CREATE INDEX "IDX_9f0c52a9a9efd4b0bcebe06b15" ON "checkpoints_patrols_patrols" ("checkpointsId")
+            CREATE INDEX "IDX_4deb379658c562f41b988ba3f5" ON "patrol_checkpoints" ("checkpoint_id")
         `);
         await queryRunner.query(`
-            CREATE INDEX "IDX_4683087d2d267f765629f964fe" ON "checkpoints_patrols_patrols" ("patrolsId")
+            CREATE INDEX "IDX_9ea6b77a69a61a80d984ea864e" ON "patrol_checkpoints" ("patrol_id")
         `);
         await queryRunner.query(`
             ALTER TABLE "patrol_records"
@@ -254,21 +262,21 @@ export class Init1752879189227 implements MigrationInterface {
             ADD CONSTRAINT "FK_3c70d27cc467909260030c98003" FOREIGN KEY ("checkpoint_id") REFERENCES "checkpoints"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
-            ALTER TABLE "checkpoints_patrols_patrols"
-            ADD CONSTRAINT "FK_9f0c52a9a9efd4b0bcebe06b151" FOREIGN KEY ("checkpointsId") REFERENCES "checkpoints"("id") ON DELETE CASCADE ON UPDATE CASCADE
+            ALTER TABLE "patrol_checkpoints"
+            ADD CONSTRAINT "FK_4deb379658c562f41b988ba3f5d" FOREIGN KEY ("checkpoint_id") REFERENCES "checkpoints"("id") ON DELETE CASCADE ON UPDATE CASCADE
         `);
         await queryRunner.query(`
-            ALTER TABLE "checkpoints_patrols_patrols"
-            ADD CONSTRAINT "FK_4683087d2d267f765629f964fea" FOREIGN KEY ("patrolsId") REFERENCES "patrols"("id") ON DELETE CASCADE ON UPDATE CASCADE
+            ALTER TABLE "patrol_checkpoints"
+            ADD CONSTRAINT "FK_9ea6b77a69a61a80d984ea864ea" FOREIGN KEY ("patrol_id") REFERENCES "patrols"("id") ON DELETE CASCADE ON UPDATE CASCADE
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
-            ALTER TABLE "checkpoints_patrols_patrols" DROP CONSTRAINT "FK_4683087d2d267f765629f964fea"
+            ALTER TABLE "patrol_checkpoints" DROP CONSTRAINT "FK_9ea6b77a69a61a80d984ea864ea"
         `);
         await queryRunner.query(`
-            ALTER TABLE "checkpoints_patrols_patrols" DROP CONSTRAINT "FK_9f0c52a9a9efd4b0bcebe06b151"
+            ALTER TABLE "patrol_checkpoints" DROP CONSTRAINT "FK_4deb379658c562f41b988ba3f5d"
         `);
         await queryRunner.query(`
             ALTER TABLE "checkpoint_records" DROP CONSTRAINT "FK_3c70d27cc467909260030c98003"
@@ -322,13 +330,13 @@ export class Init1752879189227 implements MigrationInterface {
             ALTER TABLE "patrol_records" DROP CONSTRAINT "FK_b1e9d94485eeeb0e5e2475a4ab8"
         `);
         await queryRunner.query(`
-            DROP INDEX "public"."IDX_4683087d2d267f765629f964fe"
+            DROP INDEX "public"."IDX_9ea6b77a69a61a80d984ea864e"
         `);
         await queryRunner.query(`
-            DROP INDEX "public"."IDX_9f0c52a9a9efd4b0bcebe06b15"
+            DROP INDEX "public"."IDX_4deb379658c562f41b988ba3f5"
         `);
         await queryRunner.query(`
-            DROP TABLE "checkpoints_patrols_patrols"
+            DROP TABLE "patrol_checkpoints"
         `);
         await queryRunner.query(`
             DROP TABLE "checkpoint_records"
@@ -362,6 +370,9 @@ export class Init1752879189227 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE "patrol_records"
+        `);
+        await queryRunner.query(`
+            DROP TYPE "public"."patrol_records_status_enum"
         `);
         await queryRunner.query(`
             DROP TABLE "companies"

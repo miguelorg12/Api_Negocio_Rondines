@@ -40,7 +40,11 @@ export class Checkpoint {
   incident: Incident[];
 
   @ManyToMany(() => Patrol, { onDelete: "CASCADE" })
-  @JoinTable()
+  @JoinTable({
+    name: "patrol_checkpoints",
+    joinColumn: { name: "checkpoint_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "patrol_id", referencedColumnName: "id" },
+  })
   patrols: Patrol[];
 
   @CreateDateColumn({ type: "timestamptz" })

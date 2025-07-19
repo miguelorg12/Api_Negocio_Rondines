@@ -12,7 +12,7 @@ export const getAllShifts = async (
   const shifts = await shiftService.getAll();
   return res.status(200).json({
     message: "Turnos obtenidos correctamente",
-    shifts,
+    data: shifts,
   });
 };
 
@@ -31,7 +31,7 @@ export const createShift = async (
   const newShift = await shiftService.create(shiftData);
   return res
     .status(201)
-    .json({ message: "Turno creado correctamente", shift: newShift });
+    .json({ message: "Turno creado correctamente", data: newShift });
 };
 
 export const getShiftById = async (
@@ -43,7 +43,7 @@ export const getShiftById = async (
   if (!shift) {
     return res.status(404).json({ message: "Turno no encontrado" });
   }
-  return res.status(200).json({ message: "Turno encontrado", shift });
+  return res.status(200).json({ message: "Turno encontrado", data: shift });
 };
 
 export const updateShift = async (
@@ -66,7 +66,7 @@ export const updateShift = async (
   const updatedShift = await shiftService.update(shiftId, shiftData);
   return res.status(200).json({
     message: "Turno actualizado correctamente",
-    shift: updatedShift,
+    data: updatedShift,
   });
 };
 
@@ -82,5 +82,5 @@ export const deleteShift = async (
   shift = await shiftService.delete(shiftId);
   return res
     .status(200)
-    .json({ message: "Turno eliminado correctamente", shift });
+    .json({ message: "Turno eliminado correctamente", data: shift });
 };

@@ -11,7 +11,7 @@ export const getAllRoles = async (
   const roles = await roleService.findAll();
   return res.status(200).json({
     message: "Roles obtenidos correctamente",
-    roles,
+    data: roles,
   });
 };
 
@@ -30,7 +30,7 @@ export const createRole = async (
   const newRole = await roleService.create(roleData);
   return res
     .status(201)
-    .json({ message: "Rol creado correctamente", role: newRole });
+    .json({ message: "Rol creado correctamente", data: newRole });
 };
 
 export const getRoleById = async (
@@ -42,7 +42,7 @@ export const getRoleById = async (
   if (!role) {
     return res.status(404).json({ message: "Rol no encontrado" });
   }
-  return res.status(200).json({ message: "Rol encontrado", role });
+  return res.status(200).json({ message: "Rol encontrado", data: role });
 };
 
 export const updateRole = async (
@@ -66,7 +66,7 @@ export const updateRole = async (
 
   return res.status(200).json({
     message: "Rol actualizado correctamente",
-    role,
+    data: role,
   });
 };
 
@@ -83,6 +83,6 @@ export const deleteRole = async (
 
   return res.status(200).json({
     message: "Rol eliminado correctamente",
-    role,
+    data: role,
   });
 };
