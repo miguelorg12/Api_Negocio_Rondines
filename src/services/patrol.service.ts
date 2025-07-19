@@ -2,7 +2,7 @@ import { AppDataSource } from "@configs/data-source";
 import { Patrol } from "@interfaces/entity/patrol.entity";
 import { PatrolDto, PartialPatrolDto } from "@interfaces/dto/patrol.dto";
 import { Repository } from "typeorm";
-import { PlanService } from "./plan.service";
+import { PlanService } from "@services/plan.service";
 
 export class PatrolService {
   private patrolRepository: Repository<Patrol>;
@@ -13,7 +13,7 @@ export class PatrolService {
   }
 
   async create(patrolDto: PatrolDto): Promise<Patrol> {
-    let patrol = await this.patrolRepository.create(patrolDto);
+    let patrol = this.patrolRepository.create(patrolDto);
 
     if (patrolDto.plan_id) {
       const plan = await this.planService.findById(patrolDto.plan_id);
