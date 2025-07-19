@@ -5,6 +5,7 @@ import roleRoutes from "../src/routes/role.route";
 import companyRoutes from "../src/routes/company.route";
 import branchRoutes from "../src/routes/branch.router";
 import patrolRoutes from "../src/routes/patrol.router";
+import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,11 @@ app.get("/", (req, res) => {
 
 const apiRouter = express.Router();
 app.use("/api/v1", apiRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 apiRouter.use("/users", userRoutes);
 apiRouter.use("/roles", roleRoutes);

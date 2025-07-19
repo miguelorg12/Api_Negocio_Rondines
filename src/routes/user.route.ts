@@ -7,6 +7,21 @@ import {
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/v1/users:
+ *   get:
+ *     summary: Obtiene todos los usuarios
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Usuarios obtenidos correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserAllResponse'
+ */
 router.get("/", userController.getAllUsers);
 router.post("/", createUserValidator, userController.createUser);
 router.get("/:id", userController.getUserById);
