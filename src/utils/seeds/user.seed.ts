@@ -12,7 +12,7 @@ export async function seedUsers() {
       password: "Password123!",
       active: true,
       biometric: "biometric_data_1",
-      role_id: 1,
+      role: { id: 1 },
     },
     {
       name: "Jane",
@@ -22,7 +22,7 @@ export async function seedUsers() {
       password: "Password456!",
       active: true,
       biometric: "biometric_data_2",
-      role_id: 2,
+      role: { id: 2 },
     },
     {
       name: "Carlos",
@@ -32,7 +32,7 @@ export async function seedUsers() {
       password: "Password789!",
       active: false,
       biometric: "biometric_data_3",
-      role_id: 3,
+      role: { id: 3 },
     },
     {
       name: "Ana",
@@ -42,7 +42,7 @@ export async function seedUsers() {
       password: "Password321!",
       active: true,
       biometric: "biometric_data_4",
-      role_id: 1,
+      role: { id: 1 },
     },
   ];
 
