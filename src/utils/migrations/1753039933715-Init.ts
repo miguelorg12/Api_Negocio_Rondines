@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1753036932378 implements MigrationInterface {
-    name = 'Init1753036932378'
+export class Init1753039933715 implements MigrationInterface {
+    name = 'Init1753039933715'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -135,7 +135,7 @@ export class Init1753036932378 implements MigrationInterface {
         await queryRunner.query(`
             CREATE TABLE "oauth_clients" (
                 "id" SERIAL NOT NULL,
-                "client_id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+                "client_id" character varying NOT NULL,
                 "client_secret" character varying NOT NULL,
                 "redirect_uri" character varying,
                 "name" character varying,

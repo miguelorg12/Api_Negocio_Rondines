@@ -19,7 +19,6 @@ export class OauthClientsEntity {
   id: number;
 
   @Column({ unique: true })
-  @Generated("uuid")
   client_id: string;
 
   @Column()
