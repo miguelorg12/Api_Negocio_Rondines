@@ -5,24 +5,21 @@ import {
   JoinColumn,
   Column,
   DeleteDateColumn,
+  PrimaryGeneratedColumn,
+  OneToMany,
 } from "typeorm";
 import { User } from "@entities/user.entity";
 import { Patrol } from "@entities/patrol.entity";
 import { Shift } from "@entities/shift.entity";
+import { PatrolRecord } from "@entities/patrol_record.entity";
 
 @Entity("patrol_assignments")
 export class PatrolAssignment {
-  @PrimaryColumn()
-  user_id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @PrimaryColumn()
-  patrol_id: number;
-
-  @PrimaryColumn()
-  shift_id: number;
-
-  @PrimaryColumn({ type: "date" })
-  date: string;
+  @Column({ type: "timestamptz" })
+  date: Date;
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })
@@ -35,6 +32,12 @@ export class PatrolAssignment {
   @ManyToOne(() => Shift, { onDelete: "CASCADE" })
   @JoinColumn({ name: "shift_id" })
   shift: Shift;
+
+  @OneToMany(
+    () => PatrolRecord,
+    (patrolRecord) => patrolRecord.patrolAssignment
+  )
+  patrolRecords: PatrolRecord[];
 
   @DeleteDateColumn({ type: "timestamptz", nullable: true })
   deleted_at?: Date;

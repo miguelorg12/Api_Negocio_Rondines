@@ -45,4 +45,11 @@ export class PatrolRecordService {
     });
     return this.findById(id);
   }
+
+  async findByAssigmentId(id: number): Promise<PatrolRecord | null> {
+    return await this.patrolRecordRepository.findOne({
+      where: { patrolAssignment: { id } },
+      relations: ["patrolAssignment"],
+    });
+  }
 }

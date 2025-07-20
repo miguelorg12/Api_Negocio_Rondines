@@ -35,8 +35,8 @@ export class Patrol {
   @ManyToMany(() => Checkpoint, (checkpoint) => checkpoint.patrols)
   checkpoints: Checkpoint[];
 
-  @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.patrol)
-  patrolRecords: PatrolRecord[];
+  // @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.patrol)
+  // patrolRecords: PatrolRecord[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1752964331098 implements MigrationInterface {
-    name = 'Init1752964331098'
+export class Init1752973473717 implements MigrationInterface {
+    name = 'Init1752973473717'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -26,29 +26,6 @@ export class Init1752964331098 implements MigrationInterface {
                 "deleted_at" TIMESTAMP WITH TIME ZONE,
                 CONSTRAINT "UQ_d0af6f5866201d5cb424767744a" UNIQUE ("email"),
                 CONSTRAINT "PK_d4bc3e82a314fa9e29f652c2c22" PRIMARY KEY ("id")
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TYPE "public"."patrol_records_status_enum" AS ENUM(
-                'completado',
-                'pendiente',
-                'cancelado',
-                'en_progreso'
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TABLE "patrol_records" (
-                "id" SERIAL NOT NULL,
-                "date" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "actual_start" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "actual_end" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "status" "public"."patrol_records_status_enum" NOT NULL,
-                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                "deleted_at" TIMESTAMP WITH TIME ZONE,
-                "user_id" integer,
-                "patrol_id" integer,
-                CONSTRAINT "PK_4e7bd5f7716b9451570b5361354" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
@@ -161,12 +138,35 @@ export class Init1752964331098 implements MigrationInterface {
         `);
         await queryRunner.query(`
             CREATE TABLE "patrol_assignments" (
-                "user_id" integer NOT NULL,
-                "patrol_id" integer NOT NULL,
-                "shift_id" integer NOT NULL,
-                "date" date NOT NULL,
+                "id" SERIAL NOT NULL,
+                "date" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "deleted_at" TIMESTAMP WITH TIME ZONE,
-                CONSTRAINT "PK_0cd978da3e5d37bd0ff45b847e1" PRIMARY KEY ("user_id", "patrol_id", "shift_id", "date")
+                "user_id" integer,
+                "patrol_id" integer,
+                "shift_id" integer,
+                CONSTRAINT "PK_fff7efae566e8ee7ae4cd55e49e" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TYPE "public"."patrol_records_status_enum" AS ENUM(
+                'completado',
+                'pendiente',
+                'cancelado',
+                'en_progreso'
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "patrol_records" (
+                "id" SERIAL NOT NULL,
+                "date" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "actual_start" TIMESTAMP WITH TIME ZONE,
+                "actual_end" TIMESTAMP WITH TIME ZONE,
+                "status" "public"."patrol_records_status_enum" NOT NULL,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "deleted_at" TIMESTAMP WITH TIME ZONE,
+                "patrol_assignment_id" integer,
+                CONSTRAINT "PK_4e7bd5f7716b9451570b5361354" PRIMARY KEY ("id")
             )
         `);
         await queryRunner.query(`
@@ -192,14 +192,6 @@ export class Init1752964331098 implements MigrationInterface {
         `);
         await queryRunner.query(`
             CREATE INDEX "IDX_9ea6b77a69a61a80d984ea864e" ON "patrol_checkpoints" ("patrol_id")
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "patrol_records"
-            ADD CONSTRAINT "FK_b1e9d94485eeeb0e5e2475a4ab8" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "patrol_records"
-            ADD CONSTRAINT "FK_c0cf048c214d5937218c35d75f5" FOREIGN KEY ("patrol_id") REFERENCES "patrols"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
             ALTER TABLE "patrols"
@@ -254,6 +246,10 @@ export class Init1752964331098 implements MigrationInterface {
             ADD CONSTRAINT "FK_f70f5be5645f658f606a7abe03a" FOREIGN KEY ("shift_id") REFERENCES "shifts"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
+            ALTER TABLE "patrol_records"
+            ADD CONSTRAINT "FK_2229f1350cc0103a511b78a6514" FOREIGN KEY ("patrol_assignment_id") REFERENCES "patrol_assignments"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
             ALTER TABLE "checkpoint_records"
             ADD CONSTRAINT "FK_9c8535b3abe7b04260b5e7d8e5a" FOREIGN KEY ("patrol_record_id") REFERENCES "patrol_records"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
@@ -283,6 +279,9 @@ export class Init1752964331098 implements MigrationInterface {
         `);
         await queryRunner.query(`
             ALTER TABLE "checkpoint_records" DROP CONSTRAINT "FK_9c8535b3abe7b04260b5e7d8e5a"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "patrol_records" DROP CONSTRAINT "FK_2229f1350cc0103a511b78a6514"
         `);
         await queryRunner.query(`
             ALTER TABLE "patrol_assignments" DROP CONSTRAINT "FK_f70f5be5645f658f606a7abe03a"
@@ -324,12 +323,6 @@ export class Init1752964331098 implements MigrationInterface {
             ALTER TABLE "patrols" DROP CONSTRAINT "FK_e854d2c5209da1045aac66cddeb"
         `);
         await queryRunner.query(`
-            ALTER TABLE "patrol_records" DROP CONSTRAINT "FK_c0cf048c214d5937218c35d75f5"
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "patrol_records" DROP CONSTRAINT "FK_b1e9d94485eeeb0e5e2475a4ab8"
-        `);
-        await queryRunner.query(`
             DROP INDEX "public"."IDX_9ea6b77a69a61a80d984ea864e"
         `);
         await queryRunner.query(`
@@ -340,6 +333,12 @@ export class Init1752964331098 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE "checkpoint_records"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "patrol_records"
+        `);
+        await queryRunner.query(`
+            DROP TYPE "public"."patrol_records_status_enum"
         `);
         await queryRunner.query(`
             DROP TABLE "patrol_assignments"
@@ -367,12 +366,6 @@ export class Init1752964331098 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE "patrols"
-        `);
-        await queryRunner.query(`
-            DROP TABLE "patrol_records"
-        `);
-        await queryRunner.query(`
-            DROP TYPE "public"."patrol_records_status_enum"
         `);
         await queryRunner.query(`
             DROP TABLE "companies"

@@ -59,8 +59,8 @@ export class User {
   @OneToMany(() => ReportLog, (reportLog) => reportLog.user)
   reportLogs: ReportLog[];
 
-  @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.user)
-  patrolRecords: PatrolRecord[];
+  // @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.user)
+  // patrolRecords: PatrolRecord[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

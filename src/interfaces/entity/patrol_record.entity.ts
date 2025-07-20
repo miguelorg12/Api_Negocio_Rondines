@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { User } from "@entities/user.entity";
 import { Patrol } from "@entities/patrol.entity";
+import { PatrolAssignment } from "@interfaces/entity/patrol_assigment.entity";
 
 @Entity("patrol_records")
 export class PatrolRecord {
@@ -19,10 +20,10 @@ export class PatrolRecord {
   @Column({ type: "timestamptz" })
   date: Date;
 
-  @Column({ type: "timestamptz" })
+  @Column({ type: "timestamptz", nullable: true })
   actual_start: Date;
 
-  @Column({ type: "timestamptz" })
+  @Column({ type: "timestamptz", nullable: true })
   actual_end: Date;
 
   @Column({
@@ -31,15 +32,25 @@ export class PatrolRecord {
   })
   status: string;
 
-  @ManyToOne(() => User, (user) => user.patrolRecords, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "user_id" })
-  user: User;
+  @ManyToOne(
+    () => PatrolAssignment,
+    (patrolAssignment) => patrolAssignment.patrolRecords,
+    {
+      onDelete: "CASCADE",
+    }
+  )
+  @JoinColumn({ name: "patrol_assignment_id" })
+  patrolAssignment: PatrolAssignment;
 
-  @ManyToOne(() => Patrol, (patrol) => patrol.patrolRecords, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "patrol_id" })
-  patrol: Patrol;
+  // @ManyToOne(() => User, (user) => user.patrolRecords, { onDelete: "CASCADE" })
+  // @JoinColumn({ name: "user_id" })
+  // user: User;
+
+  // @ManyToOne(() => Patrol, (patrol) => patrol.patrolRecords, {
+  //   onDelete: "CASCADE",
+  // })
+  // @JoinColumn({ name: "patrol_id" })
+  // patrol: Patrol;
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

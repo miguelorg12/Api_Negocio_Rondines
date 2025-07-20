@@ -5,7 +5,7 @@ import { Patrol } from "@entities/patrol.entity";
 import { Branch } from "@entities/branch.entity";
 import { Company } from "@entities/company.entity";
 import { PatrolRecord } from "@entities/patrol_record.entity";
-import { PatrolAssignment } from "@entities/patrol_assigment";
+import { PatrolAssignment } from "@interfaces/entity/patrol_assigment.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 import { CheckpointRecord } from "@entities/checkpoint_record.entity";
 import { Incident } from "@entities/incident.entity";
