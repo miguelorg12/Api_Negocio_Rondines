@@ -13,11 +13,15 @@ import { Plan } from "@entities/plan.entity";
 import { Shift } from "@entities/shift.entity";
 import { Role } from "@entities/role.entity";
 import { ReportLog } from "@entities/report_log.entity";
+import { OauthAuthorizationCodesEntity } from "@entities/oauth_authorization_codes.entity";
+import { OauthRefreshTokensEntity } from "@entities/oauth_refresh_tokens.entity";
+import { OauthAccessTokensEntity } from "@entities/oauth_access_tokens.entity";
+import { OauthClientsEntity } from "@entities/oauth_clients.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
   host: "localhost",
-  port: 5432,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
@@ -37,6 +41,10 @@ export const AppDataSource = new DataSource({
     Shift,
     Role,
     ReportLog,
+    OauthAuthorizationCodesEntity,
+    OauthRefreshTokensEntity,
+    OauthAccessTokensEntity,
+    OauthClientsEntity,
   ],
   subscribers: [],
   migrations: [__dirname + "/../utils/migrations/*.{ts,js}"],

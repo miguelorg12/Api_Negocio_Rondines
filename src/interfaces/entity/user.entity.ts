@@ -15,9 +15,11 @@ import { Exclude } from "class-transformer";
 import { Role } from "@entities/role.entity";
 import { Incident } from "@entities/incident.entity";
 import { ReportLog } from "@entities/report_log.entity";
-import { PatrolRecord } from "@entities/patrol_record.entity";
 import { Branch } from "@entities/branch.entity";
 import * as bcrypt from "bcryptjs";
+import { OauthAuthorizationCodesEntity } from "@entities/oauth_authorization_codes.entity";
+import { OauthAccessTokensEntity } from "@entities/oauth_access_tokens.entity";
+import { OauthRefreshTokensEntity } from "@entities/oauth_refresh_tokens.entity";
 
 @Entity("users")
 export class User {
@@ -59,8 +61,20 @@ export class User {
   @OneToMany(() => ReportLog, (reportLog) => reportLog.user)
   reportLogs: ReportLog[];
 
-  // @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.user)
-  // patrolRecords: PatrolRecord[];
+  @OneToMany(
+    () => OauthAuthorizationCodesEntity,
+    (authorizationCode) => authorizationCode.user
+  )
+  oauthAuthorizationCodes: OauthAuthorizationCodesEntity[];
+
+  @OneToMany(
+    () => OauthRefreshTokensEntity,
+    (refreshToken) => refreshToken.user
+  )
+  refreshTokens: OauthRefreshTokensEntity[];
+
+  @OneToMany(() => OauthAccessTokensEntity, (accessToken) => accessToken.user)
+  accessTokens: OauthAccessTokensEntity[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

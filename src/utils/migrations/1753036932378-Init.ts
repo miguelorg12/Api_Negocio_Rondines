@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1752973473717 implements MigrationInterface {
-    name = 'Init1752973473717'
+export class Init1753036932378 implements MigrationInterface {
+    name = 'Init1753036932378'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -107,6 +107,59 @@ export class Init1752973473717 implements MigrationInterface {
             )
         `);
         await queryRunner.query(`
+            CREATE TABLE "oauth_access_tokens" (
+                "id" SERIAL NOT NULL,
+                "access_token" character varying NOT NULL,
+                "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "scope" character varying,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "user_id" integer,
+                "client_id" integer,
+                CONSTRAINT "UQ_5da753a74864a0ea0bc6972c22a" UNIQUE ("access_token"),
+                CONSTRAINT "PK_5956b59ddf50246f933275699e3" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "oauth_refresh_tokens" (
+                "id" SERIAL NOT NULL,
+                "refresh_token" character varying NOT NULL,
+                "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "scope" character varying,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "user_id" integer,
+                "client_id" integer,
+                CONSTRAINT "UQ_970291eec53d3ee505b3c199742" UNIQUE ("refresh_token"),
+                CONSTRAINT "PK_6051e97f5024636e53749cfdc80" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "oauth_clients" (
+                "id" SERIAL NOT NULL,
+                "client_id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+                "client_secret" character varying NOT NULL,
+                "redirect_uri" character varying,
+                "name" character varying,
+                "trusted_client" boolean NOT NULL DEFAULT false,
+                "created_at" TIMESTAMP NOT NULL DEFAULT now(),
+                "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
+                CONSTRAINT "UQ_c5c4af500cc8bfc05500fff7f90" UNIQUE ("client_id"),
+                CONSTRAINT "PK_c4759172d3431bae6f04e678e0d" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TABLE "oauth_authorization_codes" (
+                "id" SERIAL NOT NULL,
+                "code" character varying NOT NULL,
+                "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "scope" character varying,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "user_id" integer,
+                "client_id" integer,
+                CONSTRAINT "UQ_fb91ab932cfbd694061501cc20f" UNIQUE ("code"),
+                CONSTRAINT "PK_441350d3fce3606534fbb2c1197" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
             CREATE TABLE "users" (
                 "id" SERIAL NOT NULL,
                 "name" character varying(100) NOT NULL,
@@ -145,14 +198,6 @@ export class Init1752973473717 implements MigrationInterface {
                 "patrol_id" integer,
                 "shift_id" integer,
                 CONSTRAINT "PK_fff7efae566e8ee7ae4cd55e49e" PRIMARY KEY ("id")
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TYPE "public"."patrol_records_status_enum" AS ENUM(
-                'completado',
-                'pendiente',
-                'cancelado',
-                'en_progreso'
             )
         `);
         await queryRunner.query(`
@@ -230,6 +275,30 @@ export class Init1752973473717 implements MigrationInterface {
             ADD CONSTRAINT "FK_6b182514d5aeb5ab4fbf361e573" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
+            ALTER TABLE "oauth_access_tokens"
+            ADD CONSTRAINT "FK_2a145d311b29be597ff96123114" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_access_tokens"
+            ADD CONSTRAINT "FK_2219941593702bb35b2422f9801" FOREIGN KEY ("client_id") REFERENCES "oauth_clients"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_refresh_tokens"
+            ADD CONSTRAINT "FK_a7f0966fdf948cf9045ab88d479" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_refresh_tokens"
+            ADD CONSTRAINT "FK_fb5c17c6a502c4e8bfe643edd83" FOREIGN KEY ("client_id") REFERENCES "oauth_clients"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_authorization_codes"
+            ADD CONSTRAINT "FK_1b5d11edec13074db58972ed81e" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_authorization_codes"
+            ADD CONSTRAINT "FK_85e243eecb2ac4428721a02da4e" FOREIGN KEY ("client_id") REFERENCES "oauth_clients"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
             ALTER TABLE "users"
             ADD CONSTRAINT "FK_a2cecd1a3531c0b041e29ba46e1" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
@@ -296,6 +365,24 @@ export class Init1752973473717 implements MigrationInterface {
             ALTER TABLE "users" DROP CONSTRAINT "FK_a2cecd1a3531c0b041e29ba46e1"
         `);
         await queryRunner.query(`
+            ALTER TABLE "oauth_authorization_codes" DROP CONSTRAINT "FK_85e243eecb2ac4428721a02da4e"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_authorization_codes" DROP CONSTRAINT "FK_1b5d11edec13074db58972ed81e"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_refresh_tokens" DROP CONSTRAINT "FK_fb5c17c6a502c4e8bfe643edd83"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_refresh_tokens" DROP CONSTRAINT "FK_a7f0966fdf948cf9045ab88d479"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_access_tokens" DROP CONSTRAINT "FK_2219941593702bb35b2422f9801"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "oauth_access_tokens" DROP CONSTRAINT "FK_2a145d311b29be597ff96123114"
+        `);
+        await queryRunner.query(`
             ALTER TABLE "report_logs" DROP CONSTRAINT "FK_6b182514d5aeb5ab4fbf361e573"
         `);
         await queryRunner.query(`
@@ -338,9 +425,6 @@ export class Init1752973473717 implements MigrationInterface {
             DROP TABLE "patrol_records"
         `);
         await queryRunner.query(`
-            DROP TYPE "public"."patrol_records_status_enum"
-        `);
-        await queryRunner.query(`
             DROP TABLE "patrol_assignments"
         `);
         await queryRunner.query(`
@@ -348,6 +432,18 @@ export class Init1752973473717 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE "users"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "oauth_authorization_codes"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "oauth_clients"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "oauth_refresh_tokens"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "oauth_access_tokens"
         `);
         await queryRunner.query(`
             DROP TABLE "report_logs"
