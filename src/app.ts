@@ -6,6 +6,7 @@ import companyRoutes from "../src/routes/company.route";
 import branchRoutes from "../src/routes/branch.router";
 import patrolRoutes from "../src/routes/patrol.router";
 import shifRoutes from "../src/routes/shift.router";
+import patrolAssignmentRoutes from "../src/routes/patrol_assigment.router";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
@@ -29,5 +30,6 @@ apiRouter.use("/companies", companyRoutes);
 apiRouter.use("/branches", branchRoutes);
 apiRouter.use("/shifts", shifRoutes);
 apiRouter.use("/patrols", patrolRoutes);
+apiRouter.use("/patrol-assignments", patrolAssignmentRoutes);
 
 export default app;

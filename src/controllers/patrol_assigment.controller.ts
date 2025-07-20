@@ -99,7 +99,7 @@ export const deletePatrolAssignment = async (
   res: Response
 ): Promise<Response> => {
   const patrolAssignmentId = parseInt(req.params.id);
-  const patrolAssigment = await patrolAssignmentService.getById(
+  let patrolAssigment = await patrolAssignmentService.getById(
     patrolAssignmentId
   );
   if (!patrolAssigment) {
@@ -107,7 +107,7 @@ export const deletePatrolAssignment = async (
       message: "Asignación de ronda no encontrada",
     });
   }
-  await patrolAssignmentService.delete(patrolAssignmentId);
+  patrolAssigment = await patrolAssignmentService.delete(patrolAssignmentId);
   return res.status(200).json({
     message: "Asignación de ronda eliminada correctamente",
     data: patrolAssigment,

@@ -19,3 +19,4 @@ router.put(
   PatrolAssignmentController.updatePatrolAssignment
 );
 router.delete("/:id", PatrolAssignmentController.deletePatrolAssignment);
+export default router;

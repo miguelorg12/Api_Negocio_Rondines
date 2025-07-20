@@ -54,12 +54,13 @@ export class PatrolAssignmentService {
     return await this.getById(id);
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<PatrolAssignment | null> {
     const patrolAssigment = await this.getById(id);
     if (!patrolAssigment) {
       throw new Error("Ruta asignada no encontrada");
     }
     await this.patrolRecordService.delete(id);
     await this.patrolAssignmentRepository.softDelete(id);
+    return patrolAssigment;
   }
 }
