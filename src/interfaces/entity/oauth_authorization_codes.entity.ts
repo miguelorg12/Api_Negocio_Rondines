@@ -33,6 +33,12 @@ export class OauthAuthorizationCodesEntity {
   @Column({ nullable: true })
   scope: string;
 
+  @Column()
+  code_challenge: string;
+
+  @Column()
+  code_challenge_method: string;
+
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;
 
