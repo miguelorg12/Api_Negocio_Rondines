@@ -3,9 +3,11 @@ import { seedUsers } from "@utils/seeds/user.seed";
 import { seedRoles } from "@utils/seeds/role.seed";
 import { seedCompanies } from "@utils/seeds/company.seed";
 import { seedBranches } from "@utils/seeds/branch.seed";
+import { seedClients } from "@utils/seeds/client.seed";
 
 async function main() {
   await AppDataSource.initialize();
+  await seedClients();
   await seedRoles();
   await seedUsers();
   await seedCompanies();
