@@ -212,37 +212,37 @@ router.get("/guards", userController.getAllGuards);
  * @openapi
  * /users/guards/{id}:
  *   get:
- *    summary: Obtener guardia por ID
- *   tags:
- *      - Users
- *  parameters:
- *     - in: path
- *       name: id
- *      required: true
- *      schema:
- *        type: integer
- * responses:
- *      200:
- *        description: Guardia encontrado
- *       content:
- *         application/json:
- *          schema:
- *           type: object
- *          properties:
- *            message:
- *              type: string
- *            user:
- *              $ref: '#/components/schemas/UserResponse'
- *      404:
- *       description: Guardia no encontrado
- *      content:
- *        application/json:
+ *     summary: Obtener guardia por ID
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
  *         schema:
- *          type: object
- *         properties:
- *           message:
- *             type: string
- * */
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Guardia encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/UserResponse'
+ *       404:
+ *         description: Guardia no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 router.get("/guards/:id", userController.getGuardById);
 
 export default router;
