@@ -90,3 +90,25 @@ export const deleteUser = async (
     .status(200)
     .json({ message: "Usuario eliminado correctamente", data: user });
 };
+
+export const getAllGuards = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
+  const guards = await userService.findAllGuards();
+  return res.status(200).json({
+    message: "Guardias obtenidos correctamente",
+    data: guards,
+  });
+};
+export const getGuardById = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const guardId = parseInt(req.params.id);
+  const guard = await userService.findGuardById(guardId);
+  if (!guard) {
+    return res.status(404).json({ message: "Guardia no encontrado" });
+  }
+  return res.status(200).json({ message: "Guardia encontrado", guard });
+};

@@ -46,4 +46,18 @@ export class UserService {
     });
     return this.findById(id);
   }
+
+  async findAllGuards(): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: { name: "Guard" } },
+      relations: ["role"],
+    });
+  }
+
+  async findGuardById(id: number): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { id, role: { name: "Guard" } },
+      relations: ["role"],
+    });
+  }
 }
