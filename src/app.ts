@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import express from "express";
+import cors from "cors";
 import userRoutes from "../src/routes/user.route";
 import roleRoutes from "../src/routes/role.route";
 import companyRoutes from "../src/routes/company.route";
@@ -10,6 +11,12 @@ import patrolAssignmentRoutes from "../src/routes/patrol_assigment.router";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
+app.use(cors(
+  {
+    origin: "*",
+    credentials: true,
+  }
+));
 app.use(express.json());
 
 app.get("/", (req, res) => {

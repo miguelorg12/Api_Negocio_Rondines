@@ -27,6 +27,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
@@ -37,6 +38,7 @@
     "typeorm": "^0.3.25"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.13",
     "@types/swagger-jsdoc": "^6.0.4",

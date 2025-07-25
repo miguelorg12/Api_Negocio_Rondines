@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Init1753147331703 implements MigrationInterface {
-    name = 'Init1753147331703'
+export class Init1753470546371 implements MigrationInterface {
+    name = 'Init1753470546371'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -162,6 +162,16 @@ export class Init1753147331703 implements MigrationInterface {
             )
         `);
         await queryRunner.query(`
+            CREATE TABLE "code" (
+                "id" SERIAL NOT NULL,
+                "code" character varying(255) NOT NULL,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                "expirates_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "user_id" integer,
+                CONSTRAINT "PK_367e70f79a9106b8e802e1a9825" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
             CREATE TABLE "users" (
                 "id" SERIAL NOT NULL,
                 "name" character varying(100) NOT NULL,
@@ -200,6 +210,14 @@ export class Init1753147331703 implements MigrationInterface {
                 "patrol_id" integer,
                 "shift_id" integer,
                 CONSTRAINT "PK_fff7efae566e8ee7ae4cd55e49e" PRIMARY KEY ("id")
+            )
+        `);
+        await queryRunner.query(`
+            CREATE TYPE "public"."patrol_records_status_enum" AS ENUM(
+                'completado',
+                'pendiente',
+                'cancelado',
+                'en_progreso'
             )
         `);
         await queryRunner.query(`
@@ -301,6 +319,10 @@ export class Init1753147331703 implements MigrationInterface {
             ADD CONSTRAINT "FK_85e243eecb2ac4428721a02da4e" FOREIGN KEY ("client_id") REFERENCES "oauth_clients"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
+            ALTER TABLE "code"
+            ADD CONSTRAINT "FK_2c4a681bc6a5fa9f5d4149f86bf" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
             ALTER TABLE "users"
             ADD CONSTRAINT "FK_a2cecd1a3531c0b041e29ba46e1" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
@@ -367,6 +389,9 @@ export class Init1753147331703 implements MigrationInterface {
             ALTER TABLE "users" DROP CONSTRAINT "FK_a2cecd1a3531c0b041e29ba46e1"
         `);
         await queryRunner.query(`
+            ALTER TABLE "code" DROP CONSTRAINT "FK_2c4a681bc6a5fa9f5d4149f86bf"
+        `);
+        await queryRunner.query(`
             ALTER TABLE "oauth_authorization_codes" DROP CONSTRAINT "FK_85e243eecb2ac4428721a02da4e"
         `);
         await queryRunner.query(`
@@ -427,6 +452,9 @@ export class Init1753147331703 implements MigrationInterface {
             DROP TABLE "patrol_records"
         `);
         await queryRunner.query(`
+            DROP TYPE "public"."patrol_records_status_enum"
+        `);
+        await queryRunner.query(`
             DROP TABLE "patrol_assignments"
         `);
         await queryRunner.query(`
@@ -434,6 +462,9 @@ export class Init1753147331703 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE "users"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "code"
         `);
         await queryRunner.query(`
             DROP TABLE "oauth_authorization_codes"
