@@ -6,7 +6,29 @@ import {
 } from "../utils/validators/user.validator";
 
 const router = Router();
-
+/**
+ * @openapi
+ * /users/guards:
+ *   get:
+ *     summary: Obtener todos los guardias
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Lista de guardias obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserResponse'
+ */
+router.get("/guards", userController.getAllGuards);
 /**
  * @openapi
  * /users:
@@ -185,29 +207,6 @@ router.put("/:id", updateUserValidator, userController.updateUser);
  */
 router.delete("/:id", userController.deleteUser);
 
-/**
- * @openapi
- * /users/guards:
- *   get:
- *     summary: Obtener todos los guardias
- *     tags:
- *       - Users
- *     responses:
- *       200:
- *         description: Lista de guardias obtenida correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/UserResponse'
- */
-router.get("/guards", userController.getAllGuards);
 /**
  * @openapi
  * /users/guards/{id}:
