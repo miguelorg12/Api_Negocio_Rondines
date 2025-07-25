@@ -4,8 +4,11 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import * as bcrypt from "bcryptjs";
+import { User } from "@entities/user.entity";
 
 @Entity()
 export class Code {
@@ -20,6 +23,10 @@ export class Code {
 
   @Column({ type: "timestamptz" })
   expirates_at: Date;
+
+  @ManyToOne(() => User, (user) => user.codes)
+  @JoinColumn({ name: "user_id" })
+  user: User;
 
   @BeforeInsert()
   setExpirationDate() {

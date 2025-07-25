@@ -20,6 +20,7 @@ import * as bcrypt from "bcryptjs";
 import { OauthAuthorizationCodesEntity } from "@entities/oauth_authorization_codes.entity";
 import { OauthAccessTokensEntity } from "@entities/oauth_access_tokens.entity";
 import { OauthRefreshTokensEntity } from "@entities/oauth_refresh_tokens.entity";
+import { Code } from "@entities/code.entity";
 
 @Entity("users")
 export class User {
@@ -47,6 +48,9 @@ export class User {
 
   @Column()
   biometric: string;
+
+  @OneToMany(() => Code, (code) => code.user)
+  codes: Code[];
 
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: "role_id" })
