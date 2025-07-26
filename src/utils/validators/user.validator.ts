@@ -60,10 +60,12 @@ export const updateUserValidator = [
     .optional()
     .isEmail()
     .withMessage("Email inválido")
-    .custom(async (email: string) => {
+    .custom(async (email: string, { req }) => {
       const userRepo = AppDataSource.getRepository(User);
       const user = await userRepo.findOne({ where: { email } });
-      if (user) {
+      const userId = req?.params?.id ? Number(req.params.id) : undefined;
+
+      if (user && user.id !== userId) {
         throw new Error("El email ya está en uso");
       }
       return true;
