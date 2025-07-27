@@ -16,6 +16,18 @@ export async function seedBranches() {
       company: { id: 1 },
       user: { id: 2 },
     },
+    {
+      name: "Tertiary Branch",
+      address: "789 Tertiary St, City, Country",
+      company: { id: 2 },
+      user: { id: 3 },
+    },
+    {
+      name: "Quaternary Branch",
+      address: "101 Quaternary St, City, Country",
+      company: { id: 2 },
+      user: { id: 4 },
+    },
   ];
 
   for (const branchData of branches) {

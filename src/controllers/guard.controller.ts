@@ -105,3 +105,20 @@ export const getGuardsByBranch = async (
     data: instanceToPlain(guards),
   });
 };
+
+export const patrolsAssignedToGuard = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const guardId = parseInt(req.params.id);
+  const patrols = await guardService.patrolsAssignedToGuard(guardId);
+  if (!patrols) {
+    return res
+      .status(404)
+      .json({ message: "No se encontraron rondines asignados" });
+  }
+  return res.status(200).json({
+    message: "Rondines asignados al guardia obtenidos correctamente",
+    data: instanceToPlain(patrols),
+  });
+};

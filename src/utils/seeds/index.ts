@@ -4,6 +4,10 @@ import { seedRoles } from "@utils/seeds/role.seed";
 import { seedCompanies } from "@utils/seeds/company.seed";
 import { seedBranches } from "@utils/seeds/branch.seed";
 import { seedClients } from "@utils/seeds/client.seed";
+import { seedGuards } from "@utils/seeds/guard.seed";
+import { seedShifts } from "@utils/seeds/shift.seed";
+import { seedPatrols } from "@utils/seeds/patrol.seed";
+import { seedPatrolAssignments } from "@utils/seeds/patrol_assigment.seed";
 
 async function main() {
   await AppDataSource.initialize();
@@ -12,6 +16,10 @@ async function main() {
   await seedUsers();
   await seedCompanies();
   await seedBranches();
+  await seedGuards();
+  await seedShifts();
+  await seedPatrols();
+  await seedPatrolAssignments();
   await AppDataSource.destroy();
 
   console.log("Seeding completed successfully.");
