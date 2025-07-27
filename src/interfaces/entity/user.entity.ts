@@ -6,6 +6,8 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -79,6 +81,14 @@ export class User {
 
   @OneToMany(() => OauthAccessTokensEntity, (accessToken) => accessToken.user)
   accessTokens: OauthAccessTokensEntity[];
+
+  @ManyToMany(() => Branch, (branch) => branch.guards)
+  @JoinTable({
+    name: "user_branches",
+    joinColumn: { name: "user_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "branch_id", referencedColumnName: "id" },
+  })
+  branches: Branch[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

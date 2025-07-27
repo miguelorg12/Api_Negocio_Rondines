@@ -4,6 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -46,6 +47,9 @@ export class Branch {
 
   @OneToMany(() => Patrol, (patrol) => patrol.branch)
   patrols: Patrol[];
+
+  @ManyToMany(() => User, (user) => user.branches)
+  guards: User[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

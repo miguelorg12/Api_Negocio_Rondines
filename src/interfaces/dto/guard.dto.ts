@@ -1,4 +1,4 @@
-export interface CreateUserDto {
+export interface CreateGuardDto {
   name: string;
   last_name: string;
   curp: string;
@@ -7,6 +7,7 @@ export interface CreateUserDto {
   role_id: number;
   active: boolean;
   biometric: string;
+  branch_id: number;
 }
 
-export type PartialCreateUserDto = Partial<CreateUserDto>;
+export type PartialCreateGuardDto = Partial<CreateGuardDto>;

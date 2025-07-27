@@ -2,8 +2,9 @@ import { body } from "express-validator";
 import { AppDataSource } from "@configs/data-source";
 import { User } from "@interfaces/entity/user.entity";
 import { Role } from "@interfaces/entity/role.entity";
+import { Branch } from "@interfaces/entity/branch.entity";
 
-export const createUserValidator = [
+export const createGuardsValidator = [
   body("name").notEmpty().withMessage("El nombre es obligatorio"),
   body("last_name").notEmpty().withMessage("El apellido es obligatorio"),
   body("curp")
@@ -42,6 +43,8 @@ export const createUserValidator = [
       return true;
     }),
   body("role_id")
+    .notEmpty()
+    .withMessage("El rol es obligatorio")
     .isInt()
     .withMessage("El rol debe ser un número")
     .custom(async (roleId: number) => {
@@ -52,9 +55,22 @@ export const createUserValidator = [
       }
       return true;
     }),
+  body("branch_id")
+    .isInt()
+    .withMessage("La sucursal debe ser un número")
+    .custom(async (branchId: number) => {
+      if (branchId) {
+        const branchRepo = AppDataSource.getRepository(Branch);
+        const branch = await branchRepo.findOne({ where: { id: branchId } });
+        if (!branch) {
+          throw new Error("La sucursal especificada no existe");
+        }
+      }
+      return true;
+    }),
 ];
 
-export const updateUserValidator = [
+export const updateGuardValidator = [
   body("name").optional().notEmpty().withMessage("El nombre es obligatorio"),
   body("last_name")
     .optional()
@@ -63,15 +79,7 @@ export const updateUserValidator = [
   body("curp")
     .optional()
     .isLength({ min: 18, max: 18 })
-    .withMessage("La CURP debe tener 18 caracteres")
-    .custom((curp: string) => {
-      // CURP regex: 4 letras, 6 dígitos fecha, 1 letra sexo, 2 letras estado, 3 letras internas, 1 dígito verificador
-      const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{2}[A-Z]{3}[0-9A-Z]\d$/;
-      if (!curpRegex.test(curp)) {
-        throw new Error("La CURP no es válida");
-      }
-      return true;
-    }),
+    .withMessage("La CURP debe tener 18 caracteres"),
   body("email")
     .optional()
     .isEmail()
@@ -124,4 +132,17 @@ export const updateUserValidator = [
     .optional()
     .notEmpty()
     .withMessage("El dato biométrico es obligatorio"),
+  body("branch_id")
+    .isInt()
+    .withMessage("La sucursal debe ser un número")
+    .custom(async (branchId: number) => {
+      if (branchId) {
+        const branchRepo = AppDataSource.getRepository(Branch);
+        const branch = await branchRepo.findOne({ where: { id: branchId } });
+        if (!branch) {
+          throw new Error("La sucursal especificada no existe");
+        }
+      }
+      return true;
+    }),
 ];

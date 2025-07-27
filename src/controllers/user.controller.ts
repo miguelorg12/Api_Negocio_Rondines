@@ -5,6 +5,7 @@ import {
   PartialCreateUserDto,
 } from "../interfaces/dto/user.dto";
 import { validationResult } from "express-validator";
+import { instanceToPlain } from "class-transformer";
 
 const userService = new UserService();
 
@@ -15,7 +16,7 @@ export const getAllUsers = async (
   const users = await userService.findAll();
   return res.status(200).json({
     message: "Usuarios obtenidos correctamente",
-    data: users,
+    data: instanceToPlain(users),
   });
 };
 
@@ -32,9 +33,10 @@ export const createUser = async (
   }
   const userData: CreateUserDto = req.body;
   const newUser = await userService.create(userData);
-  return res
-    .status(201)
-    .json({ message: "Usuario creado correctamente", data: newUser });
+  return res.status(201).json({
+    message: "Usuario creado correctamente",
+    data: instanceToPlain(newUser),
+  });
 };
 
 export const getUserById = async (
@@ -46,7 +48,9 @@ export const getUserById = async (
   if (!user) {
     return res.status(404).json({ message: "Usuario no encontrado" });
   }
-  return res.status(200).json({ message: "Usuario encontrado", user });
+  return res
+    .status(200)
+    .json({ message: "Usuario encontrado", user: instanceToPlain(user) });
 };
 
 export const updateUser = async (
@@ -71,7 +75,7 @@ export const updateUser = async (
 
   return res.status(200).json({
     message: "Usuario actualizado correctamente",
-    data: updatedUser,
+    data: instanceToPlain(updatedUser),
   });
 };
 
@@ -86,29 +90,8 @@ export const deleteUser = async (
   }
   user = await userService.delete(userId);
 
-  return res
-    .status(200)
-    .json({ message: "Usuario eliminado correctamente", data: user });
-};
-
-export const getAllGuards = async (
-  _req: Request,
-  res: Response
-): Promise<Response> => {
-  const guards = await userService.findAllGuards();
   return res.status(200).json({
-    message: "Guardias obtenidos correctamente",
-    data: guards,
+    message: "Usuario eliminado correctamente",
+    data: instanceToPlain(user),
   });
-};
-export const getGuardById = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const guardId = parseInt(req.params.id);
-  const guard = await userService.findGuardById(guardId);
-  if (!guard) {
-    return res.status(404).json({ message: "Guardia no encontrado" });
-  }
-  return res.status(200).json({ message: "Guardia encontrado", guard });
 };
