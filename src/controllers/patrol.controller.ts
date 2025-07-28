@@ -84,3 +84,24 @@ export const deletePatrol = async (
     data: deletedPatrol,
   });
 };
+
+export const createPatrolAndAssigment = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      message: "Error en la validación de datos",
+      errors: errors.array(),
+    });
+  }
+  const patrolData: PatrolDto = req.body;
+  const newPatrol = await patrolService.createPatrolAndAssigment(patrolData);
+  return res
+    .status(201)
+    .json({
+      message: "Ronda y asignación creadas correctamente",
+      data: newPatrol,
+    });
+};
