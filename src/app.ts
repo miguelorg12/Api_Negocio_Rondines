@@ -9,7 +9,7 @@ import patrolRoutes from "../src/routes/patrol.router";
 import shifRoutes from "../src/routes/shift.router";
 import patrolAssignmentRoutes from "../src/routes/patrol_assigment.router";
 import guardRoutes from "../src/routes/guard.route";
-// import { swaggerSpec, swaggerUi } from "./configs/swagger";
+import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
 app.use(
@@ -26,11 +26,11 @@ app.get("/", (req, res) => {
 
 const apiRouter = express.Router();
 app.use("/api/v1", apiRouter);
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-// app.get("/swagger.json", (req, res) => {
-//   res.setHeader("Content-Type", "application/json");
-//   res.send(swaggerSpec);
-// });
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 apiRouter.use("/users", userRoutes);
 apiRouter.use("/roles", roleRoutes);

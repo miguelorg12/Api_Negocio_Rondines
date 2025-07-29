@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { PatrolService } from "@services/patrol.service";
-import { PatrolDto, PartialPatrolDto } from "@interfaces/dto/patrol.dto";
+import {
+  PatrolDto,
+  PartialPatrolDto,
+  PatrolAssigmentDto,
+} from "@interfaces/dto/patrol.dto";
 
 const patrolService = new PatrolService();
 export const getAllPatrols = async (
@@ -96,12 +100,10 @@ export const createPatrolAndAssigment = async (
       errors: errors.array(),
     });
   }
-  const patrolData: PatrolDto = req.body;
+  const patrolData: PatrolAssigmentDto = req.body;
   const newPatrol = await patrolService.createPatrolAndAssigment(patrolData);
-  return res
-    .status(201)
-    .json({
-      message: "Ronda y asignación creadas correctamente",
-      data: newPatrol,
-    });
+  return res.status(201).json({
+    message: "Ronda y asignación creadas correctamente",
+    data: newPatrol,
+  });
 };

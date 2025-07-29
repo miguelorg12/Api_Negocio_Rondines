@@ -195,26 +195,94 @@ const options = {
             branch_id: { type: "integer" },
           },
         },
-      },
-      PatrolAssignment: {
-        type: "object",
-        properties: {
-          id: { type: "integer" },
-          user_id: { type: "integer" },
-          patrol_id: { type: "integer" },
-          shift_id: { type: "integer" },
-          date: { type: "string", format: "date-time" },
-          deleted_at: { type: "string", format: "date-time", nullable: true },
+        PatrolAssignment: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            date: { type: "string", format: "date-time" },
+            user: { $ref: "#/components/schemas/UserResponse" },
+            patrol: { $ref: "#/components/schemas/Patrol" },
+            shift: { $ref: "#/components/schemas/Shift" },
+            deleted_at: { type: "string", format: "date-time", nullable: true },
+          },
         },
-      },
-      PatrolAssignmentCreateRequest: {
-        type: "object",
-        required: ["user_id", "patrol_id", "shift_id", "date"],
-        properties: {
-          user_id: { type: "integer" },
-          patrol_id: { type: "integer" },
-          shift_id: { type: "integer" },
-          date: { type: "string", format: "date-time" },
+        PatrolAssignmentCreateRequest: {
+          type: "object",
+          required: ["user_id", "patrol_id", "shift_id", "date"],
+          properties: {
+            user_id: { type: "integer" },
+            patrol_id: { type: "integer" },
+            shift_id: { type: "integer" },
+            date: { type: "string", format: "date-time" },
+          },
+        },
+        GuardResponse: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            name: { type: "string" },
+            last_name: { type: "string" },
+            curp: { type: "string" },
+            email: { type: "string" },
+            active: { type: "boolean" },
+            role: { $ref: "#/components/schemas/Role" },
+            branches: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "integer" },
+                  name: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        GuardCreateRequest: {
+          type: "object",
+          required: [
+            "name",
+            "last_name",
+            "curp",
+            "email",
+            "password",
+            "role_id",
+            "active",
+            "biometric",
+            "branch_id",
+          ],
+          properties: {
+            name: { type: "string" },
+            last_name: { type: "string" },
+            curp: { type: "string" },
+            email: { type: "string" },
+            password: { type: "string" },
+            role_id: { type: "integer" },
+            active: { type: "boolean" },
+            biometric: { type: "string" },
+            branch_id: { type: "integer" },
+          },
+        },
+        GuardPatrolAssignment: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            date: { type: "string", format: "date-time" },
+            patrol: {
+              type: "object",
+              properties: {
+                id: { type: "integer" },
+                name: { type: "string" },
+              },
+            },
+            shift: {
+              type: "object",
+              properties: {
+                id: { type: "integer" },
+                name: { type: "string" },
+              },
+            },
+          },
         },
       },
     },

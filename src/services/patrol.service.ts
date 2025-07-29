@@ -1,6 +1,10 @@
 import { AppDataSource } from "@configs/data-source";
 import { Patrol } from "@interfaces/entity/patrol.entity";
-import { PatrolDto, PartialPatrolDto } from "@interfaces/dto/patrol.dto";
+import {
+  PatrolDto,
+  PartialPatrolDto,
+  PatrolAssigmentDto,
+} from "@interfaces/dto/patrol.dto";
 import { Repository } from "typeorm";
 import { PlanService } from "@services/plan.service";
 import { PatrolRecordService } from "@services/patrol_record.service";
@@ -65,7 +69,9 @@ export class PatrolService {
     return this.getById(id);
   }
 
-  async createPatrolAndAssigment(patrolDto: PatrolDto): Promise<Patrol> {
+  async createPatrolAndAssigment(
+    patrolDto: PatrolAssigmentDto
+  ): Promise<Patrol> {
     let patrol = this.patrolRepository.create(patrolDto);
 
     if (patrolDto.plan_id) {
@@ -83,7 +89,7 @@ export class PatrolService {
     }
     patrol = await this.patrolRepository.save(patrolDto);
     this.patrolRecordService.create({
-      user_id: patrolDto.branch_id, // Assuming branch_id is the user_id for the patrol record
+      user_id: patrolDto.user_id, // Assuming branch_id is the user_id for the patrol record
       patrol_id: patrol.id,
       date: new Date(),
       status: "pendiente",
