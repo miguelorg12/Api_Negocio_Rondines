@@ -95,11 +95,16 @@ export const updateGuardValidator = [
       return true;
     }),
   body("password")
-    .optional()
-    .isLength({ min: 8, max: 255 })
-    .withMessage("La contraseña debe tener al menos 8 caracteres")
+    .optional({ checkFalsy: true })
     .custom((password: string) => {
-      if (password) {
+      // Solo validar si se proporciona una contraseña
+      if (password && password.trim() !== "") {
+        // Validar longitud
+        if (password.length < 8 || password.length > 255) {
+          throw new Error("La contraseña debe tener entre 8 y 255 caracteres");
+        }
+
+        // Validar formato
         const regex =
           /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
         if (!regex.test(password)) {
