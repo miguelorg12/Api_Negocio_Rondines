@@ -8,6 +8,7 @@
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:prod": "NODE_ENV=production node dist/server.js",
     "typeorm": "ts-node -r tsconfig-paths/register --transpile-only ./node_modules/typeorm/cli.js -d src/configs/data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate ./src/utils/migrations/Init --pretty",
     "migrate": "npm run typeorm -- migration:run",
