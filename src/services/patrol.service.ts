@@ -46,6 +46,33 @@ export class PatrolService {
     return await this.patrolRepository.findOne({ where: { id } });
   }
 
+  async getPatrolsByBranchId(id: number) {
+    return await this.patrolRepository.find({
+      where: { branch: { id } },
+      relations: {
+        patrolAssignments: {
+          shift: true,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        frequency: true,
+        patrolAssignments: {
+          id: true,
+          date: true,
+          shift: {
+            id: true,
+            name: true,
+            start_time: true,
+            end_time: true,
+            created_at: true,
+          },
+        },
+      },
+    });
+  }
+
   async update(
     id: number,
     patrolDto: PartialPatrolDto

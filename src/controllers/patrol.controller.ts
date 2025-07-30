@@ -107,3 +107,15 @@ export const createPatrolAndAssigment = async (
     data: newPatrol,
   });
 };
+
+export const getPatrolsByBranchId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const branch_id = req.params.id;
+  const patrols = await patrolService.getPatrolsByBranchId(parseInt(branch_id));
+  return res.status(200).json({
+    message: "Rondas obtenidas correctamente",
+    data: patrols,
+  });
+};

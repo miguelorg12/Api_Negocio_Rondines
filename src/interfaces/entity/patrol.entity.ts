@@ -13,6 +13,7 @@ import {
 import { Branch } from "@entities/branch.entity";
 import { PatrolRecord } from "@entities/patrol_record.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
+import { PatrolAssignment } from "@entities/patrol_assigment.entity";
 
 @Entity("patrols")
 export class Patrol {
@@ -35,8 +36,8 @@ export class Patrol {
   @ManyToMany(() => Checkpoint, (checkpoint) => checkpoint.patrols)
   checkpoints: Checkpoint[];
 
-  // @OneToMany(() => PatrolRecord, (patrolRecord) => patrolRecord.patrol)
-  // patrolRecords: PatrolRecord[];
+  @OneToMany(() => PatrolAssignment, (assignment) => assignment.patrol)
+  patrolAssignments: PatrolAssignment[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

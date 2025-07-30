@@ -10,10 +10,12 @@ import {
   updatePatrol,
   deletePatrol,
   createPatrolAndAssigment,
+  getPatrolsByBranchId,
 } from "@controllers/patrol.controller";
 
 const router = Router();
 
+router.get("/branch/:id", getPatrolsByBranchId);
 /**
  * @swagger
  * /patrols:
