@@ -290,4 +290,30 @@ export class IncidentService {
 
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 }); // 1 hora
   }
+
+  /**
+   * Obtener incidentes por branch_id
+   */
+  async getIncidentsByBranchId(branchId: number): Promise<Incident[]> {
+    return await this.incidentRepository.find({
+      where: { branch: { id: branchId } },
+      relations: ["images", "user", "checkpoint", "branch"],
+      order: { created_at: "DESC" },
+      select: {
+        id: true,
+        description: true,
+        status: true,
+        severity: true,
+        created_at: true,
+        images: {
+          image_url: true,
+        },
+        user: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    });
+  }
 }

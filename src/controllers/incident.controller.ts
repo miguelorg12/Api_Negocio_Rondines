@@ -262,4 +262,33 @@ export class IncidentController {
       res.status(500).json({ error: "Error al generar URL de subida" });
     }
   }
+
+  /**
+   * Obtener incidentes por branch_id
+   */
+  async getIncidentsByBranchId(req: Request, res: Response): Promise<void> {
+    try {
+      const { branchId } = req.params;
+
+      if (!branchId || isNaN(parseInt(branchId))) {
+        res.status(400).json({
+          error: "branchId debe ser un número válido",
+        });
+        return;
+      }
+
+      const incidents = await this.incidentService.getIncidentsByBranchId(
+        parseInt(branchId)
+      );
+
+      res.status(200).json({
+        data: incidents,
+      });
+    } catch (error) {
+      console.error("Error al obtener incidentes por branch_id:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener incidentes por branch_id" });
+    }
+  }
 }

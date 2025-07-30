@@ -376,4 +376,39 @@ router.delete(
  */
 router.post("/:id/upload-url", controller.generateUploadUrl.bind(controller));
 
+/**
+ * @swagger
+ * /api/v1/incidents/branch/{branchId}:
+ *   get:
+ *     summary: Obtener incidentes por branch_id
+ *     tags: [Incidents]
+ *     parameters:
+ *       - in: path
+ *         name: branchId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la sucursal
+ *     responses:
+ *       200:
+ *         description: Lista de incidentes de la sucursal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Incident'
+ *       400:
+ *         description: Error de validación
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/branch/:branchId",
+  controller.getIncidentsByBranchId.bind(controller)
+);
+
 export default router;
