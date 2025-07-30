@@ -233,5 +233,10 @@ router.put("/:id", updateUserValidator, userController.updateUser);
  *         description: Error interno del servidor
  */
 router.delete("/:id", userController.deleteUser);
+// Guardar ID biométrico
+router.post("/:id/biometric", userController.saveBiometricId);
+
+// Verificar ID biométrico
+router.post("/verify-biometric", userController.verifyBiometric);
 
 export default router;

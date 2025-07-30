@@ -64,4 +64,20 @@ export class UserService {
       relations: ["role"],
     });
   }
+
+  async saveBiometricId(id: number, biometric: number): Promise<User | null> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+    user.biometric = biometric;
+    return await this.userRepository.save(user);
+  }
+
+  async verifyBiometric(biometric: number): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { biometric },
+      relations: ["role"],
+    });
+  }
 }

@@ -6,7 +6,7 @@ export interface CreateGuardDto {
   password: string;
   role_id: number;
   active: boolean;
-  biometric: string;
+  biometric: number;
   branch_id: number;
 }
 

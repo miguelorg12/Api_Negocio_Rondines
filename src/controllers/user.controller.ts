@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import {
   CreateUserDto,
@@ -92,6 +92,55 @@ export const deleteUser = async (
 
   return res.status(200).json({
     message: "Usuario eliminado correctamente",
+    data: instanceToPlain(user),
+  });
+};
+
+export const saveBiometricId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = parseInt(req.params.id);
+  const { biometric } = req.body;
+
+  if (typeof biometric !== "number") {
+    return res.status(422).json({
+      message: "El ID biométrico debe ser un número",
+    });
+  }
+
+  const user = await userService.saveBiometricId(userId, biometric);
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+
+  return res.status(200).json({
+    message: "ID biométrico guardado correctamente",
+    data: instanceToPlain(user),
+  });
+};
+
+export const verifyBiometric = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { biometric } = req.body;
+
+  if (typeof biometric !== "number") {
+    return res.status(422).json({
+      message: "El ID biométrico debe ser un número",
+    });
+  }
+
+  const user = await userService.verifyBiometric(biometric);
+  if (!user) {
+    return res
+      .status(404)
+      .json({ message: "Usuario no encontrado o ID biométrico incorrecto" });
+  }
+
+  return res.status(200).json({
+    message: "ID biométrico verificado correctamente",
     data: instanceToPlain(user),
   });
 };

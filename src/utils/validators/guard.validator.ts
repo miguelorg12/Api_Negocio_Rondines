@@ -68,6 +68,10 @@ export const createGuardsValidator = [
       }
       return true;
     }),
+  body("biometric")
+    .optional()
+    .isNumeric()
+    .withMessage("El dato biométrico debe ser un número"),
 ];
 
 export const updateGuardValidator = [
@@ -135,8 +139,8 @@ export const updateGuardValidator = [
     .withMessage("El estado activo debe ser un booleano"),
   body("biometric")
     .optional()
-    .notEmpty()
-    .withMessage("El dato biométrico es obligatorio"),
+    .isNumeric()
+    .withMessage("El dato biométrico debe ser un número"),
   body("branch_id")
     .isInt()
     .withMessage("La sucursal debe ser un número")

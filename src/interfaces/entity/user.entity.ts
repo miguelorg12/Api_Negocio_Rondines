@@ -48,8 +48,8 @@ export class User {
   @Column({ default: true })
   active: boolean;
 
-  @Column()
-  biometric: string;
+  @Column({ nullable: true })
+  biometric: number;
 
   @OneToMany(() => Code, (code) => code.user)
   codes: Code[];

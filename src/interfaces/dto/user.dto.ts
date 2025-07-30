@@ -6,7 +6,7 @@ export interface CreateUserDto {
   password: string;
   role_id: number;
   active: boolean;
-  biometric: string;
+  biometric: number;
 }
 
 export type PartialCreateUserDto = Partial<CreateUserDto>;

@@ -52,6 +52,10 @@ export const createUserValidator = [
       }
       return true;
     }),
+  body("biometric")
+    .optional()
+    .isNumeric()
+    .withMessage("El dato biométrico debe ser un número"),
 ];
 
 export const updateUserValidator = [
@@ -122,6 +126,6 @@ export const updateUserValidator = [
     .withMessage("El estado activo debe ser un booleano"),
   body("biometric")
     .optional()
-    .notEmpty()
-    .withMessage("El dato biométrico es obligatorio"),
+    .isNumeric()
+    .withMessage("El dato biométrico debe ser un número"),
 ];

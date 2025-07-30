@@ -11,7 +11,6 @@ export async function seedUsers() {
       email: "john@gmail.com",
       password: "Password123!",
       active: true,
-      biometric: "biometric_data_1",
       role: { id: 1 },
     },
     {
@@ -21,7 +20,6 @@ export async function seedUsers() {
       email: "jane@gmail.com",
       password: "Password456!",
       active: true,
-      biometric: "biometric_data_2",
       role: { id: 2 },
     },
     {
@@ -31,7 +29,6 @@ export async function seedUsers() {
       email: "carlos@gmail.com",
       password: "Password789!",
       active: false,
-      biometric: "biometric_data_3",
       role: { id: 3 },
     },
     {
@@ -41,7 +38,6 @@ export async function seedUsers() {
       email: "ana@gmail.com",
       password: "Password321!",
       active: true,
-      biometric: "biometric_data_4",
       role: { id: 1 },
     },
   ];
