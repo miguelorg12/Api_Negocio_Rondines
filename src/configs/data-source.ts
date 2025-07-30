@@ -18,6 +18,7 @@ import { OauthRefreshTokensEntity } from "@entities/oauth_refresh_tokens.entity"
 import { OauthAccessTokensEntity } from "@entities/oauth_access_tokens.entity";
 import { OauthClientsEntity } from "@entities/oauth_clients.entity";
 import { Code } from "@entities/code.entity";
+import { IncidentImage } from "@interfaces/entity/incident_image.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -47,6 +48,7 @@ export const AppDataSource = new DataSource({
     OauthAccessTokensEntity,
     OauthClientsEntity,
     Code,
+    IncidentImage,
   ],
   subscribers: [],
   migrations: [__dirname + "/../utils/migrations/*.{ts,js}"],

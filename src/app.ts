@@ -9,6 +9,7 @@ import patrolRoutes from "../src/routes/patrol.router";
 import shifRoutes from "../src/routes/shift.router";
 import patrolAssignmentRoutes from "../src/routes/patrol_assigment.router";
 import guardRoutes from "../src/routes/guard.route";
+import incidentRoutes from "../src/routes/incident.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
@@ -40,5 +41,6 @@ apiRouter.use("/shifts", shifRoutes);
 apiRouter.use("/patrols", patrolRoutes);
 apiRouter.use("/patrol-assignments", patrolAssignmentRoutes);
 apiRouter.use("/guards", guardRoutes);
+apiRouter.use("/incidents", incidentRoutes);
 
 export default app;

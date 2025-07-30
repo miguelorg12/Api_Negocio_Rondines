@@ -5,12 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Checkpoint } from "@entities/checkpoint.entity";
 import { Branch } from "@entities/branch.entity";
 import { User } from "./user.entity";
+import { IncidentImage } from "./incident_image.entity";
 
 @Entity("incidents")
 export class Incident {
@@ -32,12 +34,14 @@ export class Incident {
 
   @ManyToOne(() => Checkpoint, (checkpoint) => checkpoint.incident, {
     onDelete: "CASCADE",
+    nullable: true,
   })
   @JoinColumn({ name: "checkpoint_id" })
   checkpoint: Checkpoint;
 
   @ManyToOne(() => Branch, (branch) => branch.incidents, {
     onDelete: "CASCADE",
+    nullable: true,
   })
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
@@ -50,4 +54,7 @@ export class Incident {
 
   @DeleteDateColumn({ type: "timestamptz", nullable: true })
   deleted_at?: Date;
+
+  @OneToMany(() => IncidentImage, (image) => image.incident)
+  images: IncidentImage[];
 }
