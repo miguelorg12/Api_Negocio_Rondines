@@ -91,4 +91,76 @@ export class PatrolRecordService {
       relations: ["patrolAssignment"],
     });
   }
+
+  /**
+   * Obtener patrol records completados por user_id
+   * @param userId - ID del usuario/guardia
+   * @returns Array de PatrolRecord con estado "completado"
+   */
+  async getCompletedPatrolRecords(userId: number): Promise<PatrolRecord[]> {
+    return await this.patrolRecordRepository.find({
+      where: {
+        status: "completado",
+        patrolAssignment: {
+          user: { id: userId },
+        },
+      },
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.patrol",
+        "patrolAssignment.shift",
+      ],
+      order: {
+        date: "DESC",
+      },
+    });
+  }
+
+  /**
+   * Obtener patrol records pendientes por user_id
+   * @param userId - ID del usuario/guardia
+   * @returns Array de PatrolRecord con estado "pendiente"
+   */
+  async getPendingPatrolRecords(userId: number): Promise<PatrolRecord[]> {
+    return await this.patrolRecordRepository.find({
+      where: {
+        status: "pendiente",
+        patrolAssignment: {
+          user: { id: userId },
+        },
+      },
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.patrol",
+        "patrolAssignment.shift",
+      ],
+      order: {
+        date: "ASC",
+      },
+    });
+  }
+
+  /**
+   * Obtener patrol records en progreso por user_id
+   * @param userId - ID del usuario/guardia
+   * @returns Array de PatrolRecord con estado "en_progreso"
+   */
+  async getInProgressPatrolRecords(userId: number): Promise<PatrolRecord[]> {
+    return await this.patrolRecordRepository.find({
+      where: {
+        status: "en_progreso",
+        patrolAssignment: {
+          user: { id: userId },
+        },
+      },
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.patrol",
+        "patrolAssignment.shift",
+      ],
+      order: {
+        date: "DESC",
+      },
+    });
+  }
 }

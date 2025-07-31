@@ -93,3 +93,99 @@ export const deletePatrolRecord = async (
     data: deletedPatrolRecord,
   });
 };
+
+/**
+ * Obtener patrol records completados por user_id
+ */
+export const getCompletedPatrolRecords = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id || isNaN(parseInt(user_id))) {
+      return res.status(400).json({
+        message: "user_id debe ser un número válido",
+      });
+    }
+
+    const patrolRecords = await patroRecordlService.getCompletedPatrolRecords(
+      parseInt(user_id)
+    );
+
+    return res.status(200).json({
+      message: "Patrol records completados obtenidos correctamente",
+      data: patrolRecords,
+    });
+  } catch (error) {
+    console.error("Error al obtener patrol records completados:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};
+
+/**
+ * Obtener patrol records pendientes por user_id
+ */
+export const getPendingPatrolRecords = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id || isNaN(parseInt(user_id))) {
+      return res.status(400).json({
+        message: "user_id debe ser un número válido",
+      });
+    }
+
+    const patrolRecords = await patroRecordlService.getPendingPatrolRecords(
+      parseInt(user_id)
+    );
+
+    return res.status(200).json({
+      message: "Patrol records pendientes obtenidos correctamente",
+      data: patrolRecords,
+    });
+  } catch (error) {
+    console.error("Error al obtener patrol records pendientes:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};
+
+/**
+ * Obtener patrol records en progreso por user_id
+ */
+export const getInProgressPatrolRecords = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id || isNaN(parseInt(user_id))) {
+      return res.status(400).json({
+        message: "user_id debe ser un número válido",
+      });
+    }
+
+    const patrolRecords = await patroRecordlService.getInProgressPatrolRecords(
+      parseInt(user_id)
+    );
+
+    return res.status(200).json({
+      message: "Patrol records en progreso obtenidos correctamente",
+      data: patrolRecords,
+    });
+  } catch (error) {
+    console.error("Error al obtener patrol records en progreso:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};
