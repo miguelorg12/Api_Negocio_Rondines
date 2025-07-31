@@ -292,6 +292,101 @@ export class IncidentService {
   }
 
   /**
+   * Obtener estadísticas de incidentes por empresa
+   */
+  async getIncidentStatsByCompany(
+    startDate: Date,
+    endDate: Date
+  ): Promise<any[]> {
+    const query = `
+      SELECT 
+        c.id as company_id,
+        c.name as company_name,
+        COUNT(i.id) as total_incidents,
+        COUNT(DISTINCT b.id) as branches_count
+      FROM companies c
+      LEFT JOIN branches b ON b.company_id = c.id
+      LEFT JOIN incidents i ON i.branch_id = b.id 
+        AND i.created_at >= $1 
+        AND i.created_at <= $2
+      WHERE c.deleted_at IS NULL
+      GROUP BY c.id, c.name
+      HAVING COUNT(i.id) > 0
+      ORDER BY total_incidents DESC
+    `;
+
+    return await this.incidentRepository.query(query, [startDate, endDate]);
+  }
+
+  /**
+   * Obtener estadísticas de incidentes por sucursal
+   */
+  async getIncidentStatsByBranch(
+    startDate: Date,
+    endDate: Date
+  ): Promise<any[]> {
+    const query = `
+      SELECT 
+        b.id as branch_id,
+        b.name as branch_name,
+        c.name as company_name,
+        COUNT(i.id) as total_incidents
+      FROM branches b
+      LEFT JOIN companies c ON c.id = b.company_id
+      LEFT JOIN incidents i ON i.branch_id = b.id 
+        AND i.created_at >= $1 
+        AND i.created_at <= $2
+      WHERE b.deleted_at IS NULL AND c.deleted_at IS NULL
+      GROUP BY b.id, b.name, c.name
+      HAVING COUNT(i.id) > 0
+      ORDER BY total_incidents DESC
+    `;
+
+    return await this.incidentRepository.query(query, [startDate, endDate]);
+  }
+
+  /**
+   * Obtener estadísticas generales de incidentes
+   */
+  async getGeneralIncidentStats(
+    startDate: Date,
+    endDate: Date
+  ): Promise<any> {
+    const totalIncidents = await this.incidentRepository.count({
+      where: {
+        created_at: {
+          $gte: startDate,
+          $lte: endDate,
+        } as any,
+      },
+    });
+
+    const incidentsByStatus = await this.incidentRepository
+      .createQueryBuilder("incident")
+      .select("incident.status", "status")
+      .addSelect("COUNT(*)", "count")
+      .where("incident.created_at >= :startDate", { startDate })
+      .andWhere("incident.created_at <= :endDate", { endDate })
+      .groupBy("incident.status")
+      .getRawMany();
+
+    const incidentsBySeverity = await this.incidentRepository
+      .createQueryBuilder("incident")
+      .select("incident.severity", "severity")
+      .addSelect("COUNT(*)", "count")
+      .where("incident.created_at >= :startDate", { startDate })
+      .andWhere("incident.created_at <= :endDate", { endDate })
+      .groupBy("incident.severity")
+      .getRawMany();
+
+    return {
+      total_incidents: totalIncidents,
+      by_status: incidentsByStatus,
+      by_severity: incidentsBySeverity,
+    };
+  }
+
+  /**
    * Obtener incidentes por branch_id
    */
   async getIncidentsByBranchId(branchId: number): Promise<Incident[]> {

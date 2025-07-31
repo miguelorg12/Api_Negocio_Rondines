@@ -378,6 +378,197 @@ router.post("/:id/upload-url", controller.generateUploadUrl.bind(controller));
 
 /**
  * @swagger
+ * /api/v1/incidents/stats/by-company:
+ *   get:
+ *     summary: Obtener estadísticas de incidentes por empresa
+ *     tags: [Incidents]
+ *     description: Obtiene estadísticas de incidentes agrupados por empresa, sumando los incidentes de todas las sucursales de cada empresa
+ *     parameters:
+ *       - in: query
+ *         name: start_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de inicio del rango (ISO 8601)
+ *       - in: query
+ *         name: end_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de fin del rango (ISO 8601)
+ *     responses:
+ *       200:
+ *         description: Estadísticas de incidentes por empresa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Estadísticas de incidentes por empresa obtenidas"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       company_id:
+ *                         type: integer
+ *                         description: ID de la empresa
+ *                       company_name:
+ *                         type: string
+ *                         description: Nombre de la empresa
+ *                       total_incidents:
+ *                         type: integer
+ *                         description: Total de incidentes de todas las sucursales
+ *                       branches_count:
+ *                         type: integer
+ *                         description: Número de sucursales de la empresa
+ *       400:
+ *         description: Error de validación de fechas
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/stats/by-company",
+  controller.getIncidentStatsByCompany.bind(controller)
+);
+
+/**
+ * @swagger
+ * /api/v1/incidents/stats/by-branch:
+ *   get:
+ *     summary: Obtener estadísticas de incidentes por sucursal
+ *     tags: [Incidents]
+ *     description: Obtiene estadísticas de incidentes agrupados por sucursal individual
+ *     parameters:
+ *       - in: query
+ *         name: start_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de inicio del rango (ISO 8601)
+ *       - in: query
+ *         name: end_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de fin del rango (ISO 8601)
+ *     responses:
+ *       200:
+ *         description: Estadísticas de incidentes por sucursal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Estadísticas de incidentes por sucursal obtenidas"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       branch_id:
+ *                         type: integer
+ *                         description: ID de la sucursal
+ *                       branch_name:
+ *                         type: string
+ *                         description: Nombre de la sucursal
+ *                       company_name:
+ *                         type: string
+ *                         description: Nombre de la empresa a la que pertenece
+ *                       total_incidents:
+ *                         type: integer
+ *                         description: Total de incidentes de la sucursal
+ *       400:
+ *         description: Error de validación de fechas
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/stats/by-branch",
+  controller.getIncidentStatsByBranch.bind(controller)
+);
+
+/**
+ * @swagger
+ * /api/v1/incidents/stats/general:
+ *   get:
+ *     summary: Obtener estadísticas generales de incidentes
+ *     tags: [Incidents]
+ *     description: Obtiene estadísticas generales de incidentes incluyendo totales, por estado y por severidad
+ *     parameters:
+ *       - in: query
+ *         name: start_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de inicio del rango (ISO 8601)
+ *       - in: query
+ *         name: end_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Fecha de fin del rango (ISO 8601)
+ *     responses:
+ *       200:
+ *         description: Estadísticas generales de incidentes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Estadísticas generales de incidentes obtenidas"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total_incidents:
+ *                       type: integer
+ *                       description: Total de incidentes en el rango
+ *                     by_status:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           status:
+ *                             type: string
+ *                             description: Estado del incidente
+ *                           count:
+ *                             type: integer
+ *                             description: Cantidad de incidentes con este estado
+ *                     by_severity:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           severity:
+ *                             type: string
+ *                             description: Severidad del incidente
+ *                           count:
+ *                             type: integer
+ *                             description: Cantidad de incidentes con esta severidad
+ *       400:
+ *         description: Error de validación de fechas
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/stats/general",
+  controller.getGeneralIncidentStats.bind(controller)
+);
+
+/**
+ * @swagger
  * /api/v1/incidents/branch/{branchId}:
  *   get:
  *     summary: Obtener incidentes por branch_id

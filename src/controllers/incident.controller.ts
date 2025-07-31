@@ -264,6 +264,129 @@ export class IncidentController {
   }
 
   /**
+   * Obtener estadísticas de incidentes por empresa
+   */
+  async getIncidentStatsByCompany(req: Request, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date } = req.query;
+
+      if (!start_date || !end_date) {
+        res.status(400).json({
+          error: "start_date y end_date son requeridos",
+        });
+        return;
+      }
+
+      const startDate = new Date(start_date as string);
+      const endDate = new Date(end_date as string);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        res.status(400).json({
+          error: "start_date y end_date deben ser fechas válidas",
+        });
+        return;
+      }
+
+      const stats = await this.incidentService.getIncidentStatsByCompany(
+        startDate,
+        endDate
+      );
+
+      res.status(200).json({
+        message: "Estadísticas de incidentes por empresa obtenidas",
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error al obtener estadísticas por empresa:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener estadísticas por empresa" });
+    }
+  }
+
+  /**
+   * Obtener estadísticas de incidentes por sucursal
+   */
+  async getIncidentStatsByBranch(req: Request, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date } = req.query;
+
+      if (!start_date || !end_date) {
+        res.status(400).json({
+          error: "start_date y end_date son requeridos",
+        });
+        return;
+      }
+
+      const startDate = new Date(start_date as string);
+      const endDate = new Date(end_date as string);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        res.status(400).json({
+          error: "start_date y end_date deben ser fechas válidas",
+        });
+        return;
+      }
+
+      const stats = await this.incidentService.getIncidentStatsByBranch(
+        startDate,
+        endDate
+      );
+
+      res.status(200).json({
+        message: "Estadísticas de incidentes por sucursal obtenidas",
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error al obtener estadísticas por sucursal:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener estadísticas por sucursal" });
+    }
+  }
+
+  /**
+   * Obtener estadísticas generales de incidentes
+   */
+  async getGeneralIncidentStats(req: Request, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date } = req.query;
+
+      if (!start_date || !end_date) {
+        res.status(400).json({
+          error: "start_date y end_date son requeridos",
+        });
+        return;
+      }
+
+      const startDate = new Date(start_date as string);
+      const endDate = new Date(end_date as string);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        res.status(400).json({
+          error: "start_date y end_date deben ser fechas válidas",
+        });
+        return;
+      }
+
+      const stats = await this.incidentService.getGeneralIncidentStats(
+        startDate,
+        endDate
+      );
+
+      res.status(200).json({
+        message: "Estadísticas generales de incidentes obtenidas",
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error al obtener estadísticas generales:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener estadísticas generales" });
+    }
+  }
+
+  /**
    * Obtener incidentes por branch_id
    */
   async getIncidentsByBranchId(req: Request, res: Response): Promise<void> {
