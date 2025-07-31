@@ -39,9 +39,6 @@ export class Branch {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @OneToMany(() => Plan, (plan) => plan.branch)
-  plans: Plan[];
-
   @OneToMany(() => Incident, (incident) => incident.branch)
   incidents: Incident[];
 

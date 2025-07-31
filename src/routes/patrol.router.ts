@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   createPatrolValidator,
   updatePatrolValidator,
@@ -11,11 +12,29 @@ import {
   deletePatrol,
   createPatrolAndAssigment,
   getPatrolsByBranchId,
+  createPatrolWithPlanImage,
+  deletePlan,
 } from "@controllers/patrol.controller";
 
 const router = Router();
 
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten archivos de imagen"));
+    }
+  },
+});
+
 router.get("/branch/:id", getPatrolsByBranchId);
+
 /**
  * @swagger
  * /patrols:
@@ -80,6 +99,77 @@ router.get("/", getAllPatrols);
  */
 router.post("/", createPatrolValidator, createPatrol);
 
+/**
+ * @swagger
+ * /patrols/with-plan:
+ *   post:
+ *     summary: Crear una nueva patrulla con imagen del plano
+ *     tags: [Patrullas]
+ *     description: Crea una nueva patrulla con imagen del plano subida a DigitalOcean Spaces
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - frequency
+ *               - branch_id
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 enum: [ronda_matutina, ronda_vespertina, ronda_nocturna]
+ *                 description: Tipo de ronda
+ *               frequency:
+ *                 type: string
+ *                 enum: [diaria, semanal, mensual]
+ *                 description: Frecuencia de la ronda
+ *               branch_id:
+ *                 type: integer
+ *                 description: ID de la sucursal
+ *               plan_name:
+ *                 type: string
+ *                 description: Nombre del plano (requerido si se sube imagen)
+ *               active:
+ *                 type: boolean
+ *                 default: true
+ *                 description: Estado activo de la patrulla
+ *               plan_image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Imagen del plano (opcional)
+ *     responses:
+ *       201:
+ *         description: Patrulla creada exitosamente con plano
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ronda creada correctamente con plano"
+ *                 data:
+ *                   $ref: '#/components/schemas/Patrol'
+ *       400:
+ *         description: Error de validación
+ *       422:
+ *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(
+  "/with-plan",
+  upload.single("plan_image"),
+  createPatrolValidator,
+  createPatrolWithPlanImage
+);
+
 //this route is for creating a patrol and assigning it to a user
 //it uses the createPatrolAndAssigment function from the controller
 /**
@@ -115,10 +205,6 @@ router.post("/", createPatrolValidator, createPatrol);
  *               user_id:
  *                 type: integer
  *                 description: ID del usuario al que se asignará la patrulla
- *               plan_id:
- *                 type: integer
- *                 nullable: true
- *                 description: ID del plan (opcional)
  *               active:
  *                 type: boolean
  *                 default: true
@@ -225,9 +311,6 @@ router.get("/:id", getPatrolById);
  *               branch_id:
  *                 type: integer
  *                 description: ID de la sucursal
- *               plan_id:
- *                 type: integer
- *                 description: ID del plan (opcional)
  *               active:
  *                 type: boolean
  *                 description: Estado activo de la patrulla
@@ -306,5 +389,37 @@ router.put("/:id", updatePatrolValidator, updatePatrol);
  *         description: Error interno del servidor
  */
 router.delete("/:id", deletePatrol);
+
+/**
+ * @swagger
+ * /patrols/plans/{planId}:
+ *   delete:
+ *     summary: Eliminar plan específico
+ *     tags: [Patrullas]
+ *     description: Elimina un plan específico y su imagen de DigitalOcean Spaces
+ *     parameters:
+ *       - in: path
+ *         name: planId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del plan a eliminar
+ *     responses:
+ *       200:
+ *         description: Plan eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Plan eliminado exitosamente"
+ *       404:
+ *         description: Plan no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete("/plans/:planId", deletePlan);
 
 export default router;

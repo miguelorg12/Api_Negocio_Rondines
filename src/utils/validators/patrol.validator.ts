@@ -24,6 +24,10 @@ export const createPatrolValidator = [
       }
       return true;
     }),
+  body("plan_name")
+    .optional()
+    .isString()
+    .withMessage("El nombre del plano debe ser una cadena de texto"),
 ];
 
 export const updatePatrolValidator = [
@@ -51,4 +55,8 @@ export const updatePatrolValidator = [
       }
       return true;
     }),
+  body("plan_name")
+    .optional()
+    .isString()
+    .withMessage("El nombre del plano debe ser una cadena de texto"),
 ];

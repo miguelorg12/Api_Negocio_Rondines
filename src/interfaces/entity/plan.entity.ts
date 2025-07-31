@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Branch } from "@entities/branch.entity";
+import { Patrol } from "@entities/patrol.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 
 @Entity("plans")
@@ -23,9 +23,21 @@ export class Plan {
   @Column({ type: "text" })
   image_url: string;
 
-  @ManyToOne(() => Branch, (branch) => branch.plans, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "branch_id" })
-  branch: Branch;
+  @Column({ type: "varchar", length: 255 })
+  original_name: string;
+
+  @Column({ type: "varchar", length: 100 })
+  mime_type: string;
+
+  @Column({ type: "bigint" })
+  file_size: number;
+
+  @Column({ type: "varchar", length: 500 })
+  spaces_key: string;
+
+  @ManyToOne(() => Patrol, (patrol) => patrol.plans, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "patrol_id" })
+  patrol: Patrol;
 
   @OneToMany(() => Checkpoint, (checkpoint) => checkpoint.plan)
   checkpoints: Checkpoint[];

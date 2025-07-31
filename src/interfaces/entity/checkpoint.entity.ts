@@ -26,11 +26,8 @@ export class Checkpoint {
   @Column({ type: "text" })
   nfc_uid: string;
 
-  @Column({ type: "int8" })
-  x: number;
-
-  @Column({ type: "int8" })
-  y: number;
+  @Column({ type: "time" })
+  time: string;
 
   @ManyToOne(() => Plan, (plan) => plan.checkpoints, { onDelete: "CASCADE" })
   @JoinColumn({ name: "plan_id" })
