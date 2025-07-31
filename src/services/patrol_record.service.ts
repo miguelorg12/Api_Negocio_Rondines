@@ -13,8 +13,47 @@ export class PatrolRecordService {
   }
 
   async create(dto: PatrolRecordDto): Promise<PatrolRecord> {
-    const patrolRecord = this.patrolRecordRepository.create(dto);
-    return await this.patrolRecordRepository.save(patrolRecord);
+    console.log("PatrolRecordService.create - DTO recibido:", dto);
+
+    // Crear el objeto de datos para el insert
+    const insertData: any = {
+      date: dto.date,
+      actual_start: dto.actual_start,
+      actual_end: dto.actual_end,
+      status: dto.status || "pendiente",
+    };
+
+    // Si se proporciona patrol_assignment_id, agregarlo directamente
+    if (dto.patrol_assignment_id) {
+      insertData.patrolAssignment = { id: dto.patrol_assignment_id };
+      console.log("Agregando patrol_assignment_id:", dto.patrol_assignment_id);
+    }
+
+    console.log("Datos a insertar:", insertData);
+
+    // Usar insert para crear el registro
+    const result = await this.patrolRecordRepository.insert({
+      date: dto.date,
+      actual_start: dto.actual_start,
+      actual_end: dto.actual_end,
+      status: dto.status || "pendiente",
+      patrolAssignment: { id: dto.patrol_assignment_id },
+    });
+    console.log("Resultado del insert:", result);
+
+    // Obtener el registro creado con las relaciones
+    const createdPatrolRecord = await this.patrolRecordRepository.findOne({
+      where: { id: result.identifiers[0].id },
+      relations: ["patrolAssignment"],
+    });
+
+    console.log("PatrolRecord creado con relaciones:", createdPatrolRecord);
+
+    if (!createdPatrolRecord) {
+      throw new Error("Error al crear el registro de patrulla");
+    }
+
+    return createdPatrolRecord;
   }
 
   async findById(id: number): Promise<PatrolRecord | null> {

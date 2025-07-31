@@ -225,12 +225,13 @@ export class PatrolService {
   ): Promise<Patrol> {
     let patrol = this.patrolRepository.create(patrolDto);
     patrol = await this.patrolRepository.save(patrolDto);
+
+    // Crear el registro de patrol (sin user_id y patrol_id ya que no existen en la entidad)
     this.patrolRecordService.create({
-      user_id: patrolDto.user_id, // Assuming branch_id is the user_id for the patrol record
-      patrol_id: patrol.id,
       date: new Date(),
       status: "pendiente",
     });
+
     return patrol;
   }
 
