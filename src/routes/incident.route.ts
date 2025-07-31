@@ -389,15 +389,15 @@ router.post("/:id/upload-url", controller.generateUploadUrl.bind(controller));
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de inicio del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de inicio del rango (formato YYYY-MM-DD)
  *       - in: query
  *         name: end_date
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de fin del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de fin del rango (formato YYYY-MM-DD)
  *     responses:
  *       200:
  *         description: Estadísticas de incidentes por empresa
@@ -449,15 +449,15 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de inicio del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de inicio del rango (formato YYYY-MM-DD)
  *       - in: query
  *         name: end_date
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de fin del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de fin del rango (formato YYYY-MM-DD)
  *     responses:
  *       200:
  *         description: Estadísticas de incidentes por sucursal
@@ -509,15 +509,15 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de inicio del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de inicio del rango (formato YYYY-MM-DD)
  *       - in: query
  *         name: end_date
  *         required: true
  *         schema:
  *           type: string
- *           format: date-time
- *         description: Fecha de fin del rango (ISO 8601)
+ *           pattern: '^\d{4}-\d{2}-\d{2}$'
+ *         description: Fecha de fin del rango (formato YYYY-MM-DD)
  *     responses:
  *       200:
  *         description: Estadísticas generales de incidentes

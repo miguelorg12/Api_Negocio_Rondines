@@ -277,12 +277,14 @@ export class IncidentController {
         return;
       }
 
-      const startDate = new Date(start_date as string);
-      const endDate = new Date(end_date as string);
+      // Convertir fechas YYYY-MM-DD a timestamps completos
+      const startDate = this.parseDateToTimestamp(start_date as string, true);
+      const endDate = this.parseDateToTimestamp(end_date as string, false);
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      if (!startDate || !endDate) {
         res.status(400).json({
-          error: "start_date y end_date deben ser fechas válidas",
+          error:
+            "start_date y end_date deben ser fechas válidas en formato YYYY-MM-DD",
         });
         return;
       }
@@ -318,12 +320,14 @@ export class IncidentController {
         return;
       }
 
-      const startDate = new Date(start_date as string);
-      const endDate = new Date(end_date as string);
+      // Convertir fechas YYYY-MM-DD a timestamps completos
+      const startDate = this.parseDateToTimestamp(start_date as string, true);
+      const endDate = this.parseDateToTimestamp(end_date as string, false);
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      if (!startDate || !endDate) {
         res.status(400).json({
-          error: "start_date y end_date deben ser fechas válidas",
+          error:
+            "start_date y end_date deben ser fechas válidas en formato YYYY-MM-DD",
         });
         return;
       }
@@ -359,12 +363,14 @@ export class IncidentController {
         return;
       }
 
-      const startDate = new Date(start_date as string);
-      const endDate = new Date(end_date as string);
+      // Convertir fechas YYYY-MM-DD a timestamps completos
+      const startDate = this.parseDateToTimestamp(start_date as string, true);
+      const endDate = this.parseDateToTimestamp(end_date as string, false);
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      if (!startDate || !endDate) {
         res.status(400).json({
-          error: "start_date y end_date deben ser fechas válidas",
+          error:
+            "start_date y end_date deben ser fechas válidas en formato YYYY-MM-DD",
         });
         return;
       }
@@ -412,6 +418,48 @@ export class IncidentController {
       res
         .status(500)
         .json({ error: "Error al obtener incidentes por branch_id" });
+    }
+  }
+
+  /**
+   * Método auxiliar para convertir fechas YYYY-MM-DD a timestamps
+   * @param dateString - Fecha en formato YYYY-MM-DD
+   * @param isStartDate - Si es fecha de inicio (00:00:00) o fin (23:59:59)
+   * @returns Date object o null si es inválida
+   */
+  private parseDateToTimestamp(
+    dateString: string,
+    isStartDate: boolean
+  ): Date | null {
+    // Validar formato YYYY-MM-DD
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+      return null;
+    }
+
+    try {
+      const [year, month, day] = dateString.split("-").map(Number);
+      const date = new Date(year, month - 1, day); // month - 1 porque Date usa 0-based months
+
+      // Validar que la fecha sea válida
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+
+      // Ajustar hora según si es inicio o fin
+      if (isStartDate) {
+        date.setHours(0, 0, 0, 0); // 00:00:00.000
+      } else {
+        date.setHours(23, 59, 59, 999); // 23:59:59.999
+      }
+
+      return date;
+    } catch (error) {
+      return null;
     }
   }
 }
