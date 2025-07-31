@@ -1,16 +1,16 @@
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import userRoutes from "../src/routes/user.route";
-import roleRoutes from "../src/routes/role.route";
-import companyRoutes from "../src/routes/company.route";
-import branchRoutes from "../src/routes/branch.router";
-import patrolRoutes from "../src/routes/patrol.router";
-import shifRoutes from "../src/routes/shift.router";
-import patrolAssignmentRoutes from "../src/routes/patrol_assigment.router";
-import patrolRecordRoutes from "../src/routes/patrol_record.route";
-import guardRoutes from "../src/routes/guard.route";
-import incidentRoutes from "../src/routes/incident.route";
+import userRoutes from "./routes/user.route";
+import roleRoutes from "./routes/role.route";
+import companyRoutes from "./routes/company.route";
+import branchRoutes from "./routes/branch.router";
+import patrolRoutes from "./routes/patrol.router";
+import shifRoutes from "./routes/shift.router";
+import patrolAssignmentRoutes from "./routes/patrol_assigment.router";
+import patrolRecordRoutes from "./routes/patrol_record.route";
+import guardRoutes from "./routes/guard.route";
+import incidentRoutes from "./routes/incident.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
