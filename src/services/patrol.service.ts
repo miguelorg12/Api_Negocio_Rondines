@@ -209,6 +209,35 @@ export class PatrolService {
     return this.getById(id);
   }
 
+  async updateWithPlanImage(
+    id: number,
+    patrolData: PatrolWithPlanImageDto,
+    planFile?: Express.Multer.File
+  ): Promise<Patrol> {
+    // Verificar que el patrol existe
+    const existingPatrol = await this.getById(id);
+    if (!existingPatrol) {
+      throw new Error("Ronda no encontrada");
+    }
+
+    // Actualizar datos básicos del patrol
+    const updateData: PartialPatrolDto = {
+      name: patrolData.name,
+      frequency: patrolData.frequency,
+      active: patrolData.active,
+      branch_id: patrolData.branch_id,
+    };
+
+    await this.patrolRepository.update(id, updateData);
+
+    // Si se proporcionó una imagen del plan, subirla y crear el plan
+    if (planFile && patrolData.plan_name) {
+      await this.uploadPlanImage(id, planFile, patrolData.plan_name);
+    }
+
+    return await this.getPatrolWithPlans(id);
+  }
+
   async delete(id: number): Promise<Patrol | null> {
     const patrol = await this.getById(id);
     if (!patrol) {

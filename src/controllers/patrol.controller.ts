@@ -140,6 +140,78 @@ export const updatePatrol = async (
   });
 };
 
+export const updatePatrolWithPlanImage = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        message: "Error en la validación de datos",
+        errors: errors.array(),
+      });
+    }
+
+    const patrolId = parseInt(req.params.id);
+    const file = req.file as Express.Multer.File;
+    const { name, frequency, branch_id, plan_name, active } = req.body;
+
+    // Validar campos requeridos
+    if (!name || !frequency || !branch_id) {
+      return res.status(400).json({
+        error: "name, frequency y branch_id son requeridos",
+      });
+    }
+
+    // Validar archivo si se proporcionó
+    if (file) {
+      if (!file.mimetype.startsWith("image/")) {
+        return res.status(400).json({
+          error: "Solo se permiten archivos de imagen",
+        });
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        return res.status(400).json({
+          error: "El archivo es demasiado grande. Máximo 5MB",
+        });
+      }
+
+      if (!plan_name) {
+        return res.status(400).json({
+          error: "plan_name es requerido cuando se sube una imagen",
+        });
+      }
+    }
+
+    const patrolData: PatrolWithPlanImageDto = {
+      name,
+      frequency,
+      branch_id: parseInt(branch_id),
+      active: active === "true",
+      plan_name,
+    };
+
+    const updatedPatrol = await patrolService.updateWithPlanImage(
+      patrolId,
+      patrolData,
+      file
+    );
+
+    return res.status(200).json({
+      message: "Ronda actualizada correctamente con plano",
+      data: updatedPatrol,
+    });
+  } catch (error) {
+    console.error("Error al actualizar patrol con imagen:", error);
+    return res
+      .status(500)
+      .json({ error: "Error al actualizar patrol con imagen" });
+  }
+};
+
 export const deletePatrol = async (
   req: Request,
   res: Response
