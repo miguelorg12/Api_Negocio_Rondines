@@ -4,6 +4,7 @@ import {
   createGuardsValidator,
   updateGuardValidator,
 } from "../utils/validators/guard.validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -92,6 +93,8 @@ router.get("/patrols/assigned/:id", guardController.patrolsAssignedToGuard);
  *     summary: Obtener todos los guardias
  *     tags: [Guardias]
  *     description: Retorna una lista de todos los guardias en el sistema
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de guardias obtenida exitosamente
@@ -114,10 +117,23 @@ router.get("/patrols/assigned/:id", guardController.patrolsAssignedToGuard);
  *                         type: string
  *                       curp:
  *                         type: string
+ *       401:
+ *         description: Token de acceso requerido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Access token required"
+ *                 message:
+ *                   type: string
+ *                   example: "Debe proporcionar un token de acceso"
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", guardController.getAllGuards);
+router.get("/", authenticateToken, guardController.getAllGuards);
 
 /**
  * @swagger
