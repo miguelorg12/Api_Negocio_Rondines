@@ -15,11 +15,16 @@ export class BranchService {
   }
 
   async findAll(): Promise<Branch[]> {
-    return await this.branchRepository.find();
+    return await this.branchRepository.find({
+      relations: ["user", "company"],
+    });
   }
 
   async findById(id: number): Promise<Branch | null> {
-    return await this.branchRepository.findOneBy({ id });
+    return await this.branchRepository.findOne({
+      where: { id },
+      relations: ["user", "company"],
+    });
   }
 
   async update(

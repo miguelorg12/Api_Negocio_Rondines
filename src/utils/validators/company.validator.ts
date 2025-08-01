@@ -44,10 +44,10 @@ export const updateCompanyValidator = [
     .withMessage("Email inválido")
     .custom(async (email: string, { req }) => {
       const companyRepo = AppDataSource.getRepository(Company);
-      const company = await companyRepo.findOne({
-        where: { email },
-      });
-      if (company) {
+      const company = await companyRepo.findOne({ where: { email } });
+      const companyId = req?.params?.id ? Number(req.params.id) : undefined;
+
+      if (company && company.id !== companyId) {
         throw new Error("El email ya está en uso");
       }
       return true;
