@@ -99,9 +99,9 @@ export class PatrolService {
     await this.s3Client.send(uploadCommand);
 
     // Construir URL pública
-    const imageUrl = `https://${
-      this.bucketName
-    }.${process.env.DO_SPACES_ENDPOINT?.replace("https://", "")}/${fileName}`;
+    const endpoint =
+      process.env.DO_SPACES_ENDPOINT?.replace("https://", "") || "";
+    const imageUrl = `https://${this.bucketName}.${endpoint}/${fileName}`;
 
     // Crear el plan en base de datos
     const plan = this.planRepository.create({
