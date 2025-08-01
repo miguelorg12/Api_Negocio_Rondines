@@ -40,16 +40,37 @@ export class BiometricService {
       // Configurar listeners del Arduino
       this.setupArduinoListeners(sessionId, port, parser);
 
+      // Mapear acción a número para Arduino
+      const actionMap: { [key: string]: number } = {
+        enroll: 2,
+        verify: 1,
+        delete: 3,
+      };
+
+      const actionNumber = actionMap[action] || 2; // Default a enroll si no se encuentra
+
+      console.log("=== DEBUG BIOMETRIC ===");
+      console.log("Action recibida:", action);
+      console.log("Action mapeada a número:", actionNumber);
+      console.log("User ID:", user_id);
+      console.log("Enviando al Arduino:", `${actionNumber}\\n`);
+      console.log("Luego enviando:", `${user_id}\\n`);
+      console.log("========================");
+
       // Enviar acción al Arduino
       setTimeout(() => {
-        port.write(Buffer.from(action + "\n", "utf-8"));
+        console.log("Enviando acción al Arduino:", actionNumber);
+        port.write(Buffer.from(actionNumber.toString() + "\n", "utf-8"));
+
         setTimeout(() => {
+          console.log("Enviando user_id al Arduino:", user_id);
           port.write(Buffer.from(user_id.toString() + "\n", "utf-8"));
         }, 1000);
       }, 3000);
 
       return { session_id: sessionId };
     } catch (error) {
+      console.error("Error en startRegistration:", error);
       throw new Error("Error iniciando comunicación con Arduino");
     }
   }
@@ -85,7 +106,10 @@ export class BiometricService {
 
     parser.on("data", (line: string) => {
       const message = line.trim();
-      console.log("Arduino:", message);
+      console.log("=== ARDUINO RESPONSE ===");
+      console.log("Mensaje recibido:", message);
+      console.log("Session ID:", sessionId);
+      console.log("=========================");
 
       let eventData: any = null;
 
@@ -151,7 +175,11 @@ export class BiometricService {
     });
 
     port.on("error", (error) => {
+      console.error("=== ARDUINO ERROR ===");
       console.error("Error en puerto serial:", error);
+      console.error("Session ID:", sessionId);
+      console.error("=====================");
+
       const errorEvent = {
         type: "error",
         message: "Error de conexión con el dispositivo",

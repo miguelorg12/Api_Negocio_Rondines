@@ -12,6 +12,12 @@ export const startBiometricRegistration = async (
   try {
     const { user_id, action = "enroll" } = req.body;
 
+    console.log("=== CONTROLLER DEBUG ===");
+    console.log("Request body:", req.body);
+    console.log("user_id:", user_id);
+    console.log("action:", action);
+    console.log("========================");
+
     if (!user_id) {
       return res.status(400).json({
         error: "user_id es requerido",
@@ -26,6 +32,7 @@ export const startBiometricRegistration = async (
       });
     }
 
+    console.log("Usuario encontrado:", user.name);
     const result = await biometricService.startRegistration(user_id, action);
 
     return res.status(200).json({
@@ -171,4 +178,42 @@ export const cancelBiometricRegistration = async (
   return res.status(200).json({
     message: "Registro biométrico cancelado",
   });
+};
+
+export const testArduinoConnection = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    console.log("=== TESTING ARDUINO CONNECTION ===");
+    console.log("ARDUINO_PORT:", process.env.ARDUINO_PORT || "COM5");
+    console.log("ARDUINO_BAUDRATE:", process.env.ARDUINO_BAUDRATE || "9600");
+
+    const { SerialPort } = await import("serialport");
+
+    // Listar puertos disponibles
+    const ports = await SerialPort.list();
+    console.log(
+      "Puertos disponibles:",
+      ports.map((p) => ({ path: p.path, manufacturer: p.manufacturer }))
+    );
+
+    return res.status(200).json({
+      message: "Información de conexión Arduino",
+      data: {
+        configured_port: process.env.ARDUINO_PORT || "COM5",
+        configured_baudrate: process.env.ARDUINO_BAUDRATE || "9600",
+        available_ports: ports.map((p) => ({
+          path: p.path,
+          manufacturer: p.manufacturer,
+        })),
+      },
+    });
+  } catch (error: any) {
+    console.error("Error testing Arduino connection:", error);
+    return res.status(500).json({
+      error: "Error probando conexión Arduino",
+      details: error.message,
+    });
+  }
 };

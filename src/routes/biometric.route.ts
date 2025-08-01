@@ -5,6 +5,7 @@ import {
   getBiometricSessionStatus,
   completeBiometricRegistration,
   cancelBiometricRegistration,
+  testArduinoConnection,
 } from "../controllers/biometric.controller";
 
 const router = Router();
@@ -204,4 +205,45 @@ router.post("/complete/:sessionId", completeBiometricRegistration);
  */
 router.post("/cancel/:sessionId", cancelBiometricRegistration);
 
-export default router; 
+/**
+ * @swagger
+ * /biometric/test-connection:
+ *   get:
+ *     summary: Probar conexión con Arduino
+ *     tags: [Biométrico]
+ *     description: Endpoint para probar la conexión con el dispositivo Arduino y listar puertos disponibles
+ *     responses:
+ *       200:
+ *         description: Información de conexión obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Información de conexión Arduino"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     configured_port:
+ *                       type: string
+ *                       description: Puerto configurado para Arduino
+ *                     configured_baudrate:
+ *                       type: string
+ *                       description: Baudrate configurado
+ *                     available_ports:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           path:
+ *                             type: string
+ *                           manufacturer:
+ *                             type: string
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/test-connection", testArduinoConnection);
+
+export default router;
