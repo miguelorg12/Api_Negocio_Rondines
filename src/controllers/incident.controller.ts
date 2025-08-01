@@ -422,6 +422,66 @@ export class IncidentController {
   }
 
   /**
+   * Obtener incidentes anteriores a la fecha de hoy por usuario
+   */
+  async getPreviousIncidentsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.params;
+
+      if (!userId || isNaN(parseInt(userId))) {
+        res.status(400).json({
+          error: "userId debe ser un número válido",
+        });
+        return;
+      }
+
+      const incidents = await this.incidentService.getPreviousIncidentsByUserId(
+        parseInt(userId)
+      );
+
+      res.status(200).json({
+        message: "Incidentes anteriores obtenidos exitosamente",
+        data: incidents,
+      });
+    } catch (error) {
+      console.error("Error al obtener incidentes anteriores:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener incidentes anteriores" });
+    }
+  }
+
+  /**
+   * Obtener incidentes del día de hoy por usuario
+   */
+  async getTodayIncidentsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.params;
+
+      if (!userId || isNaN(parseInt(userId))) {
+        res.status(400).json({
+          error: "userId debe ser un número válido",
+        });
+        return;
+      }
+
+      const incidents = await this.incidentService.getTodayIncidentsByUserId(
+        parseInt(userId)
+      );
+
+      res.status(200).json({
+        message: "Incidentes del día obtenidos exitosamente",
+        data: incidents,
+      });
+    } catch (error) {
+      console.error("Error al obtener incidentes del día:", error);
+      res
+        .status(500)
+        .json({ error: "Error al obtener incidentes del día" });
+    }
+  }
+
+  /**
    * Método auxiliar para convertir fechas YYYY-MM-DD a timestamps
    * @param dateString - Fecha en formato YYYY-MM-DD
    * @param isStartDate - Si es fecha de inicio (00:00:00) o fin (23:59:59)

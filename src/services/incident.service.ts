@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { Repository, LessThan, MoreThanOrEqual } from "typeorm";
 import { Incident } from "@entities/incident.entity";
 import { IncidentImage } from "@entities/incident_image.entity";
 import {
@@ -348,10 +348,7 @@ export class IncidentService {
   /**
    * Obtener estadísticas generales de incidentes
    */
-  async getGeneralIncidentStats(
-    startDate: Date,
-    endDate: Date
-  ): Promise<any> {
+  async getGeneralIncidentStats(startDate: Date, endDate: Date): Promise<any> {
     const totalIncidents = await this.incidentRepository.count({
       where: {
         created_at: {
@@ -407,6 +404,127 @@ export class IncidentService {
           id: true,
           name: true,
           email: true,
+        },
+      },
+    });
+  }
+
+  /**
+   * Obtener incidentes anteriores a la fecha de hoy por usuario
+   */
+  async getPreviousIncidentsByUserId(userId: number): Promise<Incident[]> {
+    // Crear fecha de hoy en UTC
+    const today = new Date();
+    const todayUTC = new Date(
+      Date.UTC(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
+
+    return await this.incidentRepository.find({
+      where: {
+        user: { id: userId },
+        created_at: LessThan(todayUTC),
+      },
+      relations: ["images", "user", "checkpoint", "branch"],
+      order: { created_at: "DESC" },
+      select: {
+        id: true,
+        description: true,
+        status: true,
+        severity: true,
+        created_at: true,
+        updated_at: true,
+        images: {
+          id: true,
+          image_url: true,
+          original_name: true,
+          order: true,
+        },
+        user: {
+          id: true,
+          name: true,
+          email: true,
+        },
+        checkpoint: {
+          id: true,
+          name: true,
+        },
+        branch: {
+          id: true,
+          name: true,
+        },
+      },
+    });
+  }
+
+  /**
+   * Obtener incidentes del día de hoy por usuario
+   */
+  async getTodayIncidentsByUserId(userId: number): Promise<Incident[]> {
+    // Crear fechas en UTC
+    const today = new Date();
+    const todayUTC = new Date(
+      Date.UTC(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
+    const tomorrowUTC = new Date(
+      Date.UTC(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1,
+        0,
+        0,
+        0,
+        0
+      )
+    );
+
+    return await this.incidentRepository.find({
+      where: {
+        user: { id: userId },
+        created_at: MoreThanOrEqual(todayUTC) && LessThan(tomorrowUTC),
+      },
+      relations: ["images", "user", "checkpoint", "branch"],
+      order: { created_at: "DESC" },
+      select: {
+        id: true,
+        description: true,
+        status: true,
+        severity: true,
+        created_at: true,
+        updated_at: true,
+        images: {
+          id: true,
+          image_url: true,
+          original_name: true,
+          order: true,
+        },
+        user: {
+          id: true,
+          name: true,
+          email: true,
+        },
+        checkpoint: {
+          id: true,
+          name: true,
+        },
+        branch: {
+          id: true,
+          name: true,
         },
       },
     });

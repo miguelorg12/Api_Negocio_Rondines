@@ -602,4 +602,82 @@ router.get(
   controller.getIncidentsByBranchId.bind(controller)
 );
 
+/**
+ * @swagger
+ * /api/v1/incidents/user/{userId}/previous:
+ *   get:
+ *     summary: Obtener incidentes anteriores a la fecha de hoy por usuario
+ *     tags: [Incidents]
+ *     description: Obtiene todos los incidentes reportados por un usuario específico que fueron creados antes del día de hoy
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Lista de incidentes anteriores del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Incidentes anteriores obtenidos exitosamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Incident'
+ *       400:
+ *         description: Error de validación del userId
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/user/:userId/previous",
+  controller.getPreviousIncidentsByUserId.bind(controller)
+);
+
+/**
+ * @swagger
+ * /api/v1/incidents/user/{userId}/today:
+ *   get:
+ *     summary: Obtener incidentes del día de hoy por usuario
+ *     tags: [Incidents]
+ *     description: Obtiene todos los incidentes reportados por un usuario específico que fueron creados el día de hoy
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Lista de incidentes del día del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Incidentes del día obtenidos exitosamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Incident'
+ *       400:
+ *         description: Error de validación del userId
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/user/:userId/today",
+  controller.getTodayIncidentsByUserId.bind(controller)
+);
+
 export default router;
