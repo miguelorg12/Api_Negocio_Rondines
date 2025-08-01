@@ -1,10 +1,8 @@
+import "dotenv/config";
 import "module-alias/register";
 import app from "./app";
 import { AppDataSource } from "./configs/data-source";
-import { config, validateConfig } from "./configs/environment";
-
-// Validar configuración al inicio
-validateConfig();
+const PORT = process.env.PORT || 3000;
 
 AppDataSource.initialize()
   .then(() => {
@@ -14,8 +12,6 @@ AppDataSource.initialize()
     console.error("Error during Data Source initialization:", err);
   });
 
-app.listen(config.PORT, () => {
-  console.log(
-    `Server is running on port ${config.PORT} in ${config.NODE_ENV} mode`
-  );
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

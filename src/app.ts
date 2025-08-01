@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import { config } from "./configs/environment";
 import userRoutes from "./routes/user.route";
 import roleRoutes from "./routes/role.route";
 import companyRoutes from "./routes/company.route";
@@ -17,7 +16,7 @@ import { swaggerSpec, swaggerUi } from "./configs/swagger";
 const app = express();
 app.use(
   cors({
-    origin: config.CORS_ORIGIN === "*" ? "*" : config.CORS_ORIGIN.split(","),
+    origin: "*",
     credentials: true,
   })
 );
@@ -29,15 +28,11 @@ app.get("/", (req, res) => {
 
 const apiRouter = express.Router();
 app.use("/api/v1", apiRouter);
-
-// Solo habilitar Swagger en desarrollo y QA
-if (config.ENABLE_SWAGGER) {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-  app.get("/swagger.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.send(swaggerSpec);
-  });
-}
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 apiRouter.use("/users", userRoutes);
 apiRouter.use("/roles", roleRoutes);

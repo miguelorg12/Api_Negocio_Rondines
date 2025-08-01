@@ -1,5 +1,5 @@
+import "dotenv/config";
 import { DataSource } from "typeorm";
-import { config, isDevelopment } from "./environment";
 import { User } from "@entities/user.entity";
 import { Patrol } from "@entities/patrol.entity";
 import { Branch } from "@entities/branch.entity";
@@ -22,13 +22,13 @@ import { IncidentImage } from "@interfaces/entity/incident_image.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: config.DB_HOST,
-  port: config.DB_PORT,
-  username: config.DB_USERNAME,
-  password: config.DB_PASSWORD,
-  database: config.DB_DATABASE,
-  synchronize: isDevelopment, // Solo sincronizar en desarrollo
-  logging: isDevelopment, // Solo logging en desarrollo
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  synchronize: process.env.TYPEORM_SYNCHRONIZE === "true",
+  logging: false,
   entities: [
     User,
     Patrol,
