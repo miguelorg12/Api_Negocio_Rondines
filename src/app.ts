@@ -11,6 +11,7 @@ import patrolAssignmentRoutes from "./routes/patrol_assigment.router";
 import patrolRecordRoutes from "./routes/patrol_record.route";
 import guardRoutes from "./routes/guard.route";
 import incidentRoutes from "./routes/incident.route";
+import biometricRoutes from "./routes/biometric.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
@@ -44,5 +45,6 @@ apiRouter.use("/patrol-assignments", patrolAssignmentRoutes);
 apiRouter.use("/patrol-records", patrolRecordRoutes);
 apiRouter.use("/guards", guardRoutes);
 apiRouter.use("/incidents", incidentRoutes);
+apiRouter.use("/biometric", biometricRoutes);
 
 export default app;
