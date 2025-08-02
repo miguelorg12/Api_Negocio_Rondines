@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { IncidentService } from "@services/incident.service";
-import { AppDataSource } from "@configs/data-source";
-import { Incident } from "@interfaces/entity/incident.entity";
-import { IncidentImage } from "@interfaces/entity/incident_image.entity";
+import { IncidentService } from "../services/incident.service";
+import { AppDataSource } from "../configs/data-source";
+import { Incident } from "../interfaces/entity/incident.entity";
+import { IncidentImage } from "../interfaces/entity/incident_image.entity";
 
 export class IncidentController {
   private incidentService: IncidentService;
@@ -424,7 +424,10 @@ export class IncidentController {
   /**
    * Obtener incidentes anteriores a la fecha de hoy por usuario
    */
-  async getPreviousIncidentsByUserId(req: Request, res: Response): Promise<void> {
+  async getPreviousIncidentsByUserId(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     try {
       const { userId } = req.params;
 
@@ -445,9 +448,7 @@ export class IncidentController {
       });
     } catch (error) {
       console.error("Error al obtener incidentes anteriores:", error);
-      res
-        .status(500)
-        .json({ error: "Error al obtener incidentes anteriores" });
+      res.status(500).json({ error: "Error al obtener incidentes anteriores" });
     }
   }
 
@@ -475,9 +476,7 @@ export class IncidentController {
       });
     } catch (error) {
       console.error("Error al obtener incidentes del día:", error);
-      res
-        .status(500)
-        .json({ error: "Error al obtener incidentes del día" });
+      res.status(500).json({ error: "Error al obtener incidentes del día" });
     }
   }
 

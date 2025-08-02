@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { PatrolService } from "@services/patrol.service";
+import { PatrolService } from "../services/patrol.service";
 import {
   PatrolDto,
   PartialPatrolDto,
   PatrolAssigmentDto,
   PatrolWithPlanImageDto,
-} from "@interfaces/dto/patrol.dto";
+} from "../interfaces/dto/patrol.dto";
 
 const patrolService = new PatrolService();
 

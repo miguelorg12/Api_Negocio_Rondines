@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
-import { IncidentController } from "@controllers/incident.controller";
-import { createIncidentValidator } from "@utils/validators/incident.validator";
+import { IncidentController } from "../controllers/incident.controller";
+import { createIncidentValidator } from "../utils/validators/incident.validator";
 import { validationResult } from "express-validator";
 
 const router = express.Router();
