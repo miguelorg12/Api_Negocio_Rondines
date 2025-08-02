@@ -347,87 +347,87 @@ router.get("/:id", getPatrolById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updatePatrolValidator, updatePatrol);
+// router.put("/:id", updatePatrolValidator, updatePatrol);
 
-/**
- * @swagger
- * /patrols/{id}/with-plan:
- *   put:
- *     summary: Actualizar patrulla con imagen del plano
- *     tags: [Patrullas]
- *     description: Actualiza una patrulla existente y opcionalmente sube una nueva imagen del plano
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID de la patrulla a actualizar
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - frequency
- *               - branch_id
- *             properties:
- *               name:
- *                 type: string
- *                 enum: [ronda_matutina, ronda_vespertina, ronda_nocturna]
- *                 description: Tipo de ronda
- *               frequency:
- *                 type: string
- *                 enum: [diaria, semanal, mensual]
- *                 description: Frecuencia de la ronda
- *               branch_id:
- *                 type: integer
- *                 description: ID de la sucursal
- *               plan_name:
- *                 type: string
- *                 description: Nombre del plano (requerido si se sube imagen)
- *               active:
- *                 type: boolean
- *                 default: true
- *                 description: Estado activo de la patrulla
- *               plan_image:
- *                 type: string
- *                 format: binary
- *                 description: Imagen del plano (opcional)
- *     responses:
- *       200:
- *         description: Patrulla actualizada exitosamente con plano
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Ronda actualizada correctamente con plano"
- *                 data:
- *                   $ref: '#/components/schemas/Patrol'
- *       400:
- *         description: Error de validación
- *       404:
- *         description: Patrulla no encontrada
- *       422:
- *         description: Error de validación
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ValidationErrorResponse'
- *       500:
- *         description: Error interno del servidor
- */
-router.put(
-  "/:id/with-plan",
-  upload.single("plan_image"),
-  updatePatrolValidator,
-  updatePatrolWithPlanImage
-);
+// /**
+//  * @swagger
+//  * /patrols/{id}/with-plan:
+//  *   put:
+//  *     summary: Actualizar patrulla con imagen del plano
+//  *     tags: [Patrullas]
+//  *     description: Actualiza una patrulla existente y opcionalmente sube una nueva imagen del plano
+//  *     parameters:
+//  *       - in: path
+//  *         name: id
+//  *         required: true
+//  *         schema:
+//  *           type: integer
+//  *         description: ID de la patrulla a actualizar
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         multipart/form-data:
+//  *           schema:
+//  *             type: object
+//  *             required:
+//  *               - name
+//  *               - frequency
+//  *               - branch_id
+//  *             properties:
+//  *               name:
+//  *                 type: string
+//  *                 enum: [ronda_matutina, ronda_vespertina, ronda_nocturna]
+//  *                 description: Tipo de ronda
+//  *               frequency:
+//  *                 type: string
+//  *                 enum: [diaria, semanal, mensual]
+//  *                 description: Frecuencia de la ronda
+//  *               branch_id:
+//  *                 type: integer
+//  *                 description: ID de la sucursal
+//  *               plan_name:
+//  *                 type: string
+//  *                 description: Nombre del plano (requerido si se sube imagen)
+//  *               active:
+//  *                 type: boolean
+//  *                 default: true
+//  *                 description: Estado activo de la patrulla
+//  *               plan_image:
+//  *                 type: string
+//  *                 format: binary
+//  *                 description: Imagen del plano (opcional)
+//  *     responses:
+//  *       200:
+//  *         description: Patrulla actualizada exitosamente con plano
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Ronda actualizada correctamente con plano"
+//  *                 data:
+//  *                   $ref: '#/components/schemas/Patrol'
+//  *       400:
+//  *         description: Error de validación
+//  *       404:
+//  *         description: Patrulla no encontrada
+//  *       422:
+//  *         description: Error de validación
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               $ref: '#/components/schemas/ValidationErrorResponse'
+//  *       500:
+//  *         description: Error interno del servidor
+//  */
+// router.put(
+//   "/:id/with-plan",
+//   upload.single("plan_image"),
+//   updatePatrolValidator,
+//   updatePatrolWithPlanImage
+// );
 
 /**
  * @swagger
