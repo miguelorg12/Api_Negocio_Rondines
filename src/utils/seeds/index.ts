@@ -9,6 +9,7 @@ import { seedShifts } from "@utils/seeds/shift.seed";
 import { seedPatrols } from "@utils/seeds/patrol.seed";
 import { seedPatrolAssignments } from "@utils/seeds/patrol_assigment.seed";
 import { seedShiftValidationRealData } from "./shift_validation_real_data.seed";
+import { seedIncidents } from "@utils/seeds/incident.seed";
 
 async function main() {
   await AppDataSource.initialize();
@@ -22,6 +23,7 @@ async function main() {
   await seedPatrols();
   await seedPatrolAssignments();
   await seedShiftValidationRealData();
+  await seedIncidents();
   await AppDataSource.destroy();
 
   console.log("Seeding completed successfully.");
