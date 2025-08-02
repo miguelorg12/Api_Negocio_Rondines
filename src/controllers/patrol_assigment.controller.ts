@@ -5,6 +5,7 @@ import {
   PatrolAssignmentDto,
   PartialPatrolAssignmentDto,
   RouteAssignmentWithCheckpointsDto,
+  UpdateRouteWithCheckpointsDto,
 } from "@interfaces/dto/patrol_assigment.dto";
 
 const patrolAssignmentService = new PatrolAssignmentService();
@@ -161,6 +162,95 @@ export const updatePatrolAssignment = async (
     message: "Asignación de ronda actualizada correctamente",
     data: updatedPatrolAssignment,
   });
+};
+
+export const updateRouteWithCheckpoints = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        message: "Error en la validación de datos",
+        errors: errors.array(),
+      });
+    }
+
+    const assignmentId = parseInt(req.params.id);
+    const updateData: UpdateRouteWithCheckpointsDto = req.body;
+
+    // Validar que al menos un campo se esté actualizando
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        error: "Debe proporcionar al menos un campo para actualizar",
+      });
+    }
+
+    // Validar checkpoints si se proporcionan
+    if (updateData.checkpoints) {
+      if (
+        !Array.isArray(updateData.checkpoints) ||
+        updateData.checkpoints.length === 0
+      ) {
+        return res.status(400).json({
+          error: "checkpoints debe ser un array no vacío",
+        });
+      }
+
+      for (const checkpoint of updateData.checkpoints) {
+        if (!checkpoint.name || !checkpoint.time) {
+          return res.status(400).json({
+            error: "Cada checkpoint debe tener name y time",
+          });
+        }
+      }
+    }
+
+    const updatedAssignment =
+      await patrolAssignmentService.updateRouteWithCheckpoints(
+        assignmentId,
+        updateData
+      );
+
+    return res.status(200).json({
+      message: "Ruta con checkpoints actualizada correctamente",
+      data: updatedAssignment,
+    });
+  } catch (error) {
+    console.error("Error al actualizar ruta con checkpoints:", error);
+    return res.status(500).json({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar ruta con checkpoints",
+    });
+  }
+};
+
+export const deleteRouteWithCheckpoints = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const assignmentId = parseInt(req.params.id);
+
+    const deletedAssignment =
+      await patrolAssignmentService.deleteRouteWithCheckpoints(assignmentId);
+
+    return res.status(200).json({
+      message: "Ruta con checkpoints eliminada correctamente",
+      data: deletedAssignment,
+    });
+  } catch (error) {
+    console.error("Error al eliminar ruta con checkpoints:", error);
+    return res.status(500).json({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error al eliminar ruta con checkpoints",
+    });
+  }
 };
 
 export const deletePatrolAssignment = async (

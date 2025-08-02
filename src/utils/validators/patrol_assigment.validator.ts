@@ -187,3 +187,80 @@ export const PatrolAssignmentUpdateValidator = [
     .isISO8601()
     .withMessage("La fecha debe ser una fecha válida en formato ISO 8601"),
 ];
+
+export const UpdateRouteWithCheckpointsValidator = [
+  body("user_id")
+    .optional()
+    .isInt()
+    .withMessage("El ID del usuario debe ser un número entero")
+    .custom(async (value) => {
+      if (value) {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { id: value } });
+        if (!user) {
+          throw new Error("Usuario no encontrado");
+        }
+      }
+      return true;
+    }),
+  body("patrol_id")
+    .optional()
+    .isInt()
+    .withMessage("El ID de la ronda debe ser un número entero")
+    .custom(async (value) => {
+      if (value) {
+        const patrolRepository = AppDataSource.getRepository(Patrol);
+        const patrol = await patrolRepository.findOne({
+          where: { id: value },
+          relations: ["plans"],
+        });
+        if (!patrol) {
+          throw new Error("Ronda no encontrada");
+        }
+        if (!patrol.plans || patrol.plans.length === 0) {
+          throw new Error("La ronda seleccionada no tiene un plan asignado");
+        }
+      }
+      return true;
+    }),
+  body("shift_id")
+    .optional()
+    .isInt()
+    .withMessage("El ID del turno debe ser un número entero")
+    .custom(async (value) => {
+      if (value) {
+        const shiftRepository = AppDataSource.getRepository(Shift);
+        const shift = await shiftRepository.findOne({ where: { id: value } });
+        if (!shift) {
+          throw new Error("Turno no encontrado");
+        }
+      }
+      return true;
+    }),
+  body("date")
+    .optional()
+    .isISO8601()
+    .withMessage("La fecha debe ser una fecha válida en formato ISO 8601"),
+  body("checkpoints")
+    .optional()
+    .isArray()
+    .withMessage("checkpoints debe ser un array")
+    .custom((value) => {
+      if (value && value.length > 0) {
+        for (const checkpoint of value) {
+          if (!checkpoint.name || typeof checkpoint.name !== "string") {
+            throw new Error("Cada checkpoint debe tener un nombre válido");
+          }
+          if (!checkpoint.time || typeof checkpoint.time !== "string") {
+            throw new Error("Cada checkpoint debe tener un tiempo válido");
+          }
+          // Validar formato de tiempo (HH:MM o HH:MM:SS)
+          const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+          if (!timeRegex.test(checkpoint.time)) {
+            throw new Error("El tiempo debe estar en formato HH:MM o HH:MM:SS");
+          }
+        }
+      }
+      return true;
+    }),
+];
