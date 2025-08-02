@@ -1,6 +1,6 @@
 import { Repository, LessThan, MoreThanOrEqual } from "typeorm";
-import { Incident } from "../interfaces/entity/incident.entity";
-import { IncidentImage } from "../interfaces/entity/incident_image.entity";
+import { Incident } from "@entities/incident.entity";
+import { IncidentImage } from "@entities/incident_image.entity";
 import {
   S3Client,
   PutObjectCommand,

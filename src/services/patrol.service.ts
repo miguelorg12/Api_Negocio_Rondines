@@ -1,15 +1,15 @@
-import { AppDataSource } from "../configs/data-source";
-import { Patrol } from "../interfaces/entity/patrol.entity";
-import { Plan } from "../interfaces/entity/plan.entity";
+import { AppDataSource } from "@configs/data-source";
+import { Patrol } from "@interfaces/entity/patrol.entity";
+import { Plan } from "@interfaces/entity/plan.entity";
 import {
   PatrolDto,
   PartialPatrolDto,
   PatrolAssigmentDto,
   PatrolWithPlanImageDto,
-} from "../interfaces/dto/patrol.dto";
+} from "@interfaces/dto/patrol.dto";
 import { Repository } from "typeorm";
-import { PlanService } from "../services/plan.service";
-import { PatrolRecordService } from "../services/patrol_record.service";
+import { PlanService } from "@services/plan.service";
+import { PatrolRecordService } from "@services/patrol_record.service";
 import {
   S3Client,
   PutObjectCommand,

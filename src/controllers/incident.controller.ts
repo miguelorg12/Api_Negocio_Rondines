@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { IncidentService } from "../services/incident.service";
-import { AppDataSource } from "../configs/data-source";
-import { Incident } from "../interfaces/entity/incident.entity";
-import { IncidentImage } from "../interfaces/entity/incident_image.entity";
+import { IncidentService } from "@services/incident.service";
+import { AppDataSource } from "@configs/data-source";
+import { Incident } from "@interfaces/entity/incident.entity";
+import { IncidentImage } from "@interfaces/entity/incident_image.entity";
 
 export class IncidentController {
   private incidentService: IncidentService;

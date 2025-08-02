@@ -3,7 +3,7 @@ import multer from "multer";
 import {
   createPatrolValidator,
   updatePatrolValidator,
-} from "../utils/validators/patrol.validator";
+} from "@utils/validators/patrol.validator";
 import {
   getAllPatrols,
   createPatrol,
@@ -15,7 +15,7 @@ import {
   getPatrolsByBranchId,
   createPatrolWithPlanImage,
   deletePlan,
-} from "../controllers/patrol.controller";
+} from "@controllers/patrol.controller";
 
 const router = Router();
 
