@@ -13,6 +13,7 @@ import guardRoutes from "./routes/guard.route";
 import incidentRoutes from "./routes/incident.route";
 import biometricRoutes from "./routes/biometric.route";
 import shiftValidationRoutes from "./routes/shift_validation.route";
+import shiftValidationBiometricRoutes from "./routes/shift_validation_biometric.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
@@ -48,5 +49,6 @@ apiRouter.use("/guards", guardRoutes);
 apiRouter.use("/incidents", incidentRoutes);
 apiRouter.use("/biometric", biometricRoutes);
 apiRouter.use("/shift-validation", shiftValidationRoutes);
+apiRouter.use("/shift-validation/biometric", shiftValidationBiometricRoutes);
 
 export default app;
