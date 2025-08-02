@@ -132,6 +132,21 @@ export const updateUserValidator = [
       }
       return true;
     }),
+  // NUEVA VALIDACIÓN: confirm_password solo si se proporciona password
+  body("confirm_password")
+    .optional()
+    .custom((confirmPassword: string, { req }) => {
+      const { password } = req.body;
+      if (password && !confirmPassword) {
+        throw new Error(
+          "La confirmación de contraseña es obligatoria cuando se cambia la contraseña"
+        );
+      }
+      if (confirmPassword && password !== confirmPassword) {
+        throw new Error("Las contraseñas no coinciden");
+      }
+      return true;
+    }),
   body("role_id")
     .optional()
     .isInt()
