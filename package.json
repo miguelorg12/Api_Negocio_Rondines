@@ -10,27 +10,11 @@
     "dev:prod": "cross-env NODE_ENV=production nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
     "build:clean": "rimraf dist && npm run build",
-    "build:prod": "npm run build:clean",
-    "deploy": "npm run build:prod && npm run start:prod",
-    "start": "node dist/server.js",
-    "start:qa": "NODE_ENV=qa node dist/server.js",
-    "start:prod": "NODE_ENV=production node dist/server.js",
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:start:qa": "pm2 start ecosystem.config.js --only api-negocio-qa",
-    "pm2:start:prod": "pm2 start ecosystem.config.js --only api-negocio-prod",
-    "pm2:start:dev": "pm2 start ecosystem.config.js --only api-negocio-dev",
-    "pm2:stop": "pm2 stop ecosystem.config.js",
-    "pm2:restart": "pm2 restart ecosystem.config.js",
-    "pm2:delete": "pm2 delete ecosystem.config.js",
-    "pm2:logs": "pm2 logs",
-    "pm2:status": "pm2 status",
     "typeorm": "ts-node -r tsconfig-paths/register --transpile-only ./node_modules/typeorm/cli.js -d src/configs/data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate ./src/utils/migrations/Init --pretty",
     "migrate": "npm run typeorm -- migration:run",
     "migrate:revert": "npm run typeorm -- migration:revert",
     "seed": "ts-node -r tsconfig-paths/register src/utils/seeds/index.ts",
-
-
     "postbuild": "echo 'Build completed successfully!'"
   },
   "repository": {
