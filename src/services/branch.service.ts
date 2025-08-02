@@ -13,7 +13,12 @@ export class BranchService {
   }
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
-    return await this.branchRepository.save(createBranchDto);
+    const branch = this.branchRepository.create({
+      ...createBranchDto,
+      user: { id: createBranchDto.user_id },
+      company: { id: createBranchDto.company_id },
+    });
+    return await this.branchRepository.save(branch);
   }
 
   async findAll(): Promise<Branch[]> {
