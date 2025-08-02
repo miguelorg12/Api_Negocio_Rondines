@@ -113,7 +113,7 @@ export class BiometricService {
 
       let eventData: any = null;
 
-      // Mapear mensajes del Arduino a eventos
+      // 🎯 CORRECCIÓN: Manejar tanto registro como validación
       if (message.includes("Sensor conectado")) {
         eventData = {
           type: "connection",
@@ -122,30 +122,54 @@ export class BiometricService {
         };
         session.status = "waiting";
       } else if (message.includes("Esperando dedo")) {
-        eventData = {
-          type: "waiting_first",
-          message: "Coloque el dedo en el sensor para la primera lectura...",
-          status: "waiting_first",
-        };
+        // 🎯 Para validación, solo necesitamos una lectura
+        if (session.user_id === 0) {
+          // Es validación
+          eventData = {
+            type: "waiting_verify",
+            message: "Coloque el dedo en el sensor para validar...",
+            status: "waiting_verify",
+          };
+        } else {
+          // Es registro
+          eventData = {
+            type: "waiting_first",
+            message: "Coloque el dedo en el sensor para la primera lectura...",
+            status: "waiting_first",
+          };
+        }
       } else if (message.includes("Retira el dedo")) {
-        eventData = {
-          type: "first_complete",
-          message: "Primera lectura completada. Retire el dedo del sensor",
-          status: "first_complete",
-        };
+        if (session.user_id === 0) {
+          // Validación: procesar huella encontrada
+          eventData = {
+            type: "processing",
+            message: "Procesando huella...",
+            status: "processing",
+          };
+        } else {
+          // Registro: primera lectura completada
+          eventData = {
+            type: "first_complete",
+            message: "Primera lectura completada. Retire el dedo del sensor",
+            status: "first_complete",
+          };
+        }
       } else if (message.includes("Coloca el mismo dedo")) {
+        // Solo para registro
         eventData = {
           type: "waiting_second",
           message: "Coloque el mismo dedo nuevamente para confirmar...",
           status: "waiting_second",
         };
       } else if (message.includes("Huella guardada exitosamente")) {
+        // Solo para registro
         eventData = {
           type: "processing",
           message: "Procesando y guardando huella...",
           status: "processing",
         };
       } else if (message.includes("Huella registrada con ID:")) {
+        // Solo para registro
         const biometricId = parseInt(message.match(/(\d+)/)?.[1] || "0");
         session.biometric_id = biometricId;
         eventData = {
@@ -155,10 +179,29 @@ export class BiometricService {
           status: "completed",
         };
         session.status = "completed";
+      } else if (message.includes("Huella encontrada con ID:")) {
+        // 🎯 NUEVO: Para validación
+        const biometricId = parseInt(message.match(/(\d+)/)?.[1] || "0");
+        session.biometric_id = biometricId;
+        eventData = {
+          type: "verify_success",
+          message: "¡Huella validada exitosamente!",
+          biometric_id: biometricId,
+          status: "completed",
+        };
+        session.status = "completed";
+      } else if (message.includes("Huella no encontrada")) {
+        // 🎯 NUEVO: Para validación
+        eventData = {
+          type: "verify_error",
+          message: "Huella no reconocida. Intente nuevamente.",
+          status: "error",
+        };
+        session.status = "error";
       } else if (message.includes("Error")) {
         eventData = {
           type: "error",
-          message: "Error durante el registro de huella",
+          message: "Error durante el proceso",
           status: "error",
         };
         session.status = "error";

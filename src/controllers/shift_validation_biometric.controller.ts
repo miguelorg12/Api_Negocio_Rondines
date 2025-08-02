@@ -65,10 +65,11 @@ export const startShiftValidationBiometric = async (
       });
     }
 
-    // Iniciar sesión biométrica para verificación
+    // 🎯 CORRECCIÓN: Para validación, NO necesitamos user_id
+    // Solo enviamos comando 1 (verify) al Arduino
     const { session_id } = await biometricService.startRegistration(
-      0,
-      "verify"
+      0, // user_id = 0 para validación
+      "verify" // 🎯 Acción correcta para validación
     );
 
     res.json({
@@ -168,16 +169,17 @@ export const completeShiftValidationBiometric = async (
       });
     }
 
-    if (sessionStatus.status !== "completed") {
+    // 🎯 CORRECCIÓN: Para validación, verificamos que se obtuvo biometric_id
+    if (sessionStatus.status !== "completed" || !sessionStatus.biometric_id) {
       return res.status(400).json({
         success: false,
-        message: "La sesión biométrica aún no está completada",
+        message: "La validación biométrica no se completó correctamente",
       });
     }
 
-    // Validar turno con el biometric obtenido
+    // 🎯 CORRECCIÓN: Usar el biometric_id de la sesión, no del body
     const validationResult = await shiftValidationService.validateShift({
-      biometric: biometric_id,
+      biometric: sessionStatus.biometric_id, // Usar el de la sesión
       timestamp: timestamp,
     });
 
