@@ -8,7 +8,7 @@
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
     "dev:qa": "cross-env NODE_ENV=qa nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
     "dev:prod": "cross-env NODE_ENV=production nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "build:clean": "rimraf dist && npm run build",
     "typeorm": "ts-node -r tsconfig-paths/register --transpile-only ./node_modules/typeorm/cli.js -d src/configs/data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate ./src/utils/migrations/Init --pretty",
@@ -62,6 +62,7 @@
     "nodemon": "^3.1.10",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   },
