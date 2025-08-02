@@ -3,6 +3,7 @@ import { IncidentService } from "@services/incident.service";
 import { AppDataSource } from "@configs/data-source";
 import { Incident } from "@interfaces/entity/incident.entity";
 import { IncidentImage } from "@interfaces/entity/incident_image.entity";
+import { Repository, LessThan, MoreThanOrEqual, Between } from "typeorm";
 
 export class IncidentController {
   private incidentService: IncidentService;

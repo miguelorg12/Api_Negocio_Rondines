@@ -349,14 +349,11 @@ export class IncidentService {
    * Obtener estadísticas generales de incidentes
    */
   async getGeneralIncidentStats(startDate: Date, endDate: Date): Promise<any> {
-    const totalIncidents = await this.incidentRepository.count({
-      where: {
-        created_at: {
-          $gte: startDate,
-          $lte: endDate,
-        } as any,
-      },
-    });
+    const totalIncidents = await this.incidentRepository
+      .createQueryBuilder("incident")
+      .where("incident.created_at >= :startDate", { startDate })
+      .andWhere("incident.created_at <= :endDate", { endDate })
+      .getCount();
 
     const incidentsByStatus = await this.incidentRepository
       .createQueryBuilder("incident")
