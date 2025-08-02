@@ -28,6 +28,11 @@ export async function seedBranches() {
       company: { id: 2 },
       user: { id: 4 },
     },
+    {
+      name: "Quinary Branch",
+      address: "101 Quinary St, City, Country",
+      company: { id: 2 },
+    },
   ];
 
   for (const branchData of branches) {

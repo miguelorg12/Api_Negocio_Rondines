@@ -2,6 +2,7 @@ import { body } from "express-validator";
 import { AppDataSource } from "@configs/data-source";
 import { User } from "@interfaces/entity/user.entity";
 import { Role } from "@interfaces/entity/role.entity";
+import { Branch } from "@interfaces/entity/branch.entity";
 
 export const createUserValidator = [
   body("name").notEmpty().withMessage("El nombre es obligatorio"),
@@ -56,6 +57,17 @@ export const createUserValidator = [
     .optional()
     .isNumeric()
     .withMessage("El dato biométrico debe ser un número"),
+  body("branch_id")
+    .isInt()
+    .withMessage("La sucursal debe ser un número")
+    .custom(async (branchId: number) => {
+      const branchRepo = AppDataSource.getRepository(Branch);
+      const branch = await branchRepo.findOne({ where: { id: branchId } });
+      if (!branch) {
+        throw new Error("La sucursal especificada no existe");
+      }
+      return true;
+    }),
 ];
 
 export const updateUserValidator = [
@@ -128,4 +140,16 @@ export const updateUserValidator = [
     .optional()
     .isNumeric()
     .withMessage("El dato biométrico debe ser un número"),
+  body("branch_id")
+    .optional()
+    .isInt()
+    .withMessage("La sucursal debe ser un número")
+    .custom(async (branchId: number) => {
+      const branchRepo = AppDataSource.getRepository(Branch);
+      const branch = await branchRepo.findOne({ where: { id: branchId } });
+      if (!branch) {
+        throw new Error("La sucursal especificada no existe");
+      }
+      return true;
+    }),
 ];

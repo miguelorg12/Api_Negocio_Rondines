@@ -35,6 +35,7 @@ export class Branch {
 
   @ManyToOne(() => User, (user) => user.branch, {
     onDelete: "CASCADE",
+    nullable: true,
   })
   @JoinColumn({ name: "user_id" })
   user: User;

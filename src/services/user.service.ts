@@ -1,30 +1,52 @@
 import { AppDataSource } from "@configs/data-source";
 import { CreateUserDto, PartialCreateUserDto } from "@dto/user.dto";
 import { User } from "@entities/user.entity";
+import { Branch } from "@interfaces/entity/branch.entity";
 import { Repository } from "typeorm";
+import { BranchService } from "./branch.service";
 
 export class UserService {
   private userRepository: Repository<User>;
-
+  private branchRepository: Repository<Branch>;
+  private branchService: BranchService;
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
+    this.branchRepository = AppDataSource.getRepository(Branch);
+    this.branchService = new BranchService();
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userRepository.find({ relations: ["role"] });
+    return await this.userRepository.find({
+      relations: ["role", "branch"],
+    });
   }
 
   async create(user: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create({
+    let newUser = this.userRepository.create({
       ...user,
       role: { id: user.role_id },
     });
-    return await this.userRepository.save(newUser);
+    console.log(user.role_id);
+
+    const userSaved = await this.userRepository.save(newUser);
+    if (user.role_id !== 4) {
+      await this.branchService.userOwnerToBranch(user.branch_id, userSaved.id);
+    } else {
+      const branch = await this.branchRepository.findOne({
+        where: { id: user.branch_id },
+      });
+      console.log(branch);
+
+      userSaved.branches = [branch];
+      await this.userRepository.save(userSaved);
+    }
+    return userSaved;
   }
 
   async findById(id: number): Promise<User | null> {
     return await this.userRepository.findOne({
       where: { id },
+      relations: ["role", "branch"],
     });
   }
 

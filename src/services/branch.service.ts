@@ -2,12 +2,14 @@ import { AppDataSource } from "@configs/data-source";
 import { Branch } from "@interfaces/entity/branch.entity";
 import { Repository } from "typeorm";
 import { PartialBranchDto, CreateBranchDto } from "@interfaces/dto/branch.dto";
+import { User } from "@interfaces/entity/user.entity";
 
 export class BranchService {
   private branchRepository: Repository<Branch>;
-
+  private userRepository: Repository<User>;
   constructor() {
     this.branchRepository = AppDataSource.getRepository(Branch);
+    this.userRepository = AppDataSource.getRepository(User);
   }
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
@@ -46,5 +48,21 @@ export class BranchService {
     }
     await this.branchRepository.softDelete(id);
     return branch;
+  }
+
+  async userOwnerToBranch(
+    branchId: number,
+    userId: number
+  ): Promise<Branch | null> {
+    const branch = await this.findById(branchId);
+    if (!branch) {
+      throw new Error("Branch not found");
+    }
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    branch.user = user;
+    return await this.branchRepository.save(branch);
   }
 }
