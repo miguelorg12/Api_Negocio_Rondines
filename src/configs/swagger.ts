@@ -267,27 +267,65 @@ const options = {
             branch_id: { type: "integer" },
           },
         },
-        GuardPatrolAssignment: {
-          type: "object",
-          properties: {
-            id: { type: "integer" },
-            date: { type: "string", format: "date-time" },
-            patrol: {
-              type: "object",
-              properties: {
-                id: { type: "integer" },
-                name: { type: "string" },
-              },
-            },
-            shift: {
-              type: "object",
-              properties: {
-                id: { type: "integer" },
-                name: { type: "string" },
-              },
-            },
-          },
-        },
+                 GuardPatrolAssignment: {
+           type: "object",
+           properties: {
+             id: { type: "integer" },
+             date: { type: "string", format: "date-time" },
+             patrol: {
+               type: "object",
+               properties: {
+                 id: { type: "integer" },
+                 name: { type: "string" },
+               },
+             },
+             shift: {
+               type: "object",
+               properties: {
+                 id: { type: "integer" },
+                 name: { type: "string" },
+               },
+             },
+           },
+         },
+         ShiftValidationRequest: {
+           type: "object",
+           required: ["biometric", "timestamp"],
+           properties: {
+             biometric: { type: "number", description: "ID biométrico del usuario" },
+             timestamp: { type: "string", format: "date-time", description: "Timestamp de cuando se colocó la huella" },
+           },
+         },
+         ShiftValidationResponse: {
+           type: "object",
+           properties: {
+             message: { type: "string" },
+             data: {
+               type: "object",
+               properties: {
+                 status: { type: "string", enum: ["en_progreso", "completado", "pendiente"] },
+                 patrolRecord: {
+                   type: "object",
+                   properties: {
+                     id: { type: "integer" },
+                     actual_start: { type: "string", format: "date-time" },
+                     actual_end: { type: "string", format: "date-time" },
+                     status: { type: "string" },
+                   },
+                 },
+                 shift: {
+                   type: "object",
+                   properties: {
+                     id: { type: "integer" },
+                     name: { type: "string" },
+                     start_time: { type: "string", format: "date-time" },
+                     end_time: { type: "string", format: "date-time" },
+                   },
+                 },
+               },
+             },
+           },
+         },
       },
     },
   },

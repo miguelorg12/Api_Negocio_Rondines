@@ -29,6 +29,8 @@
     "migrate": "npm run typeorm -- migration:run",
     "migrate:revert": "npm run typeorm -- migration:revert",
     "seed": "ts-node -r tsconfig-paths/register src/utils/seeds/index.ts",
+
+
     "postbuild": "echo 'Build completed successfully!'"
   },
   "repository": {
