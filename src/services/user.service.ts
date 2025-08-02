@@ -1,5 +1,9 @@
 import { AppDataSource } from "@configs/data-source";
-import { CreateUserDto, PartialCreateUserDto } from "@dto/user.dto";
+import {
+  CreateUserDto,
+  PartialCreateUserDto,
+  UserDataDto,
+} from "@dto/user.dto";
 import { User } from "@entities/user.entity";
 import { Branch } from "@interfaces/entity/branch.entity";
 import { Repository } from "typeorm";
@@ -22,18 +26,34 @@ export class UserService {
   }
 
   async create(user: CreateUserDto): Promise<User> {
+    // Extract user data without confirm_password
+    const userData: UserDataDto = {
+      name: user.name,
+      last_name: user.last_name,
+      curp: user.curp,
+      email: user.email,
+      password: user.password,
+      role_id: user.role_id,
+      active: user.active,
+      biometric: user.biometric,
+      branch_id: user.branch_id,
+    };
+
     let newUser = this.userRepository.create({
-      ...user,
-      role: { id: user.role_id },
+      ...userData,
+      role: { id: userData.role_id },
     });
-    console.log(user.role_id);
+    console.log(userData.role_id);
 
     const userSaved = await this.userRepository.save(newUser);
-    if (user.role_id !== 4) {
-      await this.branchService.userOwnerToBranch(user.branch_id, userSaved.id);
+    if (userData.role_id !== 4) {
+      await this.branchService.userOwnerToBranch(
+        userData.branch_id,
+        userSaved.id
+      );
     } else {
       const branch = await this.branchRepository.findOne({
-        where: { id: user.branch_id },
+        where: { id: userData.branch_id },
       });
       console.log(branch);
 

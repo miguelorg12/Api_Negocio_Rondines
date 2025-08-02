@@ -42,6 +42,16 @@ export const createUserValidator = [
       }
       return true;
     }),
+  body("confirm_password")
+    .notEmpty()
+    .withMessage("La confirmación de contraseña es obligatoria")
+    .custom((confirmPassword: string, { req }) => {
+      const { password } = req.body;
+      if (confirmPassword !== password) {
+        throw new Error("Las contraseñas no coinciden");
+      }
+      return true;
+    }),
   body("role_id")
     .isInt()
     .withMessage("El rol debe ser un número")

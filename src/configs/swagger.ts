@@ -65,8 +65,10 @@ const options = {
             "curp",
             "email",
             "password",
+            "confirm_password",
             "biometric",
             "role_id",
+            "branch_id",
           ],
           properties: {
             name: { type: "string" },
@@ -74,8 +76,10 @@ const options = {
             curp: { type: "string" },
             email: { type: "string" },
             password: { type: "string" },
+            confirm_password: { type: "string" },
             biometric: { type: "string" },
             role_id: { type: "integer" },
+            branch_id: { type: "integer" },
           },
         },
         Shift: {
