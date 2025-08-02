@@ -93,9 +93,13 @@ export const updateUserValidator = [
     .isEmail()
     .withMessage("Email inválido")
     .custom(async (email: string, { req }) => {
+      if (!email) return true;
+
       const userRepo = AppDataSource.getRepository(User);
       const user = await userRepo.findOne({ where: { email } });
-      const userId = req?.params?.id ? Number(req.params.id) : undefined;
+
+      // Get the user ID from the request parameters
+      const userId = req?.params?.id ? parseInt(req.params.id) : undefined;
 
       if (user && user.id !== userId) {
         throw new Error("El email ya está en uso");
@@ -144,7 +148,9 @@ export const updateUserValidator = [
     .optional()
     .isInt()
     .withMessage("La sucursal debe ser un número")
-    .custom(async (branchId: number) => {
+    .custom(async (branchId: number, { req }) => {
+      if (!branchId) return true;
+
       const branchRepo = AppDataSource.getRepository(Branch);
       const branch = await branchRepo.findOne({ where: { id: branchId } });
       if (!branch) {
@@ -152,4 +158,14 @@ export const updateUserValidator = [
       }
       return true;
     }),
+  // Validación adicional para asegurar que si se proporciona role_id, también se proporcione branch_id
+  body().custom((value, { req }) => {
+    const { role_id, branch_id } = req.body;
+    if (role_id !== undefined && branch_id === undefined) {
+      throw new Error(
+        "Si se especifica un rol, también debe especificarse una sucursal"
+      );
+    }
+    return true;
+  }),
 ];

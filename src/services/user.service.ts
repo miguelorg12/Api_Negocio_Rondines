@@ -58,7 +58,41 @@ export class UserService {
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
+
+    // Update user data
     await this.userRepository.update(id, userData);
+
+    // Handle branch assignment logic similar to create
+    if (userData.role_id !== undefined) {
+      const updatedUser = await this.findById(id);
+      if (!updatedUser) {
+        throw new Error("Error al actualizar usuario");
+      }
+
+      if (userData.role_id !== 4) {
+        // For non-guard roles, assign user as owner to branch
+        if (userData.branch_id !== undefined) {
+          await this.branchService.userOwnerToBranch(
+            userData.branch_id,
+            updatedUser.id
+          );
+        }
+      } else {
+        // For guard role (role_id = 4), assign branch directly
+        if (userData.branch_id !== undefined) {
+          const branch = await this.branchRepository.findOne({
+            where: { id: userData.branch_id },
+          });
+          console.log(branch);
+
+          if (branch) {
+            updatedUser.branches = [branch];
+            await this.userRepository.save(updatedUser);
+          }
+        }
+      }
+    }
+
     return this.findById(id);
   }
 
