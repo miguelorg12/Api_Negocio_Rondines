@@ -1,24 +1,24 @@
 import "dotenv/config";
 import { DataSource } from "typeorm";
-import { User } from "@entities/user.entity";
-import { Patrol } from "@entities/patrol.entity";
-import { Branch } from "@entities/branch.entity";
-import { Company } from "@entities/company.entity";
-import { PatrolRecord } from "@entities/patrol_record.entity";
-import { PatrolAssignment } from "@interfaces/entity/patrol_assigment.entity";
-import { Checkpoint } from "@entities/checkpoint.entity";
-import { CheckpointRecord } from "@entities/checkpoint_record.entity";
-import { Incident } from "@entities/incident.entity";
-import { Plan } from "@entities/plan.entity";
-import { Shift } from "@entities/shift.entity";
-import { Role } from "@entities/role.entity";
-import { ReportLog } from "@entities/report_log.entity";
-import { OauthAuthorizationCodesEntity } from "@entities/oauth_authorization_codes.entity";
-import { OauthRefreshTokensEntity } from "@entities/oauth_refresh_tokens.entity";
-import { OauthAccessTokensEntity } from "@entities/oauth_access_tokens.entity";
-import { OauthClientsEntity } from "@entities/oauth_clients.entity";
-import { Code } from "@entities/code.entity";
-import { IncidentImage } from "@interfaces/entity/incident_image.entity";
+import { User } from "../interfaces/entity/user.entity";
+import { Patrol } from "../interfaces/entity/patrol.entity";
+import { Branch } from "../interfaces/entity/branch.entity";
+import { Company } from "../interfaces/entity/company.entity";
+import { PatrolRecord } from "../interfaces/entity/patrol_record.entity";
+import { PatrolAssignment } from "../interfaces/entity/patrol_assigment.entity";
+import { Checkpoint } from "../interfaces/entity/checkpoint.entity";
+import { CheckpointRecord } from "../interfaces/entity/checkpoint_record.entity";
+import { Incident } from "../interfaces/entity/incident.entity";
+import { Plan } from "../interfaces/entity/plan.entity";
+import { Shift } from "../interfaces/entity/shift.entity";
+import { Role } from "../interfaces/entity/role.entity";
+import { ReportLog } from "../interfaces/entity/report_log.entity";
+import { OauthAuthorizationCodesEntity } from "../interfaces/entity/oauth_authorization_codes.entity";
+import { OauthRefreshTokensEntity } from "../interfaces/entity/oauth_refresh_tokens.entity";
+import { OauthAccessTokensEntity } from "../interfaces/entity/oauth_access_tokens.entity";
+import { OauthClientsEntity } from "../interfaces/entity/oauth_clients.entity";
+import { Code } from "../interfaces/entity/code.entity";
+import { IncidentImage } from "../interfaces/entity/incident_image.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
