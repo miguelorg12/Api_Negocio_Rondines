@@ -26,41 +26,11 @@ export class UserService {
   }
 
   async create(user: CreateUserDto): Promise<User> {
-    // Extract user data without confirm_password
-    const userData: UserDataDto = {
-      name: user.name,
-      last_name: user.last_name,
-      curp: user.curp,
-      email: user.email,
-      password: user.password,
-      role_id: user.role_id,
-      active: user.active,
-      biometric: user.biometric,
-      branch_id: user.branch_id,
-    };
-
-    let newUser = this.userRepository.create({
-      ...userData,
-      role: { id: userData.role_id },
+    const newUser = this.userRepository.create({
+      ...user,
+      role: { id: user.role_id },
     });
-    console.log(userData.role_id);
-
-    const userSaved = await this.userRepository.save(newUser);
-    if (userData.role_id !== 4) {
-      await this.branchService.userOwnerToBranch(
-        userData.branch_id,
-        userSaved.id
-      );
-    } else {
-      const branch = await this.branchRepository.findOne({
-        where: { id: userData.branch_id },
-      });
-      console.log(branch);
-
-      userSaved.branches = [branch];
-      await this.userRepository.save(userSaved);
-    }
-    return userSaved;
+    return await this.userRepository.save(newUser);
   }
 
   async findById(id: number): Promise<User | null> {
@@ -78,42 +48,11 @@ export class UserService {
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
-
-    // Update user data
-    await this.userRepository.update(id, userData);
-
-    // Handle branch assignment logic similar to create
-    if (userData.role_id !== undefined) {
-      const updatedUser = await this.findById(id);
-      if (!updatedUser) {
-        throw new Error("Error al actualizar usuario");
-      }
-
-      if (userData.role_id !== 4) {
-        // For non-guard roles, assign user as owner to branch
-        if (userData.branch_id !== undefined) {
-          await this.branchService.userOwnerToBranch(
-            userData.branch_id,
-            updatedUser.id
-          );
-        }
-      } else {
-        // For guard role (role_id = 4), assign branch directly
-        if (userData.branch_id !== undefined) {
-          const branch = await this.branchRepository.findOne({
-            where: { id: userData.branch_id },
-          });
-          console.log(branch);
-
-          if (branch) {
-            updatedUser.branches = [branch];
-            await this.userRepository.save(updatedUser);
-          }
-        }
-      }
-    }
-
-    return this.findById(id);
+    const updatedUser = this.userRepository.create({
+      ...userData,
+      role: { id: userData.role_id },
+    });
+    return await this.userRepository.save(updatedUser);
   }
 
   async delete(id: number): Promise<User | null> {
