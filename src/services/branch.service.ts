@@ -44,8 +44,10 @@ export class BranchService {
     }
     await this.branchRepository.update(id, {
       ...updateData,
-      user: { id: updateData.user_id },
-      company: { id: updateData.company_id },
+      user: { id: updateData.user_id ? updateData.user_id : branch.user.id },
+      company: {
+        id: updateData.company_id ? updateData.company_id : branch.company.id,
+      },
     });
     return this.findById(id);
   }
