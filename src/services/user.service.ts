@@ -3,6 +3,7 @@ import {
   CreateUserDto,
   PartialCreateUserDto,
   UserDataDto,
+  UpdateUserDto,
 } from "@dto/user.dto";
 import { User } from "@entities/user.entity";
 import { Branch } from "@interfaces/entity/branch.entity";
@@ -40,19 +41,24 @@ export class UserService {
     });
   }
 
-  async update(
-    id: number,
-    userData: PartialCreateUserDto
-  ): Promise<User | null> {
+  async update(id: number, userData: UpdateUserDto): Promise<User | null> {
     const user = await this.findById(id);
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
-    const updatedUser = this.userRepository.create({
-      ...userData,
-      role: { id: userData.role_id },
-    });
-    return await this.userRepository.save(updatedUser);
+
+    // Actualizar solo los campos proporcionados
+    if (userData.name !== undefined) user.name = userData.name;
+    if (userData.last_name !== undefined) user.last_name = userData.last_name;
+    if (userData.curp !== undefined) user.curp = userData.curp;
+    if (userData.email !== undefined) user.email = userData.email;
+    if (userData.active !== undefined) user.active = userData.active;
+    if (userData.biometric !== undefined) user.biometric = userData.biometric;
+    if (userData.password) user.password = userData.password;
+    if (userData.role_id) user.role = { id: userData.role_id } as any;
+
+    // Guardar el usuario (el hash se hará automáticamente en la entidad)
+    return await this.userRepository.save(user);
   }
 
   async delete(id: number): Promise<User | null> {

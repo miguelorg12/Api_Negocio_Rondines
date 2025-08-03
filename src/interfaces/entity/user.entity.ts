@@ -1,6 +1,7 @@
 import {
   AfterInsert,
   BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -101,6 +102,13 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
+
+  @BeforeUpdate()
+  async hashPasswordOnUpdate() {
     if (this.password) {
       this.password = await bcrypt.hash(this.password, 10);
     }

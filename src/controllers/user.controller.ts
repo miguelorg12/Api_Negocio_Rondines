@@ -3,6 +3,7 @@ import { UserService } from "../services/user.service";
 import {
   CreateUserDto,
   PartialCreateUserDto,
+  UpdateUserDto,
 } from "../interfaces/dto/user.dto";
 import { validationResult } from "express-validator";
 import { instanceToPlain } from "class-transformer";
@@ -65,7 +66,7 @@ export const updateUser = async (
     });
   }
   const userId = parseInt(req.params.id);
-  const userData: PartialCreateUserDto = req.body;
+  const userData: UpdateUserDto = req.body;
 
   const user = await userService.findById(userId);
   if (!user) {
