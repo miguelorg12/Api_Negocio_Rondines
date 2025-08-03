@@ -24,6 +24,20 @@ export async function seedClients() {
       name: "ronditrack Desktop Application",
       trusted_client: true,
     },
+    {
+      client_id: "ronditrack-mobile-qa",
+      client_secret: "super-secret-mobile-app-key-101",
+      redirect_uri: "https://api-sec-qa.ronditrack.online:3002/auth/callback",
+      name: "ronditrack Mobile QA App",
+      trusted_client: true,
+    },
+    {
+      client_id: "ronditrack-web-qa",
+      client_secret: "super-secret-web-app-key-123",
+      redirect_uri: "https://api-sec-qa.ronditrack.online:3002/auth/callback",
+      name: "ronditrack Web QA App",
+      trusted_client: true,
+    },
   ];
 
   const clientRepository = AppDataSource.getRepository(OauthClientsEntity);
