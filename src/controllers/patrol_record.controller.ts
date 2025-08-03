@@ -189,3 +189,41 @@ export const getInProgressPatrolRecords = async (
     });
   }
 };
+
+/**
+ * Obtener la ronda actual del usuario del día de hoy que esté en progreso
+ */
+export const getCurrentPatrolRecord = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id || isNaN(parseInt(user_id))) {
+      return res.status(400).json({
+        message: "user_id debe ser un número válido",
+      });
+    }
+
+    const patrolRecord = await patroRecordlService.getCurrentPatrolRecord(
+      parseInt(user_id)
+    );
+
+    if (!patrolRecord) {
+      return res.status(404).json({
+        message: "No se encontró una ronda en progreso para el día de hoy",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Ronda actual obtenida correctamente",
+      data: patrolRecord,
+    });
+  } catch (error) {
+    console.error("Error al obtener la ronda actual:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};

@@ -125,6 +125,75 @@ export async function seedIncidents() {
       checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
       imageCount: 3,
     },
+    // INCIDENTES PARA VIELMASEXO
+    {
+      description: "Ventana rota en área de vigilancia - vielmasexo",
+      status: "pendiente",
+      severity: "alta",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[0].id,
+      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
+      imageCount: 2,
+    },
+    {
+      description:
+        "Sistema de alarma defectuoso en entrada principal - vielmasexo",
+      status: "en_progreso",
+      severity: "alta",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[0].id,
+      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
+      imageCount: 3,
+    },
+    {
+      description: "Cámara de seguridad con imagen borrosa - vielmasexo",
+      status: "completado",
+      severity: "media",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[1].id,
+      checkpoint_id: checkpoints.length > 2 ? checkpoints[2].id : null,
+      imageCount: 1,
+    },
+    {
+      description: "Puerta de emergencia bloqueada - vielmasexo",
+      status: "pendiente",
+      severity: "alta",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[0].id,
+      checkpoint_id: checkpoints.length > 3 ? checkpoints[3].id : null,
+      imageCount: 2,
+    },
+    {
+      description: "Extintor faltante en pasillo secundario - vielmasexo",
+      status: "en_progreso",
+      severity: "media",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[1].id,
+      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
+      imageCount: 1,
+    },
+    {
+      description:
+        "Sistema de iluminación defectuoso en estacionamiento - vielmasexo",
+      status: "pendiente",
+      severity: "baja",
+      user_id:
+        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
+        users[0].id,
+      branch_id: branches[0].id,
+      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
+      imageCount: 2,
+    },
   ];
 
   for (const incidentData of incidents) {

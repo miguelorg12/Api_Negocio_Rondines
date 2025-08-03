@@ -4,6 +4,7 @@ import {
   PatrolRecordDto,
   PartialPatrolRecordDto,
 } from "@interfaces/dto/patrol_record.dto";
+import { Between } from "typeorm";
 
 export class PatrolRecordService {
   private patrolRecordRepository = AppDataSource.getRepository(PatrolRecord);
@@ -161,6 +162,35 @@ export class PatrolRecordService {
       order: {
         date: "DESC",
       },
+    });
+  }
+
+  /**
+   * Obtener la ronda actual del usuario del día de hoy que esté en progreso
+   * @param userId - ID del usuario/guardia
+   * @returns PatrolRecord con estado "en_progreso" del día de hoy
+   */
+  async getCurrentPatrolRecord(userId: number): Promise<PatrolRecord | null> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return await this.patrolRecordRepository.findOne({
+      where: {
+        status: "en_progreso",
+        date: Between(today, tomorrow),
+        patrolAssignment: {
+          user: { id: userId },
+        },
+      },
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.patrol",
+        "patrolAssignment.patrol.plans",
+        "patrolAssignment.shift",
+        "patrolAssignment.user",
+      ],
     });
   }
 }

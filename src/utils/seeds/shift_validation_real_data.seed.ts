@@ -6,6 +6,9 @@ import { Shift } from "@interfaces/entity/shift.entity";
 import { User } from "@entities/user.entity";
 import { Branch } from "@entities/branch.entity";
 import { Role } from "@entities/role.entity";
+import { PatrolService } from "@services/patrol.service";
+import * as fs from "fs";
+import * as path from "path";
 
 export async function seedShiftValidationRealData() {
   try {
@@ -20,6 +23,9 @@ export async function seedShiftValidationRealData() {
     const userRepository = AppDataSource.getRepository(User);
     const branchRepository = AppDataSource.getRepository(Branch);
     const roleRepository = AppDataSource.getRepository(Role);
+
+    // Crear instancia del servicio de patrol
+    const patrolService = new PatrolService();
 
     // Verificar dependencias
     console.log("Verificando dependencias...");
@@ -46,6 +52,22 @@ export async function seedShiftValidationRealData() {
 
     console.log(
       `✅ Found ${existingShifts.length} shifts, ${existingBranches.length} branches`
+    );
+
+    // Obtener el usuario vielmasexo
+    const vielmasexoUser = await userRepository.findOne({
+      where: { email: "vielma7220@gmail.com" },
+    });
+
+    if (!vielmasexoUser) {
+      console.log(
+        "❌ Usuario vielmasexo no encontrado. Please run the user seeder first."
+      );
+      return;
+    }
+
+    console.log(
+      `✅ Usuario vielmasexo encontrado: ${vielmasexoUser.name} ${vielmasexoUser.last_name} (ID: ${vielmasexoUser.id})`
     );
 
     // Crear usuarios con biometric para testing
@@ -164,38 +186,88 @@ export async function seedShiftValidationRealData() {
       }
     }
 
-    // Crear patrols para testing
-    console.log("\n🛡️  Creando patrols...");
-    const testPatrols = [
+    // Cargar imagen del plano
+    const planoImageBuffer = loadPlanoImage();
+
+    // Crear patrols con planos usando el servicio
+    console.log("\n🛡️  Creando patrols con planos...");
+    const testPatrols: Array<{
+      name: string;
+      frequency: "diaria" | "semanal" | "mensual";
+      active: boolean;
+      branch_id: number;
+      plan_name: string;
+    }> = [
       {
         name: "Ronda Matutina Principal",
         frequency: "diaria",
         active: true,
-        branch: { id: existingBranches[0].id },
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Matutino Principal",
       },
       {
         name: "Ronda Vespertina Principal",
         frequency: "diaria",
         active: true,
-        branch: { id: existingBranches[0].id },
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Vespertino Principal",
       },
       {
         name: "Ronda Nocturna Principal",
         frequency: "diaria",
         active: true,
-        branch: { id: existingBranches[0].id },
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Nocturno Principal",
       },
       {
         name: "Ronda Matutina Secundaria",
         frequency: "diaria",
         active: true,
-        branch: { id: existingBranches[0].id },
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Matutino Secundario",
       },
       {
         name: "Ronda Vespertina Secundaria",
         frequency: "diaria",
         active: true,
-        branch: { id: existingBranches[0].id },
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Vespertino Secundario",
+      },
+      // Patrols adicionales para vielmasexo
+      {
+        name: "Ronda Especial Vielmasexo 1",
+        frequency: "diaria",
+        active: true,
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Especial Vielmasexo 1",
+      },
+      {
+        name: "Ronda Especial Vielmasexo 2",
+        frequency: "diaria",
+        active: true,
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Especial Vielmasexo 2",
+      },
+      {
+        name: "Ronda Especial Vielmasexo 3",
+        frequency: "diaria",
+        active: true,
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Especial Vielmasexo 3",
+      },
+      {
+        name: "Ronda Especial Vielmasexo 4",
+        frequency: "diaria",
+        active: true,
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Especial Vielmasexo 4",
+      },
+      {
+        name: "Ronda Especial Vielmasexo 5",
+        frequency: "diaria",
+        active: true,
+        branch_id: existingBranches[0].id,
+        plan_name: "Plan Especial Vielmasexo 5",
       },
     ];
 
@@ -208,10 +280,30 @@ export async function seedShiftValidationRealData() {
         console.log(`⚠️  Patrol ${patrolData.name} already exists`);
         createdPatrols.push(existingPatrol);
       } else {
-        const patrol = patrolRepository.create(patrolData);
-        const savedPatrol = await patrolRepository.save(patrol);
-        createdPatrols.push(savedPatrol);
-        console.log(`✅ Created patrol: ${savedPatrol.name}`);
+        // Crear archivo simulado para el plan
+        const planFile: Express.Multer.File = {
+          fieldname: "plan",
+          originalname: "plano-seeder.jpeg",
+          encoding: "7bit",
+          mimetype: "image/jpeg",
+          buffer: planoImageBuffer,
+          size: planoImageBuffer.length,
+        } as Express.Multer.File;
+
+        // Usar el servicio para crear el patrol con plan
+        const patrol = await patrolService.createWithPlanImage(
+          {
+            name: patrolData.name,
+            frequency: patrolData.frequency,
+            active: patrolData.active,
+            branch_id: patrolData.branch_id,
+            plan_name: patrolData.plan_name,
+          },
+          planFile
+        );
+
+        createdPatrols.push(patrol);
+        console.log(`✅ Created patrol with plan: ${patrol.name}`);
       }
     }
 
@@ -288,6 +380,37 @@ export async function seedShiftValidationRealData() {
         patrol: { id: createdPatrols[0].id },
         shift: { id: existingShifts[0].id },
       },
+      // ASIGNACIONES PARA VIELMASEXO - Múltiples patrols
+      {
+        date: today,
+        user: { id: vielmasexoUser.id },
+        patrol: { id: createdPatrols[5].id }, // Ronda Especial Vielmasexo 1
+        shift: { id: existingShifts[0].id },
+      },
+      {
+        date: today,
+        user: { id: vielmasexoUser.id },
+        patrol: { id: createdPatrols[6].id }, // Ronda Especial Vielmasexo 2
+        shift: { id: existingShifts[1]?.id || existingShifts[0].id },
+      },
+      {
+        date: tomorrow,
+        user: { id: vielmasexoUser.id },
+        patrol: { id: createdPatrols[7].id }, // Ronda Especial Vielmasexo 3
+        shift: { id: existingShifts[0].id },
+      },
+      {
+        date: tomorrow,
+        user: { id: vielmasexoUser.id },
+        patrol: { id: createdPatrols[8].id }, // Ronda Especial Vielmasexo 4
+        shift: { id: existingShifts[1]?.id || existingShifts[0].id },
+      },
+      {
+        date: dayAfterTomorrow,
+        user: { id: vielmasexoUser.id },
+        patrol: { id: createdPatrols[9].id }, // Ronda Especial Vielmasexo 5
+        shift: { id: existingShifts[0].id },
+      },
     ];
 
     const createdAssignments = [];
@@ -296,6 +419,7 @@ export async function seedShiftValidationRealData() {
         where: {
           user: { id: assignmentData.user.id },
           date: assignmentData.date,
+          patrol: { id: assignmentData.patrol.id },
         },
       });
 
@@ -379,6 +503,34 @@ export async function seedShiftValidationRealData() {
         status: "pendiente",
         patrolAssignment: { id: createdAssignments[7].id },
       },
+      // RECORDS PARA VIELMASEXO
+      {
+        date: today,
+        actual_start: new Date(today.getTime() + 7 * 60 * 60 * 1000), // 7:00 AM
+        status: "en_progreso",
+        patrolAssignment: { id: createdAssignments[8].id }, // Vielmasexo 1
+      },
+      {
+        date: today,
+        actual_start: new Date(today.getTime() + 15 * 60 * 60 * 1000), // 3:00 PM
+        status: "en_progreso",
+        patrolAssignment: { id: createdAssignments[9].id }, // Vielmasexo 2
+      },
+      {
+        date: tomorrow,
+        status: "pendiente",
+        patrolAssignment: { id: createdAssignments[10].id }, // Vielmasexo 3
+      },
+      {
+        date: tomorrow,
+        status: "pendiente",
+        patrolAssignment: { id: createdAssignments[11].id }, // Vielmasexo 4
+      },
+      {
+        date: dayAfterTomorrow,
+        status: "pendiente",
+        patrolAssignment: { id: createdAssignments[12].id }, // Vielmasexo 5
+      },
     ];
 
     for (const recordData of testPatrolRecords) {
@@ -414,7 +566,7 @@ export async function seedShiftValidationRealData() {
       );
     });
 
-    console.log("\n🛡️  Patrols:");
+    console.log("\n🛡️  Patrols con planos:");
     createdPatrols.forEach((patrol) => {
       console.log(`- ${patrol.name} (ID: ${patrol.id})`);
     });
@@ -452,6 +604,13 @@ export async function seedShiftValidationRealData() {
       "8. Usuario 1008 (Patricia): Asignación para pasado mañana con record pendiente"
     );
 
+    console.log("\n=== VIELMASEXO - ESCENARIOS ESPECIALES ===");
+    console.log(`Usuario ${vielmasexoUser.id} (${vielmasexoUser.name}):`);
+    console.log("- 2 rondas en progreso para hoy");
+    console.log("- 2 rondas pendientes para mañana");
+    console.log("- 1 ronda pendiente para pasado mañana");
+    console.log("- Total: 5 patrols asignados con planos");
+
     console.log("\n=== EJEMPLOS DE PRUEBA ===");
     console.log("1. Iniciar turno (usuario 1003 - nocturno):");
     console.log(`POST /api/v1/shift-validation`);
@@ -477,9 +636,38 @@ export async function seedShiftValidationRealData() {
       `Body: { "biometric": 1002, "timestamp": "2024-01-15T15:30:00.000Z" }`
     );
 
+    console.log("\n5. Vielmasexo - Ronda en progreso:");
+    console.log(`GET /api/v1/patrol-records/current/${vielmasexoUser.id}`);
+
     console.log("\n✅ Seeding completed successfully!");
   } catch (error) {
     console.error("❌ Error during seeding:", error);
+  }
+}
+
+/**
+ * Cargar imagen del plano desde archivo local
+ */
+function loadPlanoImage(): Buffer {
+  try {
+    const imagePath = path.join(
+      __dirname,
+      "../../assets/images/plano-seeder.jpeg"
+    );
+
+    if (fs.existsSync(imagePath)) {
+      console.log("Usando imagen local: plano-seeder.jpeg");
+      return fs.readFileSync(imagePath);
+    } else {
+      throw new Error(
+        "Imagen plano-seeder.jpeg no encontrada en src/assets/images/"
+      );
+    }
+  } catch (error) {
+    console.error("Error cargando imagen local:", error);
+    throw new Error(
+      'Por favor, coloca una imagen llamada "plano-seeder.jpeg" en la carpeta src/assets/images/'
+    );
   }
 }
 
