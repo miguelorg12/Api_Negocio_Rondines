@@ -42,7 +42,11 @@ export class BranchService {
     if (!branch) {
       throw new Error("Branch not found");
     }
-    await this.branchRepository.update(id, updateData);
+    await this.branchRepository.update(id, {
+      ...updateData,
+      user: { id: updateData.user_id },
+      company: { id: updateData.company_id },
+    });
     return this.findById(id);
   }
 
