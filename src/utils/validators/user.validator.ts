@@ -67,17 +67,6 @@ export const createUserValidator = [
     .optional()
     .isNumeric()
     .withMessage("El dato biométrico debe ser un número"),
-  body("branch_id")
-    .isInt()
-    .withMessage("La sucursal debe ser un número")
-    .custom(async (branchId: number) => {
-      const branchRepo = AppDataSource.getRepository(Branch);
-      const branch = await branchRepo.findOne({ where: { id: branchId } });
-      if (!branch) {
-        throw new Error("La sucursal especificada no existe");
-      }
-      return true;
-    }),
 ];
 
 export const updateUserValidator = [
@@ -183,14 +172,4 @@ export const updateUserValidator = [
       }
       return true;
     }),
-  // Validación adicional para asegurar que si se proporciona role_id, también se proporcione branch_id
-  body().custom((value, { req }) => {
-    const { role_id, branch_id } = req.body;
-    if (role_id !== undefined && branch_id === undefined) {
-      throw new Error(
-        "Si se especifica un rol, también debe especificarse una sucursal"
-      );
-    }
-    return true;
-  }),
 ];
