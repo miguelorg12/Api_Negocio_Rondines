@@ -40,6 +40,33 @@ export async function seedUsers() {
       active: true,
       role: { id: 1 },
     },
+    {
+      name: "MiguelitoSexDeerOmgShit",
+      last_name: "MiguelitoSexDeerOmgShit",
+      curp: "MIGS456789HDFLNR05",
+      email: "miguelvillalpando19@gmail.com",
+      password: "pastelito123",
+      active: true,
+      role: { id: 1 },
+    },
+    {
+      name: "vielmasexo",
+      last_name: "vielmasex",
+      curp: "VIEV456789HDFLNR06",
+      email: "vielma7220@gmail.com",
+      password: "vielmasex123",
+      active: true,
+      role: { id: 4 },
+    },
+    {
+      name: "carlitosAWSOFTZZZWARE",
+      last_name: "awsoftware",
+      curp: "CAWS456789HDFLNR07",
+      email: "carlosduron973@gmail.com",
+      password: "carlos123sexo",
+      active: true,
+      role: { id: 1 },
+    },
   ];
 
   for (const userData of users) {
