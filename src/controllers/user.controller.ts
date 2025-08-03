@@ -144,3 +144,22 @@ export const verifyBiometric = async (
     data: instanceToPlain(user),
   });
 };
+
+export const getUsersBySpecificRoles = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const users = await userService.getUsersBySpecificRoles();
+
+    return res.status(200).json({
+      message: "Usuarios obtenidos correctamente",
+      data: instanceToPlain(users),
+    });
+  } catch (error) {
+    console.error("Error al obtener usuarios por roles específicos:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};

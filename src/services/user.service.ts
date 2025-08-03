@@ -6,7 +6,7 @@ import {
 } from "@dto/user.dto";
 import { User } from "@entities/user.entity";
 import { Branch } from "@interfaces/entity/branch.entity";
-import { Repository } from "typeorm";
+import { Repository, In } from "typeorm";
 import { BranchService } from "./branch.service";
 
 export class UserService {
@@ -154,6 +154,36 @@ export class UserService {
     return await this.userRepository.findOne({
       where: { biometric },
       relations: ["role"],
+    });
+  }
+
+  async getUsersBySpecificRoles(): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: { id: In([1, 2, 3, 5]) } },
+      relations: ["role", "branch", "branches"],
+      select: {
+        id: true,
+        name: true,
+        last_name: true,
+        curp: true,
+        email: true,
+        active: true,
+        biometric: true,
+        created_at: true,
+        updated_at: true,
+        role: {
+          id: true,
+          name: true,
+        },
+        branch: {
+          id: true,
+          name: true,
+        },
+        branches: {
+          id: true,
+          name: true,
+        },
+      },
     });
   }
 }

@@ -36,6 +36,33 @@ router.get("/", userController.getAllUsers);
 
 /**
  * @swagger
+ * /users/specific-roles:
+ *   get:
+ *     summary: Obtener usuarios con roles específicos
+ *     tags: [Usuarios]
+ *     description: Retorna usuarios que tienen los roles SuperAdmin, CompanyAdmin, BranchAdmin y Viewer
+ *     responses:
+ *       200:
+ *         description: Usuarios obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuarios obtenidos correctamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/specific-roles", userController.getUsersBySpecificRoles);
+
+/**
+ * @swagger
  * /users/{id}:
  *   get:
  *     summary: Obtener usuario por ID

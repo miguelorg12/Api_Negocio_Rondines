@@ -197,6 +197,31 @@ export class PatrolService {
     });
   }
 
+  /**
+   * Obtener patrols disponibles (sin asignaciones) por sucursal
+   */
+  async getAvailablePatrolsByBranchId(id: number) {
+    // Obtener patrols de la sucursal que NO tienen asignaciones
+    const patrols = await this.patrolRepository
+      .createQueryBuilder("patrol")
+      .leftJoinAndSelect("patrol.plans", "plans")
+      .leftJoin("patrol.patrolAssignments", "assignment")
+      .where("patrol.branch.id = :branchId", { branchId: id })
+      .andWhere("assignment.id IS NULL") // Solo patrols sin asignaciones
+      .select([
+        "patrol.id",
+        "patrol.name",
+        "patrol.frequency",
+        "patrol.active",
+        "plans.id",
+        "plans.name",
+        "plans.image_url",
+      ])
+      .getMany();
+
+    return patrols;
+  }
+
   async update(
     id: number,
     patrolDto: PartialPatrolDto

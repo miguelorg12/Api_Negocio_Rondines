@@ -259,6 +259,20 @@ export const getPatrolsByBranchId = async (
   });
 };
 
+export const getAvailablePatrolsByBranchId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const branch_id = req.params.id;
+  const patrols = await patrolService.getAvailablePatrolsByBranchId(
+    parseInt(branch_id)
+  );
+  return res.status(200).json({
+    message: "Rondas disponibles obtenidas correctamente",
+    data: patrols,
+  });
+};
+
 export const deletePlan = async (
   req: Request,
   res: Response

@@ -13,6 +13,7 @@ import {
   deletePatrol,
   createPatrolAndAssigment,
   getPatrolsByBranchId,
+  getAvailablePatrolsByBranchId,
   createPatrolWithPlanImage,
   deletePlan,
 } from "@controllers/patrol.controller";
@@ -35,6 +36,40 @@ const upload = multer({
 });
 
 router.get("/branch/:id", getPatrolsByBranchId);
+
+/**
+ * @swagger
+ * /patrols/branch/{id}/available:
+ *   get:
+ *     summary: Obtener patrullas disponibles por sucursal
+ *     tags: [Patrullas]
+ *     description: Retorna las patrullas de una sucursal que NO tienen asignaciones activas
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la sucursal
+ *     responses:
+ *       200:
+ *         description: Patrullas disponibles obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Rondas disponibles obtenidas correctamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Patrol'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/branch/:id/available", getAvailablePatrolsByBranchId);
 
 /**
  * @swagger
