@@ -3,6 +3,8 @@ import { User } from "@entities/user.entity";
 
 export async function seedUsers() {
   const userRepository = AppDataSource.getRepository(User);
+
+  console.log("👥 Iniciando seeder de usuarios...");
   const users = [
     {
       name: "John",
@@ -70,8 +72,20 @@ export async function seedUsers() {
   ];
 
   for (const userData of users) {
-    const user = userRepository.create(userData);
-    await userRepository.save(user);
+    // Verificar si el usuario ya existe
+    const existingUser = await userRepository.findOne({
+      where: { email: userData.email },
+    });
+
+    if (existingUser) {
+      console.log(`⚠️  User ${userData.email} already exists`);
+    } else {
+      const user = userRepository.create(userData);
+      await userRepository.save(user);
+      console.log(
+        `✅ Created user: ${userData.name} ${userData.last_name} (${userData.email})`
+      );
+    }
   }
 
   console.log("User seeded successfully");

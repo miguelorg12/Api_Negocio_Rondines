@@ -63,6 +63,12 @@ export async function seedShiftValidationRealData() {
       console.log(
         "❌ Usuario vielmasexo no encontrado. Please run the user seeder first."
       );
+      console.log("🔍 Verificando usuarios existentes...");
+      const allUsers = await userRepository.find();
+      console.log(`📊 Total usuarios en BD: ${allUsers.length}`);
+      allUsers.forEach((user) => {
+        console.log(`- ${user.name} ${user.last_name}: ${user.email}`);
+      });
       return;
     }
 
