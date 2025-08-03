@@ -85,7 +85,9 @@ export class PatrolService {
   ): Promise<Plan> {
     // Generar nombre único para el archivo
     const fileExtension = path.extname(file.originalname);
-    const fileName = `plans/${patrolId}/${crypto.randomUUID()}${fileExtension}`;
+    const fileName = `${
+      process.env.DO_SPACES_ALIAS
+    }plans/${patrolId}/${crypto.randomUUID()}${fileExtension}`;
 
     // Subir archivo a DigitalOcean Spaces
     const uploadCommand = new PutObjectCommand({

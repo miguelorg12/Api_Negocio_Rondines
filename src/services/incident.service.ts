@@ -98,7 +98,9 @@ export class IncidentService {
 
       // Generar nombre único para el archivo
       const fileExtension = path.extname(file.originalname);
-      const fileName = `incidents/${incidentId}/${crypto.randomUUID()}${fileExtension}`;
+      const fileName = `${
+        process.env.DO_SPACES_ALIAS
+      }/incidents/${incidentId}/${crypto.randomUUID()}${fileExtension}`;
 
       // Subir archivo a DigitalOcean Spaces
       const uploadCommand = new PutObjectCommand({
