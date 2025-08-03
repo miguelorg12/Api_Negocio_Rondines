@@ -42,14 +42,21 @@ export class BranchService {
     if (!branch) {
       throw new Error("Branch not found");
     }
-    await this.branchRepository.update(id, {
-      ...updateData,
-      user: { id: updateData.user_id ? updateData.user_id : branch.user.id },
-      company: {
-        id: updateData.company_id ? updateData.company_id : branch.company.id,
-      },
-    });
-    return this.findById(id);
+
+    // Update the branch properties
+    if (updateData.name !== undefined) branch.name = updateData.name;
+    if (updateData.address !== undefined) branch.address = updateData.address;
+
+    // Update relationships if provided
+    if (updateData.user_id !== undefined) {
+      branch.user = { id: updateData.user_id } as User;
+    }
+    if (updateData.company_id !== undefined) {
+      branch.company = { id: updateData.company_id } as any;
+    }
+
+    // Save the updated branch
+    return await this.branchRepository.save(branch);
   }
 
   async delete(id: number): Promise<Branch | null> {
