@@ -23,6 +23,62 @@ export class ShiftValidationService {
     this.shiftRepository = AppDataSource.getRepository(Shift);
   }
 
+  // Función auxiliar para formatear hora en formato timestamp (24 horas)
+  private formatTimeTimestamp(hour: number, minute: number): string {
+    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+  }
+
+  // Función auxiliar para convertir hora a minutos para comparación
+  private timeToMinutes(hour: number, minute: number): number {
+    return hour * 60 + minute;
+  }
+
+  // Función para verificar si un turno cruza la medianoche
+  private isOvernightShift(startTime: Date, endTime: Date): boolean {
+    const startHour = startTime.getHours();
+    const endHour = endTime.getHours();
+    
+    // Si la hora de inicio es mayor que la hora de fin, cruza la medianoche
+    return startHour > endHour;
+  }
+
+  // Función para obtener la hora actual en minutos considerando turnos nocturnos
+  private getCurrentTimeInMinutes(currentTime: Date, shiftStartTime: Date, shiftEndTime: Date): number {
+    const currentHour = currentTime.getHours();
+    const currentMinutes = currentTime.getMinutes();
+    const currentTimeInMinutes = this.timeToMinutes(currentHour, currentMinutes);
+    
+    const isOvernight = this.isOvernightShift(shiftStartTime, shiftEndTime);
+    
+    if (isOvernight) {
+      // Para turnos nocturnos, si la hora actual es menor que la hora de inicio,
+      // significa que estamos en el día siguiente
+      const shiftStartHour = shiftStartTime.getHours();
+      if (currentHour < shiftStartHour) {
+        // Estamos en el día siguiente, sumar 24 horas
+        return currentTimeInMinutes + (24 * 60);
+      }
+    }
+    
+    return currentTimeInMinutes;
+  }
+
+  // Función para obtener la hora de fin del turno en minutos considerando turnos nocturnos
+  private getShiftEndTimeInMinutes(shiftEndTime: Date, shiftStartTime: Date): number {
+    const shiftEndHour = shiftEndTime.getHours();
+    const shiftEndMinutes = shiftEndTime.getMinutes();
+    const shiftEndInMinutes = this.timeToMinutes(shiftEndHour, shiftEndMinutes);
+    
+    const isOvernight = this.isOvernightShift(shiftStartTime, shiftEndTime);
+    
+    if (isOvernight) {
+      // Para turnos nocturnos, la hora de fin está en el día siguiente
+      return shiftEndInMinutes + (24 * 60);
+    }
+    
+    return shiftEndInMinutes;
+  }
+
   async validateShift(
     validationData: ShiftValidationDto
   ): Promise<ShiftValidationResponse> {
@@ -75,33 +131,24 @@ export class ShiftValidationService {
 
       // 5. Obtener hora actual del timestamp
       const currentTime = new Date(validationData.timestamp);
-      const currentHour = currentTime.getHours();
-      const currentMinutes = currentTime.getMinutes();
-      const currentTimeInMinutes = currentHour * 60 + currentMinutes;
-
+      
       // 6. Obtener horas del shift
       const shiftStartTime = new Date(patrolAssignment.shift.start_time);
       const shiftEndTime = new Date(patrolAssignment.shift.end_time);
 
       // Convertir a hora local para comparación
-      const shiftStartHour = shiftStartTime.getUTCHours();
-      const shiftStartMinutes = shiftStartTime.getUTCMinutes();
-      const shiftStartInMinutes = shiftStartHour * 60 + shiftStartMinutes;
+      const shiftStartHour = shiftStartTime.getHours();
+      const shiftStartMinutes = shiftStartTime.getMinutes();
+      const shiftStartInMinutes = this.timeToMinutes(shiftStartHour, shiftStartMinutes);
 
-      const shiftEndHour = shiftEndTime.getUTCHours();
-      const shiftEndMinutes = shiftEndTime.getUTCMinutes();
-      const shiftEndInMinutes = shiftEndHour * 60 + shiftEndMinutes;
-
-      // Obtener hora actual en UTC para comparación consistente
-      const currentTimeUTC = new Date(validationData.timestamp);
-      const currentHourUTC = currentTimeUTC.getUTCHours();
-      const currentMinutesUTC = currentTimeUTC.getUTCMinutes();
-      const currentTimeInMinutesUTC = currentHourUTC * 60 + currentMinutesUTC;
+      // Obtener hora actual y de fin considerando turnos nocturnos
+      const currentTimeInMinutes = this.getCurrentTimeInMinutes(currentTime, shiftStartTime, shiftEndTime);
+      const shiftEndInMinutes = this.getShiftEndTimeInMinutes(shiftEndTime, shiftStartTime);
 
       // 7. Lógica de validación
       if (!existingPatrolRecord) {
         // No hay record, verificar si puede iniciar
-        if (currentTimeInMinutesUTC >= shiftStartInMinutes) {
+        if (currentTimeInMinutes >= shiftStartInMinutes) {
           // Crear nuevo patrol record
           const newPatrolRecord = this.patrolRecordRepository.create({
             date: today,
@@ -120,13 +167,10 @@ export class ShiftValidationService {
             shift: patrolAssignment.shift,
           };
         } else {
+          const startTimeFormatted = this.formatTimeTimestamp(shiftStartHour, shiftStartMinutes);
           return {
             success: false,
-            message: `Aún no es hora de iniciar el turno. Tu turno inicia a las ${shiftStartHour
-              .toString()
-              .padStart(2, "0")}:${shiftStartMinutes
-              .toString()
-              .padStart(2, "0")} UTC`,
+            message: `Aún no es hora de iniciar el turno. Tu turno inicia a las ${startTimeFormatted}`,
             shift: patrolAssignment.shift,
           };
         }
@@ -134,7 +178,7 @@ export class ShiftValidationService {
         // Ya existe un record, verificar estado
         if (existingPatrolRecord.status === "en_progreso") {
           // Está en progreso, verificar si puede terminar
-          if (currentTimeInMinutesUTC >= shiftEndInMinutes) {
+          if (currentTimeInMinutes >= shiftEndInMinutes) {
             // Actualizar record para finalizar
             existingPatrolRecord.actual_end = currentTime;
             existingPatrolRecord.status = "completado";
@@ -149,13 +193,11 @@ export class ShiftValidationService {
               shift: patrolAssignment.shift,
             };
           } else {
+            const endTimeFormatted = this.formatTimeTimestamp(shiftEndTime.getHours(), shiftEndTime.getMinutes());
+            const currentTimeFormatted = this.formatTimeTimestamp(currentTime.getHours(), currentTime.getMinutes());
             return {
               success: false,
-              message: `Tu turno está en progreso. Termina a las ${shiftEndHour
-                .toString()
-                .padStart(2, "0")}:${shiftEndMinutes
-                .toString()
-                .padStart(2, "0")} UTC`,
+              message: `Tu turno está en progreso. Termina a las ${endTimeFormatted}. Hora actual: ${currentTimeFormatted}`,
               status: "en_progreso",
               patrolRecord: existingPatrolRecord,
               shift: patrolAssignment.shift,
@@ -171,7 +213,7 @@ export class ShiftValidationService {
           };
         } else if (existingPatrolRecord.status === "pendiente") {
           // Record pendiente, verificar si puede iniciar
-          if (currentTimeInMinutesUTC >= shiftStartInMinutes) {
+          if (currentTimeInMinutes >= shiftStartInMinutes) {
             // Actualizar record para iniciar
             existingPatrolRecord.actual_start = currentTime;
             existingPatrolRecord.status = "en_progreso";
@@ -186,13 +228,10 @@ export class ShiftValidationService {
               shift: patrolAssignment.shift,
             };
           } else {
+            const startTimeFormatted = this.formatTimeTimestamp(shiftStartHour, shiftStartMinutes);
             return {
               success: false,
-              message: `Aún no es hora de iniciar el turno. Tu turno inicia a las ${shiftStartHour
-                .toString()
-                .padStart(2, "0")}:${shiftStartMinutes
-                .toString()
-                .padStart(2, "0")} UTC`,
+              message: `Aún no es hora de iniciar el turno. Tu turno inicia a las ${startTimeFormatted}`,
               status: "pendiente",
               patrolRecord: existingPatrolRecord,
               shift: patrolAssignment.shift,
