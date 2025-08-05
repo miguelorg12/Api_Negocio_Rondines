@@ -6,7 +6,10 @@ import {
   PartialPatrolDto,
   PatrolAssigmentDto,
 } from "@interfaces/dto/patrol.dto";
-import { CreatePatrolWithRoutePointsDto } from "@interfaces/dto/patrol_route_point.dto";
+import {
+  CreatePatrolWithRoutePointsDto,
+  UpdatePatrolWithRoutePointsDto,
+} from "@interfaces/dto/patrol_route_point.dto";
 
 const patrolService = new PatrolService();
 
@@ -148,12 +151,41 @@ export const createPatrolWithRoutePoints = async (
       errors: errors.array(),
     });
   }
-  
+
   const patrolData: CreatePatrolWithRoutePointsDto = req.body;
   const newPatrol = await patrolService.createPatrolWithRoutePoints(patrolData);
-  
+
   return res.status(201).json({
     message: "Ronda creada con puntos de ruta correctamente",
     data: newPatrol,
+  });
+};
+
+export const updatePatrolWithRoutePoints = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      message: "Error en la validación de datos",
+      errors: errors.array(),
+    });
+  }
+
+  const { id } = req.params;
+  const patrolData: UpdatePatrolWithRoutePointsDto = req.body;
+  const updatedPatrol = await patrolService.updatePatrolWithRoutePoints(
+    parseInt(id),
+    patrolData
+  );
+
+  if (!updatedPatrol) {
+    return res.status(404).json({ message: "Ronda no encontrada" });
+  }
+
+  return res.status(200).json({
+    message: "Ronda actualizada con puntos de ruta correctamente",
+    data: updatedPatrol,
   });
 };

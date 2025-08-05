@@ -6,7 +6,10 @@ import {
   PartialPatrolDto,
   PatrolAssigmentDto,
 } from "@interfaces/dto/patrol.dto";
-import { CreatePatrolWithRoutePointsDto } from "@interfaces/dto/patrol_route_point.dto";
+import {
+  CreatePatrolWithRoutePointsDto,
+  UpdatePatrolWithRoutePointsDto,
+} from "@interfaces/dto/patrol_route_point.dto";
 import { Repository } from "typeorm";
 import { PatrolRecordService } from "@services/patrol_record.service";
 
@@ -136,6 +139,49 @@ export class PatrolService {
     }
 
     await this.patrolRepository.update(id, updateData);
+    return this.getById(id);
+  }
+
+  async updatePatrolWithRoutePoints(
+    id: number,
+    updatePatrolDto: UpdatePatrolWithRoutePointsDto
+  ): Promise<Patrol | null> {
+    const patrol = await this.getById(id);
+    if (!patrol) {
+      throw new Error("Ronda no encontrada");
+    }
+
+    // 1. Actualizar el patrol
+    const updateData = {
+      name: updatePatrolDto.name,
+      active: updatePatrolDto.active,
+      branch: { id: updatePatrolDto.branch_id },
+    };
+
+    await this.patrolRepository.update(id, updateData);
+
+    // 2. Eliminar todos los puntos de ruta existentes
+    await this.patrolRoutePointRepository.delete({ patrol: { id } });
+
+    // 3. Crear los nuevos puntos de ruta
+    if (
+      updatePatrolDto.route_points &&
+      updatePatrolDto.route_points.length > 0
+    ) {
+      const routePointsToCreate = updatePatrolDto.route_points.map((point) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        order: point.order,
+        google_place_id: point.google_place_id,
+        address: point.address,
+        formatted_address: point.formatted_address,
+        patrol: { id },
+        checkpoint: { id: point.checkpoint_id },
+      }));
+
+      await this.patrolRoutePointRepository.save(routePointsToCreate);
+    }
+
     return this.getById(id);
   }
 

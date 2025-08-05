@@ -18,4 +18,14 @@ export interface CreatePatrolWithRoutePointsDto {
   route_points: PatrolRoutePointDto[];
 }
 
+export interface UpdatePatrolWithRoutePointsDto {
+  // Datos del patrol
+  name: string;
+  active?: boolean | true;
+  branch_id: number;
+
+  // Array de puntos de ruta
+  route_points: PatrolRoutePointDto[];
+}
+
 export type PartialPatrolRoutePointDto = Partial<PatrolRoutePointDto>;

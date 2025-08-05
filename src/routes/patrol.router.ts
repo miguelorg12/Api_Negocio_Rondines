@@ -3,7 +3,10 @@ import {
   createPatrolValidator,
   updatePatrolValidator,
 } from "@utils/validators/patrol.validator";
-import { createPatrolWithRoutePointsValidator } from "@utils/validators/patrol_route_point.validator";
+import {
+  createPatrolWithRoutePointsValidator,
+  updatePatrolWithRoutePointsValidator,
+} from "@utils/validators/patrol_route_point.validator";
 import {
   getAllPatrols,
   createPatrol,
@@ -14,6 +17,7 @@ import {
   getPatrolsByBranchId,
   getAvailablePatrolsByBranchId,
   createPatrolWithRoutePoints,
+  updatePatrolWithRoutePoints,
 } from "@controllers/patrol.controller";
 
 const router = Router();
@@ -333,6 +337,97 @@ router.post(
  *         description: Error interno del servidor
  */
 router.put("/:id", updatePatrolValidator, updatePatrol);
+
+/**
+ * @swagger
+ * /patrols/{id}/with-route-points:
+ *   put:
+ *     summary: Actualizar patrulla con puntos de ruta
+ *     tags: [Patrullas]
+ *     description: Actualiza una patrulla existente incluyendo todos sus puntos de ruta
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la patrulla a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 enum: [ronda_matutina, ronda_vespertina, ronda_nocturna]
+ *                 description: Tipo de ronda
+ *               branch_id:
+ *                 type: integer
+ *                 description: ID de la sucursal
+ *               active:
+ *                 type: boolean
+ *                 description: Estado activo de la patrulla
+ *               route_points:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     latitude:
+ *                       type: number
+ *                       format: float
+ *                       description: Latitud del punto
+ *                     longitude:
+ *                       type: number
+ *                       format: float
+ *                       description: Longitud del punto
+ *                     order:
+ *                       type: integer
+ *                       description: Orden del punto en la ruta
+ *                     checkpoint_id:
+ *                       type: integer
+ *                       description: ID del checkpoint asociado
+ *                     google_place_id:
+ *                       type: string
+ *                       description: ID del lugar en Google Maps (opcional)
+ *                     address:
+ *                       type: string
+ *                       description: Dirección del punto (opcional)
+ *                     formatted_address:
+ *                       type: string
+ *                       description: Dirección formateada (opcional)
+ *     responses:
+ *       200:
+ *         description: Patrulla actualizada con puntos de ruta exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ronda actualizada con puntos de ruta correctamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/Patrol'
+ *       400:
+ *         description: Error de validación
+ *       404:
+ *         description: Patrulla no encontrada
+ *       422:
+ *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(
+  "/:id/with-route-points",
+  updatePatrolWithRoutePointsValidator,
+  updatePatrolWithRoutePoints
+);
 
 /**
  * @swagger
