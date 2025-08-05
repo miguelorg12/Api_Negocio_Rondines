@@ -6,13 +6,6 @@ export interface PatrolAssignmentDto {
   deleted_at?: Date; // Optional for soft delete
 }
 
-export interface RouteAssignmentWithCheckpointsDto {
-  user_id: number;
-  patrol_id: number;
-  shift_id: number;
-  date: Date;
-}
-
 export interface UpdateRouteWithCheckpointsDto {
   user_id?: number;
   patrol_id?: number;

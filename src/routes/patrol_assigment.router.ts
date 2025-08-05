@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   PatrolAssignmentValidator,
   PatrolAssignmentUpdateValidator,
-  RouteAssignmentWithCheckpointsValidator,
   UpdateRouteWithCheckpointsValidator,
 } from "@utils/validators/patrol_assigment.validator";
 import * as PatrolAssignmentController from "@controllers/patrol_assigment.controller";
@@ -75,85 +74,6 @@ router.post(
   "/",
   PatrolAssignmentValidator,
   PatrolAssignmentController.createPatrolAssignment
-);
-
-/**
- * @swagger
- * /patrol-assignments/route-with-checkpoints:
- *   post:
- *     summary: Crear asignación de ruta con checkpoints automáticos
- *     tags: [Asignaciones de Patrulla]
- *     description: Crea una asignación de ruta y genera checkpoints con el plan del patrol seleccionado
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - user_id
- *               - patrol_id
- *               - shift_id
- *               - date
- *               - checkpoints
- *             properties:
- *               user_id:
- *                 type: integer
- *                 description: ID del usuario asignado
- *               patrol_id:
- *                 type: integer
- *                 description: ID del patrol (debe tener un plan asignado)
- *               shift_id:
- *                 type: integer
- *                 description: ID del turno
- *               date:
- *                 type: string
- *                 format: date-time
- *                 description: Fecha y hora de la asignación
- *               checkpoints:
- *                 type: array
- *                 items:
- *                   type: object
- *                   required:
- *                     - name
- *                     - time
- *                   properties:
- *                     name:
- *                       type: string
- *                       description: Nombre del checkpoint
- *                     time:
- *                       type: string
- *                       pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
- *                       description: Hora del checkpoint en formato HH:MM o HH:MM:SS
- *                 description: Array de checkpoints con nombre y hora
- *     responses:
- *       201:
- *         description: Ruta asignada con checkpoints creada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Ruta asignada con checkpoints creada correctamente"
- *                 data:
- *                   $ref: '#/components/schemas/PatrolAssignment'
- *       400:
- *         description: Error de validación
- *       422:
- *         description: Error de validación
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ValidationErrorResponse'
- *       500:
- *         description: Error interno del servidor
- */
-router.post(
-  "/route-with-checkpoints",
-  RouteAssignmentWithCheckpointsValidator,
-  PatrolAssignmentController.createRouteWithCheckpoints
 );
 
 /**

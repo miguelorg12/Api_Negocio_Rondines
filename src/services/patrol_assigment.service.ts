@@ -5,7 +5,6 @@ import { Patrol } from "@interfaces/entity/patrol.entity";
 import {
   PatrolAssignmentDto,
   PartialPatrolAssignmentDto,
-  RouteAssignmentWithCheckpointsDto,
   UpdateRouteWithCheckpointsDto,
 } from "@interfaces/dto/patrol_assigment.dto";
 import { Repository } from "typeorm";
@@ -25,8 +24,12 @@ export class PatrolAssignmentService {
   async create(
     patrolAssignmentDto: PatrolAssignmentDto
   ): Promise<PatrolAssignment> {
-    const patrolAssignment =
-      this.patrolAssignmentRepository.create(patrolAssignmentDto);
+    const patrolAssignment = this.patrolAssignmentRepository.create({
+      user: { id: patrolAssignmentDto.user_id },
+      patrol: { id: patrolAssignmentDto.patrol_id },
+      shift: { id: patrolAssignmentDto.shift_id },
+      date: patrolAssignmentDto.date,
+    });
 
     const savedAssignment = await this.patrolAssignmentRepository.save(
       patrolAssignment
@@ -38,49 +41,6 @@ export class PatrolAssignmentService {
       status: "pendiente",
       patrol_assignment_id: savedAssignment.id,
     });
-
-    return savedAssignment;
-  }
-
-  /**
-   * Crear asignación de ruta
-   */
-  async createRouteWithCheckpoints(
-    routeData: RouteAssignmentWithCheckpointsDto
-  ): Promise<PatrolAssignment> {
-    // Obtener el patrol
-    const patrol = await this.patrolRepository.findOne({
-      where: { id: routeData.patrol_id },
-    });
-
-    if (!patrol) {
-      throw new Error("Patrol no encontrado");
-    }
-
-    // Crear la asignación de patrol
-    const patrolAssignment = this.patrolAssignmentRepository.create({
-      user: { id: routeData.user_id },
-      patrol: { id: routeData.patrol_id },
-      shift: { id: routeData.shift_id },
-      date: routeData.date,
-    });
-
-    const savedAssignment = await this.patrolAssignmentRepository.save(
-      patrolAssignment
-    );
-
-    // Crear el registro de patrol asociado al PatrolAssignment
-    console.log(
-      "Creando PatrolRecord con patrol_assignment_id:",
-      savedAssignment.id
-    );
-    const patrolRecord = await this.patrolRecordService.create({
-      date: routeData.date, // Usar la misma fecha del assignment
-      status: "pendiente",
-      patrol_assignment_id: savedAssignment.id,
-    });
-
-    console.log("PatrolRecord creado:", patrolRecord);
 
     return savedAssignment;
   }

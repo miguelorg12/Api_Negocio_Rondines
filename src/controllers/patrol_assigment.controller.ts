@@ -4,7 +4,6 @@ import { PatrolAssignmentService } from "@services/patrol_assigment.service";
 import {
   PatrolAssignmentDto,
   PartialPatrolAssignmentDto,
-  RouteAssignmentWithCheckpointsDto,
   UpdateRouteWithCheckpointsDto,
 } from "@interfaces/dto/patrol_assigment.dto";
 
@@ -31,50 +30,6 @@ export const createPatrolAssignment = async (
     message: "Asignación de ronda creada correctamente",
     data: newPatrolAssignment,
   });
-};
-
-export const createRouteWithCheckpoints = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({
-        message: "Error en la validación de datos",
-        errors: errors.array(),
-      });
-    }
-
-    const { user_id, patrol_id, shift_id, date } = req.body;
-
-    // Validar campos requeridos
-    if (!user_id || !patrol_id || !shift_id || !date) {
-      return res.status(400).json({
-        error: "user_id, patrol_id, shift_id y date son requeridos",
-      });
-    }
-
-    const routeData: RouteAssignmentWithCheckpointsDto = {
-      user_id: parseInt(user_id),
-      patrol_id: parseInt(patrol_id),
-      shift_id: parseInt(shift_id),
-      date: new Date(date),
-    };
-
-    const newRouteAssignment =
-      await patrolAssignmentService.createRouteWithCheckpoints(routeData);
-
-    return res.status(201).json({
-      message: "Ruta asignada creada correctamente",
-      data: newRouteAssignment,
-    });
-  } catch (error) {
-    console.error("Error al crear ruta:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Error al crear ruta",
-    });
-  }
 };
 
 export const getAllPatrolAssignments = async (
