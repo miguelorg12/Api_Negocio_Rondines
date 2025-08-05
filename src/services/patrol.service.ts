@@ -118,7 +118,24 @@ export class PatrolService {
     if (!patrol) {
       throw new Error("Ronda no encontrada");
     }
-    await this.patrolRepository.update(id, patrolDto);
+
+    // Preparar los datos para actualizar
+    const updateData: any = {};
+
+    if (patrolDto.name !== undefined) {
+      updateData.name = patrolDto.name;
+    }
+
+    if (patrolDto.active !== undefined) {
+      updateData.active = patrolDto.active;
+    }
+
+    // Si se está actualizando branch_id, convertir a la relación correcta
+    if (patrolDto.branch_id !== undefined) {
+      updateData.branch = { id: patrolDto.branch_id };
+    }
+
+    await this.patrolRepository.update(id, updateData);
     return this.getById(id);
   }
 
