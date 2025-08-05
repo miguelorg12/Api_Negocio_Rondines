@@ -32,19 +32,19 @@ export class Incident {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @ManyToOne(() => Checkpoint, (checkpoint) => checkpoint.incident, {
-    onDelete: "CASCADE",
-    nullable: true,
-  })
-  @JoinColumn({ name: "checkpoint_id" })
-  checkpoint: Checkpoint;
-
   @ManyToOne(() => Branch, (branch) => branch.incidents, {
     onDelete: "CASCADE",
     nullable: true,
   })
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
+
+  @ManyToOne(() => Checkpoint, (checkpoint) => checkpoint.incidents, {
+    onDelete: "CASCADE",
+    nullable: true,
+  })
+  @JoinColumn({ name: "checkpoint_id" })
+  checkpoint: Checkpoint;
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

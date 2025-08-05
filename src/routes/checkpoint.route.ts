@@ -1,9 +1,16 @@
 import { Router } from "express";
-import * as checkpointController from "../controllers/checkpoint.controller";
 import {
-  createCheckpointValidator,
-  updateCheckpointValidator,
-} from "../utils/validators/checkpoint.validator";
+  getAllCheckpoints,
+  getCheckpointById,
+  getCheckpointsByBranchId,
+  createCheckpoint,
+  updateCheckpoint,
+  deleteCheckpoint,
+} from "@controllers/checkpoint.controller";
+import {
+  CheckpointValidator,
+  CheckpointUpdateValidator,
+} from "@utils/validators/checkpoint.validator";
 
 const router = Router();
 
@@ -11,12 +18,12 @@ const router = Router();
  * @swagger
  * /checkpoints:
  *   get:
- *     summary: Obtener todos los puntos de control
- *     tags: [Puntos de Control]
- *     description: Retorna una lista de todos los puntos de control en el sistema
+ *     summary: Obtener todos los checkpoints
+ *     tags: [Checkpoints]
+ *     description: Retorna una lista de todos los checkpoints en el sistema
  *     responses:
  *       200:
- *         description: Lista de puntos de control obtenida exitosamente
+ *         description: Lista de checkpoints obtenida exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -24,7 +31,7 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Puntos de control obtenidos correctamente"
+ *                   example: "Checkpoints obtenidos correctamente"
  *                 data:
  *                   type: array
  *                   items:
@@ -32,24 +39,25 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", checkpointController.getAllCheckpoints);
+router.get("/", getAllCheckpoints);
 
 /**
  * @swagger
- * /checkpoints:
- *   post:
- *     summary: Crear un nuevo punto de control
- *     tags: [Puntos de Control]
- *     description: Crea un nuevo punto de control en el sistema
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CheckpointCreateRequest'
+ * /checkpoints/{id}:
+ *   get:
+ *     summary: Obtener checkpoint por ID
+ *     tags: [Checkpoints]
+ *     description: Retorna un checkpoint específico por su ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del checkpoint
  *     responses:
- *       201:
- *         description: Punto de control creado exitosamente
+ *       200:
+ *         description: Checkpoint obtenido exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -57,9 +65,88 @@ router.get("/", checkpointController.getAllCheckpoints);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Punto de control creado correctamente"
+ *                   example: "Checkpoint obtenido correctamente"
  *                 data:
  *                   $ref: '#/components/schemas/Checkpoint'
+ *       404:
+ *         description: Checkpoint no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/:id", getCheckpointById);
+
+/**
+ * @swagger
+ * /checkpoints/branch/{branchId}:
+ *   get:
+ *     summary: Obtener checkpoints por sucursal
+ *     tags: [Checkpoints]
+ *     description: Retorna todos los checkpoints de una sucursal específica
+ *     parameters:
+ *       - in: path
+ *         name: branchId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la sucursal
+ *     responses:
+ *       200:
+ *         description: Checkpoints obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Checkpoints obtenidos correctamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Checkpoint'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/branch/:branchId", getCheckpointsByBranchId);
+
+/**
+ * @swagger
+ * /checkpoints:
+ *   post:
+ *     summary: Crear un nuevo checkpoint
+ *     tags: [Checkpoints]
+ *     description: Crea un nuevo checkpoint en el sistema
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - branch_id
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nombre del checkpoint
+ *               branch_id:
+ *                 type: integer
+ *                 description: ID de la sucursal
+ *     responses:
+ *       201:
+ *         description: Checkpoint creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Checkpoint creado correctamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/Checkpoint'
+ *       400:
+ *         description: Error de validación
  *       422:
  *         description: Error de validación
  *         content:
@@ -69,77 +156,38 @@ router.get("/", checkpointController.getAllCheckpoints);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(
-  "/",
-  createCheckpointValidator,
-  checkpointController.createCheckpoint
-);
-
-/**
- * @swagger
- * /checkpoints/{id}:
- *   get:
- *     summary: Obtener punto de control por ID
- *     tags: [Puntos de Control]
- *     description: Retorna un punto de control específico por su ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID del punto de control
- *     responses:
- *       200:
- *         description: Punto de control encontrado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Punto de control encontrado"
- *                 data:
- *                   $ref: '#/components/schemas/Checkpoint'
- *       404:
- *         description: Punto de control no encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Punto de control no encontrado"
- *       500:
- *         description: Error interno del servidor
- */
-router.get("/:id", checkpointController.getCheckpointById);
+router.post("/", CheckpointValidator, createCheckpoint);
 
 /**
  * @swagger
  * /checkpoints/{id}:
  *   put:
- *     summary: Actualizar punto de control
- *     tags: [Puntos de Control]
- *     description: Actualiza la información de un punto de control existente
+ *     summary: Actualizar checkpoint
+ *     tags: [Checkpoints]
+ *     description: Actualiza un checkpoint existente
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del punto de control
+ *         description: ID del checkpoint a actualizar
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CheckpointCreateRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nombre del checkpoint
+ *               branch_id:
+ *                 type: integer
+ *                 description: ID de la sucursal
  *     responses:
  *       200:
- *         description: Punto de control actualizado exitosamente
+ *         description: Checkpoint actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -147,59 +195,41 @@ router.get("/:id", checkpointController.getCheckpointById);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Punto de control actualizado exitosamente"
+ *                   example: "Checkpoint actualizado correctamente"
  *                 data:
  *                   $ref: '#/components/schemas/Checkpoint'
  *       400:
- *         description: Datos de entrada inválidos
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Datos de entrada inválidos"
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
+ *         description: Error de validación
  *       404:
- *         description: Punto de control no encontrado
+ *         description: Checkpoint no encontrado
+ *       422:
+ *         description: Error de validación
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Punto de control no encontrado"
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
  *       500:
  *         description: Error interno del servidor
  */
-router.put(
-  "/:id",
-  updateCheckpointValidator,
-  checkpointController.updateCheckpoint
-);
+router.put("/:id", CheckpointUpdateValidator, updateCheckpoint);
 
 /**
  * @swagger
  * /checkpoints/{id}:
  *   delete:
- *     summary: Eliminar punto de control
- *     tags: [Puntos de Control]
- *     description: Elimina lógicamente un punto de control (soft delete)
+ *     summary: Eliminar checkpoint
+ *     tags: [Checkpoints]
+ *     description: Elimina un checkpoint del sistema
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del punto de control
+ *         description: ID del checkpoint a eliminar
  *     responses:
  *       200:
- *         description: Punto de control eliminado exitosamente
+ *         description: Checkpoint eliminado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -207,20 +237,14 @@ router.put(
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Punto de control eliminado exitosamente"
+ *                   example: "Checkpoint eliminado correctamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/Checkpoint'
  *       404:
- *         description: Punto de control no encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Punto de control no encontrado"
+ *         description: Checkpoint no encontrado
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", checkpointController.deleteCheckpoint);
+router.delete("/:id", deleteCheckpoint);
 
 export default router;

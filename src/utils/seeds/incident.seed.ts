@@ -77,7 +77,7 @@ export async function seedIncidents() {
       severity: "media",
       user_id: users[1].id,
       branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
+      checkpoint_id: checkpoints.length > 4 ? checkpoints[4].id : null,
       imageCount: 1,
     },
     {
@@ -86,7 +86,7 @@ export async function seedIncidents() {
       severity: "alta",
       user_id: users[2].id,
       branch_id: branches[1].id,
-      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
+      checkpoint_id: checkpoints.length > 5 ? checkpoints[5].id : null,
       imageCount: 2,
     },
     {
@@ -95,104 +95,73 @@ export async function seedIncidents() {
       severity: "alta",
       user_id: users[0].id,
       branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 2 ? checkpoints[2].id : null,
+      checkpoint_id: checkpoints.length > 6 ? checkpoints[6].id : null,
       imageCount: 1,
     },
     {
-      description: "Sistema de ventilación con ruido anormal",
+      description: "Ventilación de aire acondicionado con fuga de agua",
       status: "completado",
-      severity: "baja",
+      severity: "media",
       user_id: users[1].id,
       branch_id: branches[1].id,
-      checkpoint_id: checkpoints.length > 3 ? checkpoints[3].id : null,
-      imageCount: 1,
-    },
-    {
-      description: "Cableado eléctrico expuesto en área de oficinas",
-      status: "en_progreso",
-      severity: "alta",
-      user_id: users[2].id,
-      branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
+      checkpoint_id: checkpoints.length > 7 ? checkpoints[7].id : null,
       imageCount: 2,
     },
     {
-      description: "Puerta de acceso a sala de servidores sin cerrar",
+      description: "Sistema de iluminación exterior defectuoso",
       status: "pendiente",
+      severity: "baja",
+      user_id: users[2].id,
+      branch_id: branches[0].id,
+      imageCount: 1,
+    },
+    {
+      description: "Puerta de acceso a sótano sin seguro",
+      status: "en_progreso",
       severity: "alta",
       user_id: users[0].id,
       branch_id: branches[1].id,
-      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
       imageCount: 3,
     },
-    // INCIDENTES PARA VIELMASEXO
     {
-      description: "Ventana rota en área de vigilancia - vielmasexo",
+      description: "Detector de humo en cocina sin funcionar",
       status: "pendiente",
       severity: "alta",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
+      user_id: users[1].id,
       branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
-      imageCount: 2,
+      imageCount: 1,
     },
     {
-      description:
-        "Sistema de alarma defectuoso en entrada principal - vielmasexo",
-      status: "en_progreso",
-      severity: "alta",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
-      branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
-      imageCount: 3,
-    },
-    {
-      description: "Cámara de seguridad con imagen borrosa - vielmasexo",
+      description: "Cerradura de oficina administrativa defectuosa",
       status: "completado",
       severity: "media",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
+      user_id: users[2].id,
       branch_id: branches[1].id,
-      checkpoint_id: checkpoints.length > 2 ? checkpoints[2].id : null,
-      imageCount: 1,
-    },
-    {
-      description: "Puerta de emergencia bloqueada - vielmasexo",
-      status: "pendiente",
-      severity: "alta",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
-      branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 3 ? checkpoints[3].id : null,
       imageCount: 2,
     },
     {
-      description: "Extintor faltante en pasillo secundario - vielmasexo",
-      status: "en_progreso",
-      severity: "media",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
-      branch_id: branches[1].id,
-      checkpoint_id: checkpoints.length > 0 ? checkpoints[0].id : null,
-      imageCount: 1,
-    },
-    {
-      description:
-        "Sistema de iluminación defectuoso en estacionamiento - vielmasexo",
+      description: "Sistema de riego automático activado sin causa",
       status: "pendiente",
       severity: "baja",
-      user_id:
-        users.find((u) => u.email === "vielma7220@gmail.com")?.id ||
-        users[0].id,
+      user_id: users[0].id,
       branch_id: branches[0].id,
-      checkpoint_id: checkpoints.length > 1 ? checkpoints[1].id : null,
+      imageCount: 1,
+    },
+    {
+      description: "Ventana de baño sin seguro - posible entrada",
+      status: "en_progreso",
+      severity: "alta",
+      user_id: users[1].id,
+      branch_id: branches[1].id,
       imageCount: 2,
+    },
+    {
+      description: "Sistema de calefacción con mal funcionamiento",
+      status: "completado",
+      severity: "media",
+      user_id: users[2].id,
+      branch_id: branches[0].id,
+      imageCount: 1,
     },
   ];
 
@@ -200,7 +169,6 @@ export async function seedIncidents() {
     try {
       // Crear archivos simulados para el incidente
       const files: Express.Multer.File[] = [];
-
       for (let i = 0; i < incidentData.imageCount; i++) {
         const file: Express.Multer.File = {
           fieldname: "images",
@@ -221,8 +189,8 @@ export async function seedIncidents() {
           status: incidentData.status,
           severity: incidentData.severity,
           user_id: incidentData.user_id,
-          checkpoint_id: incidentData.checkpoint_id,
           branch_id: incidentData.branch_id,
+          checkpoint_id: incidentData.checkpoint_id,
         },
         files
       );
@@ -245,25 +213,21 @@ export async function seedIncidents() {
  * Cargar imagen de ejemplo desde archivo local
  */
 function loadSampleImage(): Buffer {
-  try {
-    // Corregir la ruta: desde seeds/ hacia assets/images/
-    const imagePath = path.join(
-      __dirname,
-      "../../assets/images/sample_incident.jpg"
-    );
+  const imagePath = path.join(
+    __dirname,
+    "../../assets/images/sample_incident.jpg"
+  );
 
-    if (fs.existsSync(imagePath)) {
-      console.log("Usando imagen local: sample_incident.jpg");
-      return fs.readFileSync(imagePath);
-    } else {
-      throw new Error(
-        "Imagen sample_incident.jpg no encontrada en src/assets/images/"
-      );
-    }
-  } catch (error) {
-    console.error("Error cargando imagen local:", error);
-    throw new Error(
-      'Por favor, coloca una imagen llamada "sample_incident.jpg" en la carpeta src/assets/images/'
-    );
+  if (fs.existsSync(imagePath)) {
+    console.log("Usando imagen local: sample_incident.jpg");
+    return fs.readFileSync(imagePath);
   }
+
+  console.log("Imagen sample_incident.jpg no encontrada en src/assets/images/");
+  console.log(
+    'Por favor, coloca una imagen llamada "sample_incident.jpg" en la carpeta src/assets/images/'
+  );
+
+  // Crear un buffer vacío como fallback
+  return Buffer.from([]);
 }

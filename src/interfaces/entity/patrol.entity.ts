@@ -14,7 +14,6 @@ import { Branch } from "@entities/branch.entity";
 import { PatrolRecord } from "@entities/patrol_record.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 import { PatrolAssignment } from "@entities/patrol_assigment.entity";
-import { Plan } from "@entities/plan.entity";
 
 @Entity("patrols")
 export class Patrol {
@@ -24,9 +23,6 @@ export class Patrol {
   @Column({ enum: ["ronda_matutina", "ronda_vespertina", "ronda_nocturna"] })
   name: string;
 
-  @Column({ enum: ["diaria", "semanal", "mensual"] })
-  frequency: string;
-
   @Column({ default: true })
   active: boolean;
 
@@ -34,14 +30,8 @@ export class Patrol {
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
 
-  @ManyToMany(() => Checkpoint, (checkpoint) => checkpoint.patrols)
-  checkpoints: Checkpoint[];
-
   @OneToMany(() => PatrolAssignment, (assignment) => assignment.patrol)
   patrolAssignments: PatrolAssignment[];
-
-  @OneToMany(() => Plan, (plan) => plan.patrol)
-  plans: Plan[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

@@ -1,7 +1,6 @@
 import { AppDataSource } from "@configs/data-source";
 import { PatrolAssignment } from "@interfaces/entity/patrol_assigment.entity";
 import { PatrolRecordService } from "@services/patrol_record.service";
-import { Checkpoint } from "@interfaces/entity/checkpoint.entity";
 import { Patrol } from "@interfaces/entity/patrol.entity";
 import {
   PatrolAssignmentDto,
@@ -14,14 +13,12 @@ import { Repository } from "typeorm";
 export class PatrolAssignmentService {
   private patrolAssignmentRepository: Repository<PatrolAssignment>;
   private patrolRecordService: PatrolRecordService;
-  private checkpointRepository: Repository<Checkpoint>;
   private patrolRepository: Repository<Patrol>;
 
   constructor() {
     this.patrolAssignmentRepository =
       AppDataSource.getRepository(PatrolAssignment);
     this.patrolRecordService = new PatrolRecordService();
-    this.checkpointRepository = AppDataSource.getRepository(Checkpoint);
     this.patrolRepository = AppDataSource.getRepository(Patrol);
   }
 
@@ -46,26 +43,19 @@ export class PatrolAssignmentService {
   }
 
   /**
-   * Crear asignación de ruta con 4 checkpoints automáticos
+   * Crear asignación de ruta
    */
   async createRouteWithCheckpoints(
     routeData: RouteAssignmentWithCheckpointsDto
   ): Promise<PatrolAssignment> {
-    // Obtener el patrol con su plan
+    // Obtener el patrol
     const patrol = await this.patrolRepository.findOne({
       where: { id: routeData.patrol_id },
-      relations: ["plans"],
     });
 
     if (!patrol) {
       throw new Error("Patrol no encontrado");
     }
-
-    if (!patrol.plans || patrol.plans.length === 0) {
-      throw new Error("El patrol seleccionado no tiene un plan asignado");
-    }
-
-    const plan = patrol.plans[0]; // Usar el primer plan del patrol
 
     // Crear la asignación de patrol
     const patrolAssignment = this.patrolAssignmentRepository.create({
@@ -78,21 +68,6 @@ export class PatrolAssignmentService {
     const savedAssignment = await this.patrolAssignmentRepository.save(
       patrolAssignment
     );
-
-    // Crear checkpoints con los datos enviados desde el frontend
-    const checkpoints = [];
-    for (let i = 0; i < routeData.checkpoints.length; i++) {
-      const checkpointData = routeData.checkpoints[i];
-      const checkpoint = this.checkpointRepository.create({
-        name: checkpointData.name,
-        nfc_uid: `NFC_CHECKPOINT_${i + 1}`, // Hardcoded NFC UID
-        time: checkpointData.time, // Usar el tiempo enviado desde el frontend
-        plan: { id: plan.id },
-      });
-
-      const savedCheckpoint = await this.checkpointRepository.save(checkpoint);
-      checkpoints.push(savedCheckpoint);
-    }
 
     // Crear el registro de patrol asociado al PatrolAssignment
     console.log(
@@ -149,7 +124,7 @@ export class PatrolAssignmentService {
   }
 
   /**
-   * Actualizar asignación de ruta con checkpoints
+   * Actualizar asignación de ruta
    */
   async updateRouteWithCheckpoints(
     id: number,
@@ -165,22 +140,17 @@ export class PatrolAssignmentService {
       throw new Error("Asignación de ruta no encontrada");
     }
 
-    // Si se va a actualizar el patrol_id, verificar que tenga plan
+    // Si se va a actualizar el patrol_id, verificar que exista
     if (
       updateData.patrol_id &&
       updateData.patrol_id !== existingAssignment.patrol.id
     ) {
       const patrol = await this.patrolRepository.findOne({
         where: { id: updateData.patrol_id },
-        relations: ["plans"],
       });
 
       if (!patrol) {
         throw new Error("Patrol no encontrado");
-      }
-
-      if (!patrol.plans || patrol.plans.length === 0) {
-        throw new Error("El patrol seleccionado no tiene un plan asignado");
       }
     }
 
@@ -193,42 +163,6 @@ export class PatrolAssignmentService {
     if (updateData.date) updateFields.date = updateData.date;
 
     await this.patrolAssignmentRepository.update(id, updateFields);
-
-    // Si se van a actualizar los checkpoints
-    if (updateData.checkpoints && updateData.checkpoints.length > 0) {
-      // Obtener el plan del patrol (nuevo o existente)
-      const patrolId = updateData.patrol_id || existingAssignment.patrol.id;
-      const patrol = await this.patrolRepository.findOne({
-        where: { id: patrolId },
-        relations: ["plans"],
-      });
-
-      if (!patrol || !patrol.plans || patrol.plans.length === 0) {
-        throw new Error("El patrol no tiene un plan asignado");
-      }
-
-      const plan = patrol.plans[0];
-
-      // Eliminar checkpoints existentes del plan
-      await this.checkpointRepository.delete({ plan: { id: plan.id } });
-
-      // Crear nuevos checkpoints
-      const checkpoints = [];
-      for (let i = 0; i < updateData.checkpoints.length; i++) {
-        const checkpointData = updateData.checkpoints[i];
-        const checkpoint = this.checkpointRepository.create({
-          name: checkpointData.name,
-          nfc_uid: `NFC_CHECKPOINT_${i + 1}`,
-          time: checkpointData.time,
-          plan: { id: plan.id },
-        });
-
-        const savedCheckpoint = await this.checkpointRepository.save(
-          checkpoint
-        );
-        checkpoints.push(savedCheckpoint);
-      }
-    }
 
     // Actualizar el PatrolRecord si se cambió la fecha
     if (updateData.date) {
@@ -244,7 +178,7 @@ export class PatrolAssignmentService {
   }
 
   /**
-   * Eliminar asignación de ruta con checkpoints
+   * Eliminar asignación de ruta
    */
   async deleteRouteWithCheckpoints(id: number): Promise<PatrolAssignment> {
     // Verificar que la asignación existe
@@ -255,17 +189,6 @@ export class PatrolAssignmentService {
 
     if (!existingAssignment) {
       throw new Error("Asignación de ruta no encontrada");
-    }
-
-    // Eliminar checkpoints asociados al plan del patrol
-    const patrol = await this.patrolRepository.findOne({
-      where: { id: existingAssignment.patrol.id },
-      relations: ["plans"],
-    });
-
-    if (patrol && patrol.plans && patrol.plans.length > 0) {
-      const plan = patrol.plans[0];
-      await this.checkpointRepository.delete({ plan: { id: plan.id } });
     }
 
     // Eliminar registros de patrol asociados

@@ -46,7 +46,7 @@ export const createRouteWithCheckpoints = async (
       });
     }
 
-    const { user_id, patrol_id, shift_id, date, checkpoints } = req.body;
+    const { user_id, patrol_id, shift_id, date } = req.body;
 
     // Validar campos requeridos
     if (!user_id || !patrol_id || !shift_id || !date) {
@@ -55,48 +55,24 @@ export const createRouteWithCheckpoints = async (
       });
     }
 
-    // Validar checkpoints
-    if (
-      !checkpoints ||
-      !Array.isArray(checkpoints) ||
-      checkpoints.length === 0
-    ) {
-      return res.status(400).json({
-        error: "checkpoints es requerido y debe ser un array no vacío",
-      });
-    }
-
-    // Validar que cada checkpoint tenga name y time
-    for (const checkpoint of checkpoints) {
-      if (!checkpoint.name || !checkpoint.time) {
-        return res.status(400).json({
-          error: "Cada checkpoint debe tener name y time",
-        });
-      }
-    }
-
     const routeData: RouteAssignmentWithCheckpointsDto = {
       user_id: parseInt(user_id),
       patrol_id: parseInt(patrol_id),
       shift_id: parseInt(shift_id),
       date: new Date(date),
-      checkpoints,
     };
 
     const newRouteAssignment =
       await patrolAssignmentService.createRouteWithCheckpoints(routeData);
 
     return res.status(201).json({
-      message: "Ruta asignada con checkpoints creada correctamente",
+      message: "Ruta asignada creada correctamente",
       data: newRouteAssignment,
     });
   } catch (error) {
-    console.error("Error al crear ruta con checkpoints:", error);
+    console.error("Error al crear ruta:", error);
     return res.status(500).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Error al crear ruta con checkpoints",
+      error: error instanceof Error ? error.message : "Error al crear ruta",
     });
   }
 };
@@ -187,26 +163,6 @@ export const updateRouteWithCheckpoints = async (
       });
     }
 
-    // Validar checkpoints si se proporcionan
-    if (updateData.checkpoints) {
-      if (
-        !Array.isArray(updateData.checkpoints) ||
-        updateData.checkpoints.length === 0
-      ) {
-        return res.status(400).json({
-          error: "checkpoints debe ser un array no vacío",
-        });
-      }
-
-      for (const checkpoint of updateData.checkpoints) {
-        if (!checkpoint.name || !checkpoint.time) {
-          return res.status(400).json({
-            error: "Cada checkpoint debe tener name y time",
-          });
-        }
-      }
-    }
-
     const updatedAssignment =
       await patrolAssignmentService.updateRouteWithCheckpoints(
         assignmentId,
@@ -214,16 +170,14 @@ export const updateRouteWithCheckpoints = async (
       );
 
     return res.status(200).json({
-      message: "Ruta con checkpoints actualizada correctamente",
+      message: "Ruta actualizada correctamente",
       data: updatedAssignment,
     });
   } catch (error) {
-    console.error("Error al actualizar ruta con checkpoints:", error);
+    console.error("Error al actualizar ruta:", error);
     return res.status(500).json({
       error:
-        error instanceof Error
-          ? error.message
-          : "Error al actualizar ruta con checkpoints",
+        error instanceof Error ? error.message : "Error al actualizar ruta",
     });
   }
 };
@@ -239,16 +193,13 @@ export const deleteRouteWithCheckpoints = async (
       await patrolAssignmentService.deleteRouteWithCheckpoints(assignmentId);
 
     return res.status(200).json({
-      message: "Ruta con checkpoints eliminada correctamente",
+      message: "Ruta eliminada correctamente",
       data: deletedAssignment,
     });
   } catch (error) {
-    console.error("Error al eliminar ruta con checkpoints:", error);
+    console.error("Error al eliminar ruta:", error);
     return res.status(500).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Error al eliminar ruta con checkpoints",
+      error: error instanceof Error ? error.message : "Error al eliminar ruta",
     });
   }
 };

@@ -11,9 +11,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Company } from "@entities/company.entity";
-import { Plan } from "@entities/plan.entity";
 import { Incident } from "@entities/incident.entity";
 import { Patrol } from "@entities/patrol.entity";
+import { Checkpoint } from "@entities/checkpoint.entity";
 import { User } from "./user.entity";
 
 @Entity("branches")
@@ -45,6 +45,9 @@ export class Branch {
 
   @OneToMany(() => Patrol, (patrol) => patrol.branch)
   patrols: Patrol[];
+
+  @OneToMany(() => Checkpoint, (checkpoint) => checkpoint.branch)
+  checkpoints: Checkpoint[];
 
   @ManyToMany(() => User, (user) => user.branches)
   guards: User[];

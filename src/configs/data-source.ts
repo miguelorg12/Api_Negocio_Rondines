@@ -9,7 +9,6 @@ import { PatrolAssignment } from "@interfaces/entity/patrol_assigment.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 import { CheckpointRecord } from "@entities/checkpoint_record.entity";
 import { Incident } from "@entities/incident.entity";
-import { Plan } from "@entities/plan.entity";
 import { Shift } from "@entities/shift.entity";
 import { Role } from "@entities/role.entity";
 import { ReportLog } from "@entities/report_log.entity";
@@ -39,7 +38,6 @@ export const AppDataSource = new DataSource({
     Checkpoint,
     CheckpointRecord,
     Incident,
-    Plan,
     Shift,
     Role,
     ReportLog,

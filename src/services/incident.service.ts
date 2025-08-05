@@ -55,11 +55,11 @@ export class IncidentService {
       status: incidentData.status,
       severity: incidentData.severity,
       user: { id: incidentData.user_id },
-      checkpoint: incidentData.checkpoint_id
-        ? { id: incidentData.checkpoint_id }
-        : undefined,
       branch: incidentData.branch_id
         ? { id: incidentData.branch_id }
+        : undefined,
+      checkpoint: incidentData.checkpoint_id
+        ? { id: incidentData.checkpoint_id }
         : undefined,
     });
 
@@ -155,7 +155,7 @@ export class IncidentService {
    */
   async getAllIncidentsWithImages(): Promise<Incident[]> {
     return await this.incidentRepository.find({
-      relations: ["images", "user", "checkpoint", "branch"],
+      relations: ["images", "user", "branch", "checkpoint"],
       order: { created_at: "DESC" },
     });
   }
@@ -186,14 +186,15 @@ export class IncidentService {
     if (updateData.status) incident.status = updateData.status;
     if (updateData.severity) incident.severity = updateData.severity;
 
-    if (updateData.checkpoint_id !== undefined) {
-      incident.checkpoint = updateData.checkpoint_id
-        ? ({ id: updateData.checkpoint_id } as any)
-        : null;
-    }
     if (updateData.branch_id !== undefined) {
       incident.branch = updateData.branch_id
         ? ({ id: updateData.branch_id } as any)
+        : null;
+    }
+
+    if (updateData.checkpoint_id !== undefined) {
+      incident.checkpoint = updateData.checkpoint_id
+        ? ({ id: updateData.checkpoint_id } as any)
         : null;
     }
 
@@ -386,7 +387,7 @@ export class IncidentService {
   async getIncidentsByBranchId(branchId: number): Promise<Incident[]> {
     return await this.incidentRepository.find({
       where: { branch: { id: branchId } },
-      relations: ["images", "user", "checkpoint", "branch"],
+      relations: ["images", "user", "branch"],
       order: { created_at: "DESC" },
       select: {
         id: true,
@@ -429,7 +430,7 @@ export class IncidentService {
         user: { id: userId },
         created_at: LessThan(todayUTC),
       },
-      relations: ["images", "user", "checkpoint", "branch"],
+      relations: ["images", "user", "branch"],
       order: { created_at: "DESC" },
       select: {
         id: true,
@@ -448,10 +449,6 @@ export class IncidentService {
           id: true,
           name: true,
           email: true,
-        },
-        checkpoint: {
-          id: true,
-          name: true,
         },
         branch: {
           id: true,
@@ -495,7 +492,7 @@ export class IncidentService {
         user: { id: userId },
         created_at: MoreThanOrEqual(todayUTC) && LessThan(tomorrowUTC),
       },
-      relations: ["images", "user", "checkpoint", "branch"],
+      relations: ["images", "user", "branch"],
       order: { created_at: "DESC" },
       select: {
         id: true,
@@ -514,10 +511,6 @@ export class IncidentService {
           id: true,
           name: true,
           email: true,
-        },
-        checkpoint: {
-          id: true,
-          name: true,
         },
         branch: {
           id: true,

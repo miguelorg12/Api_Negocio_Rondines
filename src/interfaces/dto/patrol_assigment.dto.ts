@@ -11,10 +11,6 @@ export interface RouteAssignmentWithCheckpointsDto {
   patrol_id: number;
   shift_id: number;
   date: Date;
-  checkpoints: {
-    name: string;
-    time: string; // Format: "HH:MM" or "HH:MM:SS"
-  }[];
 }
 
 export interface UpdateRouteWithCheckpointsDto {
@@ -22,10 +18,6 @@ export interface UpdateRouteWithCheckpointsDto {
   patrol_id?: number;
   shift_id?: number;
   date?: Date;
-  checkpoints?: {
-    name: string;
-    time: string; // Format: "HH:MM" or "HH:MM:SS"
-  }[];
 }
 
 export type PartialPatrolAssignmentDto = Partial<PatrolAssignmentDto>;

@@ -1,9 +1,9 @@
-import { Response, Request } from "express";
+import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { CheckpointService } from "@services/checkpoint.service";
 import {
-  CheckPointDto,
-  PartialCheckPointDto,
+  CheckpointDto,
+  PartialCheckpointDto,
 } from "@interfaces/dto/checkpoint.dto";
 
 const checkpointService = new CheckpointService();
@@ -12,9 +12,36 @@ export const getAllCheckpoints = async (
   _req: Request,
   res: Response
 ): Promise<Response> => {
-  const checkpoints = await checkpointService.findAll();
+  const checkpoints = await checkpointService.getAll();
   return res.status(200).json({
-    message: "Puntos de control obtenidos correctamente",
+    message: "Checkpoints obtenidos correctamente",
+    data: checkpoints,
+  });
+};
+
+export const getCheckpointById = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+  const checkpoint = await checkpointService.getById(parseInt(id));
+  if (!checkpoint) {
+    return res.status(404).json({ message: "Checkpoint no encontrado" });
+  }
+  return res.status(200).json({
+    message: "Checkpoint obtenido correctamente",
+    data: checkpoint,
+  });
+};
+
+export const getCheckpointsByBranchId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { branchId } = req.params;
+  const checkpoints = await checkpointService.getByBranchId(parseInt(branchId));
+  return res.status(200).json({
+    message: "Checkpoints obtenidos correctamente",
     data: checkpoints,
   });
 };
@@ -30,26 +57,13 @@ export const createCheckpoint = async (
       errors: errors.array(),
     });
   }
-  const checkpointData: CheckPointDto = req.body;
+
+  const checkpointData: CheckpointDto = req.body;
   const newCheckpoint = await checkpointService.create(checkpointData);
   return res.status(201).json({
-    message: "Punto de control creado correctamente",
+    message: "Checkpoint creado correctamente",
     data: newCheckpoint,
   });
-};
-
-export const getCheckpointById = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const checkpointId = parseInt(req.params.id);
-  const checkpoint = await checkpointService.findById(checkpointId);
-  if (!checkpoint) {
-    return res.status(404).json({ message: "Punto de control no encontrado" });
-  }
-  return res
-    .status(200)
-    .json({ message: "Punto de control encontrado", data: checkpoint });
 };
 
 export const updateCheckpoint = async (
@@ -63,17 +77,18 @@ export const updateCheckpoint = async (
       errors: errors.array(),
     });
   }
-  const checkpointId = parseInt(req.params.id);
-  const checkpointData: PartialCheckPointDto = req.body;
+
+  const { id } = req.params;
+  const checkpointData: PartialCheckpointDto = req.body;
   const updatedCheckpoint = await checkpointService.update(
-    checkpointId,
+    parseInt(id),
     checkpointData
   );
   if (!updatedCheckpoint) {
-    return res.status(404).json({ message: "Punto de control no encontrado" });
+    return res.status(404).json({ message: "Checkpoint no encontrado" });
   }
   return res.status(200).json({
-    message: "Punto de control actualizado correctamente",
+    message: "Checkpoint actualizado correctamente",
     data: updatedCheckpoint,
   });
 };
@@ -82,13 +97,13 @@ export const deleteCheckpoint = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const checkpointId = parseInt(req.params.id);
-  const deletedCheckpoint = await checkpointService.delete(checkpointId);
+  const { id } = req.params;
+  const deletedCheckpoint = await checkpointService.delete(parseInt(id));
   if (!deletedCheckpoint) {
-    return res.status(404).json({ message: "Punto de control no encontrado" });
+    return res.status(404).json({ message: "Checkpoint no encontrado" });
   }
   return res.status(200).json({
-    message: "Punto de control eliminado correctamente",
+    message: "Checkpoint eliminado correctamente",
     data: deletedCheckpoint,
   });
 };

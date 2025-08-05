@@ -1,65 +1,47 @@
 import { body } from "express-validator";
 import { AppDataSource } from "@configs/data-source";
-import { Branch } from "@interfaces/entity/branch.entity";
+import { Branch } from "@entities/branch.entity";
 
-export const createCheckpointValidator = [
+export const CheckpointValidator = [
   body("name")
-    .notEmpty()
-    .withMessage("El nombre del checkpoint es obligatorio"),
+    .exists()
+    .withMessage("El nombre del checkpoint es requerido")
+    .bail()
+    .isLength({ min: 1, max: 255 })
+    .withMessage("El nombre debe tener entre 1 y 255 caracteres"),
   body("branch_id")
+    .exists()
+    .withMessage("El ID de la sucursal es requerido")
+    .bail()
     .isInt()
-    .withMessage("El ID de la sucursal debe ser un número")
-    .custom(async (branchId: number) => {
-      const branchRepo = AppDataSource.getRepository(Branch);
-      const branch = await branchRepo.findOne({ where: { id: branchId } });
+    .withMessage("El ID de la sucursal debe ser un número entero")
+    .custom(async (value) => {
+      const branchRepository = AppDataSource.getRepository(Branch);
+      const branch = await branchRepository.findOne({ where: { id: value } });
       if (!branch) {
-        throw new Error("La sucursal especificada no existe");
+        throw new Error("Sucursal no encontrada");
       }
       return true;
     }),
-  body("nfc_uid")
-    .optional()
-    .isString()
-    .withMessage("El UID NFC debe ser una cadena de texto"),
-  body("x")
-    .notEmpty()
-    .withMessage("La coordenada X es obligatoria")
-    .isNumeric()
-    .withMessage("La coordenada X debe ser un número"),
-  body("y")
-    .notEmpty()
-    .withMessage("La coordenada Y es obligatoria")
-    .isNumeric()
-    .withMessage("La coordenada Y debe ser un número"),
 ];
 
-export const updateCheckpointValidator = [
+export const CheckpointUpdateValidator = [
   body("name")
     .optional()
-    .notEmpty()
-    .withMessage("El nombre del checkpoint es obligatorio"),
+    .isLength({ min: 1, max: 255 })
+    .withMessage("El nombre debe tener entre 1 y 255 caracteres"),
   body("branch_id")
     .optional()
     .isInt()
-    .withMessage("El ID de la sucursal debe ser un número")
-    .custom(async (branchId: number) => {
-      const branchRepo = AppDataSource.getRepository(Branch);
-      const branch = await branchRepo.findOne({ where: { id: branchId } });
-      if (!branch) {
-        throw new Error("La sucursal especificada no existe");
+    .withMessage("El ID de la sucursal debe ser un número entero")
+    .custom(async (value) => {
+      if (value) {
+        const branchRepository = AppDataSource.getRepository(Branch);
+        const branch = await branchRepository.findOne({ where: { id: value } });
+        if (!branch) {
+          throw new Error("Sucursal no encontrada");
+        }
       }
       return true;
     }),
-  body("nfc_uid")
-    .optional()
-    .isString()
-    .withMessage("El UID NFC debe ser una cadena de texto"),
-  body("x")
-    .optional()
-    .isNumeric()
-    .withMessage("La coordenada X debe ser un número"),
-  body("y")
-    .optional()
-    .isNumeric()
-    .withMessage("La coordenada Y debe ser un número"),
 ];

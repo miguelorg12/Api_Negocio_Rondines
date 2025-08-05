@@ -1,45 +1,70 @@
 import { AppDataSource } from "@configs/data-source";
+import { Checkpoint } from "@entities/checkpoint.entity";
 import {
-  CheckPointDto,
-  PartialCheckPointDto,
+  CheckpointDto,
+  PartialCheckpointDto,
 } from "@interfaces/dto/checkpoint.dto";
-import { Checkpoint } from "@interfaces/entity/checkpoint.entity";
+import { Repository } from "typeorm";
 
 export class CheckpointService {
-  private checkpointRepository = AppDataSource.getRepository(Checkpoint);
+  private checkpointRepository: Repository<Checkpoint>;
 
-  async findAll(): Promise<Checkpoint[]> {
-    return await this.checkpointRepository.find();
+  constructor() {
+    this.checkpointRepository = AppDataSource.getRepository(Checkpoint);
   }
 
-  async create(checkpoint: CheckPointDto): Promise<Checkpoint> {
+  async create(checkpointDto: CheckpointDto): Promise<Checkpoint> {
+    const checkpoint = this.checkpointRepository.create({
+      name: checkpointDto.name,
+      branch: { id: checkpointDto.branch_id },
+    });
     return await this.checkpointRepository.save(checkpoint);
   }
 
-  async findById(id: number): Promise<Checkpoint | null> {
+  async getAll(): Promise<Checkpoint[]> {
+    return await this.checkpointRepository.find({
+      relations: ["branch"],
+    });
+  }
+
+  async getById(id: number): Promise<Checkpoint | null> {
     return await this.checkpointRepository.findOne({
       where: { id },
+      relations: ["branch"],
+    });
+  }
+
+  async getByBranchId(branchId: number): Promise<Checkpoint[]> {
+    return await this.checkpointRepository.find({
+      where: { branch: { id: branchId } },
+      relations: ["branch"],
     });
   }
 
   async update(
     id: number,
-    checkpointData: PartialCheckPointDto
+    checkpointDto: PartialCheckpointDto
   ): Promise<Checkpoint | null> {
-    const checkpoint = await this.findById(id);
+    const checkpoint = await this.getById(id);
     if (!checkpoint) {
       throw new Error("Checkpoint no encontrado");
     }
-    await this.checkpointRepository.update(id, checkpointData);
-    return this.findById(id);
+
+    const updateData: any = {};
+    if (checkpointDto.name) updateData.name = checkpointDto.name;
+    if (checkpointDto.branch_id)
+      updateData.branch = { id: checkpointDto.branch_id };
+
+    await this.checkpointRepository.update(id, updateData);
+    return await this.getById(id);
   }
 
   async delete(id: number): Promise<Checkpoint | null> {
-    const checkpoint = await this.findById(id);
+    const checkpoint = await this.getById(id);
     if (!checkpoint) {
       throw new Error("Checkpoint no encontrado");
     }
-    await this.checkpointRepository.softDelete({ id });
+    await this.checkpointRepository.softDelete(id);
     return checkpoint;
   }
 }
