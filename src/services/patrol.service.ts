@@ -58,6 +58,9 @@ export class PatrolService {
         patrolAssignments: {
           shift: true,
         },
+        routePoints: {
+          checkpoint: true,
+        },
       },
       select: {
         id: true,
@@ -72,6 +75,19 @@ export class PatrolService {
             start_time: true,
             end_time: true,
             created_at: true,
+          },
+        },
+        routePoints: {
+          id: true,
+          latitude: true,
+          longitude: true,
+          order: true,
+          google_place_id: true,
+          address: true,
+          formatted_address: true,
+          checkpoint: {
+            id: true,
+            name: true,
           },
         },
       },
