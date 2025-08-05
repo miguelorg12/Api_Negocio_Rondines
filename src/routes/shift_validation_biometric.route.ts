@@ -6,22 +6,38 @@ import {
   getShiftValidationBiometricStatus,
   cancelShiftValidationBiometric,
 } from "../controllers/shift_validation_biometric.controller";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 // Ruta para iniciar validación biométrica
-router.post("/start", startShiftValidationBiometric);
+router.post("/start", authenticateToken, startShiftValidationBiometric);
 
 // Ruta para completar validación biométrica
-router.post("/complete/:sessionId", completeShiftValidationBiometric);
+router.post(
+  "/complete/:sessionId",
+  authenticateToken,
+  completeShiftValidationBiometric
+);
 
 // Ruta para stream de eventos biométricos
-router.get("/stream/:sessionId", streamShiftValidationBiometric);
+router.get(
+  "/stream/:sessionId",
+  authenticateToken,
+  streamShiftValidationBiometric
+);
 
 // Ruta para obtener estado de sesión
-router.get("/status/:sessionId", getShiftValidationBiometricStatus);
+router.get(
+  "/status/:sessionId",
+  authenticateToken,
+  getShiftValidationBiometricStatus
+);
 
 // Ruta para cancelar validación
-router.post("/cancel/:sessionId", cancelShiftValidationBiometric);
+router.post(
+  "/cancel/:sessionId",
+  authenticateToken,
+  cancelShiftValidationBiometric
+);
 
 export default router;

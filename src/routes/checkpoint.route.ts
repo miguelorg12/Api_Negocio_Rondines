@@ -11,7 +11,7 @@ import {
   CheckpointValidator,
   CheckpointUpdateValidator,
 } from "@utils/validators/checkpoint.validator";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -39,7 +39,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", getAllCheckpoints);
+router.get("/", authenticateToken, getAllCheckpoints);
 
 /**
  * @swagger
@@ -73,7 +73,7 @@ router.get("/", getAllCheckpoints);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", getCheckpointById);
+router.get("/:id", authenticateToken, getCheckpointById);
 
 /**
  * @swagger
@@ -107,7 +107,7 @@ router.get("/:id", getCheckpointById);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/branch/:branchId", getCheckpointsByBranchId);
+router.get("/branch/:branchId", authenticateToken, getCheckpointsByBranchId);
 
 /**
  * @swagger
@@ -156,7 +156,7 @@ router.get("/branch/:branchId", getCheckpointsByBranchId);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", CheckpointValidator, createCheckpoint);
+router.post("/", authenticateToken, CheckpointValidator, createCheckpoint);
 
 /**
  * @swagger
@@ -211,7 +211,12 @@ router.post("/", CheckpointValidator, createCheckpoint);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", CheckpointUpdateValidator, updateCheckpoint);
+router.put(
+  "/:id",
+  authenticateToken,
+  CheckpointUpdateValidator,
+  updateCheckpoint
+);
 
 /**
  * @swagger
@@ -245,6 +250,6 @@ router.put("/:id", CheckpointUpdateValidator, updateCheckpoint);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", deleteCheckpoint);
+router.delete("/:id", authenticateToken, deleteCheckpoint);
 
 export default router;

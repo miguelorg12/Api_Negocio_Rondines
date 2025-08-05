@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as shiftValidationController from "../controllers/shift_validation.controller";
 import { shiftValidationValidator } from "../utils/validators/shift_validation.validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -41,6 +42,7 @@ const router = Router();
  */
 router.post(
   "/",
+  authenticateToken,
   shiftValidationValidator,
   shiftValidationController.validateShift
 );

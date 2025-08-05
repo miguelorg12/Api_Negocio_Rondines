@@ -11,6 +11,7 @@ import {
   getCurrentPatrolRecord,
 } from "@controllers/patrol_record.controller";
 import { validationResult } from "express-validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ const validateRequest = (
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", getAllPatrolRecords);
+router.get("/", authenticateToken, getAllPatrolRecords);
 
 /**
  * @swagger
@@ -104,7 +105,7 @@ router.get("/", getAllPatrolRecords);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createPatrolRecord);
+router.post("/", authenticateToken, createPatrolRecord);
 
 /**
  * @swagger
@@ -136,7 +137,7 @@ router.post("/", createPatrolRecord);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", getPatrolRecordById);
+router.get("/:id", authenticateToken, getPatrolRecordById);
 
 /**
  * @swagger
@@ -187,7 +188,7 @@ router.get("/:id", getPatrolRecordById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updatePatrolRecord);
+router.put("/:id", authenticateToken, updatePatrolRecord);
 
 /**
  * @swagger
@@ -219,7 +220,7 @@ router.put("/:id", updatePatrolRecord);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", deletePatrolRecord);
+router.delete("/:id", authenticateToken, deletePatrolRecord);
 
 /**
  * @swagger
@@ -255,7 +256,7 @@ router.delete("/:id", deletePatrolRecord);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/completed/:user_id", getCompletedPatrolRecords);
+router.get("/completed/:user_id", authenticateToken, getCompletedPatrolRecords);
 
 /**
  * @swagger
@@ -291,7 +292,7 @@ router.get("/completed/:user_id", getCompletedPatrolRecords);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/pending/:user_id", getPendingPatrolRecords);
+router.get("/pending/:user_id", authenticateToken, getPendingPatrolRecords);
 
 /**
  * @swagger
@@ -327,7 +328,11 @@ router.get("/pending/:user_id", getPendingPatrolRecords);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/in-progress/:user_id", getInProgressPatrolRecords);
+router.get(
+  "/in-progress/:user_id",
+  authenticateToken,
+  getInProgressPatrolRecords
+);
 
 /**
  * @swagger
@@ -446,6 +451,6 @@ router.get("/in-progress/:user_id", getInProgressPatrolRecords);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/current/:user_id", getCurrentPatrolRecord);
+router.get("/current/:user_id", authenticateToken, getCurrentPatrolRecord);
 
 export default router;

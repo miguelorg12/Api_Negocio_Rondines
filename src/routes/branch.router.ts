@@ -4,6 +4,7 @@ import {
   createBranchValidator,
   updateBranchValidator,
 } from "../utils/validators/branch.validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -31,7 +32,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", branchController.getAllBranches);
+router.get("/", authenticateToken, branchController.getAllBranches);
 
 /**
  * @swagger
@@ -76,7 +77,12 @@ router.get("/", branchController.getAllBranches);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createBranchValidator, branchController.createBranch);
+router.post(
+  "/",
+  authenticateToken,
+  createBranchValidator,
+  branchController.createBranch
+);
 
 /**
  * @swagger
@@ -118,7 +124,7 @@ router.post("/", createBranchValidator, branchController.createBranch);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", branchController.getBranchById);
+router.get("/:id", authenticateToken, branchController.getBranchById);
 
 /**
  * @swagger
@@ -180,7 +186,12 @@ router.get("/:id", branchController.getBranchById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateBranchValidator, branchController.updateBranch);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateBranchValidator,
+  branchController.updateBranch
+);
 
 /**
  * @swagger
@@ -222,6 +233,6 @@ router.put("/:id", updateBranchValidator, branchController.updateBranch);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", branchController.deleteBranch);
+router.delete("/:id", authenticateToken, branchController.deleteBranch);
 
 export default router;

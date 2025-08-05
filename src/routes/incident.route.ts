@@ -3,6 +3,7 @@ import multer from "multer";
 import { IncidentController } from "@controllers/incident.controller";
 import { createIncidentValidator } from "@utils/validators/incident.validator";
 import { validationResult } from "express-validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = express.Router();
 const controller = new IncidentController();
@@ -129,7 +130,7 @@ router.post(
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", controller.getAllIncidents.bind(controller));
+router.get("/", authenticateToken, controller.getAllIncidents.bind(controller));
 
 /**
  * @swagger
@@ -159,7 +160,11 @@ router.get("/", controller.getAllIncidents.bind(controller));
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", controller.getIncidentById.bind(controller));
+router.get(
+  "/:id",
+  authenticateToken,
+  controller.getIncidentById.bind(controller)
+);
 
 /**
  * @swagger
@@ -240,7 +245,11 @@ router.put("/:id", controller.updateIncident.bind(controller));
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", controller.deleteIncident.bind(controller));
+router.delete(
+  "/:id",
+  authenticateToken,
+  controller.deleteIncident.bind(controller)
+);
 
 /**
  * @swagger
@@ -294,6 +303,7 @@ router.delete("/:id", controller.deleteIncident.bind(controller));
 router.post(
   "/:id/images",
   upload.array("images", 3),
+  authenticateToken,
   controller.addImagesToIncident.bind(controller)
 );
 
@@ -327,6 +337,7 @@ router.post(
  */
 router.delete(
   "/images/:imageId",
+  authenticateToken,
   controller.deleteIncidentImage.bind(controller)
 );
 
@@ -374,7 +385,11 @@ router.delete(
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/:id/upload-url", controller.generateUploadUrl.bind(controller));
+router.post(
+  "/:id/upload-url",
+  authenticateToken,
+  controller.generateUploadUrl.bind(controller)
+);
 
 /**
  * @swagger
@@ -433,6 +448,7 @@ router.post("/:id/upload-url", controller.generateUploadUrl.bind(controller));
  */
 router.get(
   "/stats/by-company",
+  authenticateToken,
   controller.getIncidentStatsByCompany.bind(controller)
 );
 
@@ -493,6 +509,7 @@ router.get(
  */
 router.get(
   "/stats/by-branch",
+  authenticateToken,
   controller.getIncidentStatsByBranch.bind(controller)
 );
 
@@ -564,6 +581,7 @@ router.get(
  */
 router.get(
   "/stats/general",
+  authenticateToken,
   controller.getGeneralIncidentStats.bind(controller)
 );
 
@@ -599,6 +617,7 @@ router.get(
  */
 router.get(
   "/branch/:branchId",
+  authenticateToken,
   controller.getIncidentsByBranchId.bind(controller)
 );
 
@@ -638,6 +657,7 @@ router.get(
  */
 router.get(
   "/user/:userId/previous",
+  authenticateToken,
   controller.getPreviousIncidentsByUserId.bind(controller)
 );
 
@@ -677,6 +697,8 @@ router.get(
  */
 router.get(
   "/user/:userId/today",
+  authenticateToken,
+
   controller.getTodayIncidentsByUserId.bind(controller)
 );
 

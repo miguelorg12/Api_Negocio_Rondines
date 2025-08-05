@@ -4,7 +4,7 @@ import {
   createUserValidator,
   updateUserValidator,
 } from "../utils/validators/user.validator";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -32,7 +32,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", userController.getAllUsers);
+router.get("/", authenticateToken, userController.getAllUsers);
 
 /**
  * @swagger
@@ -59,7 +59,11 @@ router.get("/", userController.getAllUsers);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/specific-roles", userController.getUsersBySpecificRoles);
+router.get(
+  "/specific-roles",
+  authenticateToken,
+  userController.getUsersBySpecificRoles
+);
 
 /**
  * @swagger
@@ -101,7 +105,7 @@ router.get("/specific-roles", userController.getUsersBySpecificRoles);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", userController.getUserById);
+router.get("/:id", authenticateToken, userController.getUserById);
 
 /**
  * @swagger
@@ -138,7 +142,12 @@ router.get("/:id", userController.getUserById);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createUserValidator, userController.createUser);
+router.post(
+  "/",
+  authenticateToken,
+  createUserValidator,
+  userController.createUser
+);
 
 /**
  * @swagger
@@ -217,7 +226,12 @@ router.post("/", createUserValidator, userController.createUser);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateUserValidator, userController.updateUser);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateUserValidator,
+  userController.updateUser
+);
 
 /**
  * @swagger
@@ -259,11 +273,19 @@ router.put("/:id", updateUserValidator, userController.updateUser);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", userController.deleteUser);
+router.delete("/:id", authenticateToken, userController.deleteUser);
 // Guardar ID biométrico
-router.post("/:id/biometric", userController.saveBiometricId);
+router.post(
+  "/:id/biometric",
+  authenticateToken,
+  userController.saveBiometricId
+);
 
 // Verificar ID biométrico
-router.post("/verify-biometric", userController.verifyBiometric);
+router.post(
+  "/verify-biometric",
+  authenticateToken,
+  userController.verifyBiometric
+);
 
 export default router;

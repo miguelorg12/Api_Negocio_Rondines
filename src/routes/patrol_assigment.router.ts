@@ -5,7 +5,7 @@ import {
   UpdateRouteWithCheckpointsValidator,
 } from "@utils/validators/patrol_assigment.validator";
 import * as PatrolAssignmentController from "@controllers/patrol_assigment.controller";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -33,7 +33,11 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", PatrolAssignmentController.getAllPatrolAssignments);
+router.get(
+  "/",
+  authenticateToken,
+  PatrolAssignmentController.getAllPatrolAssignments
+);
 
 /**
  * @swagger
@@ -116,7 +120,11 @@ router.post(
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", PatrolAssignmentController.getPatrolAssignmentById);
+router.get(
+  "/:id",
+  authenticateToken,
+  PatrolAssignmentController.getPatrolAssignmentById
+);
 
 /**
  * @swagger
@@ -230,7 +238,11 @@ router.put(
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", PatrolAssignmentController.deletePatrolAssignment);
+router.delete(
+  "/:id",
+  authenticateToken,
+  PatrolAssignmentController.deletePatrolAssignment
+);
 
 /**
  * @swagger
@@ -346,6 +358,7 @@ router.put(
  */
 router.delete(
   "/:id/route-with-checkpoints",
+  authenticateToken,
   PatrolAssignmentController.deleteRouteWithCheckpoints
 );
 

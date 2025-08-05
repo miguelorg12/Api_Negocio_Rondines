@@ -4,7 +4,7 @@ import {
   createCompanyValidator,
   updateCompanyValidator,
 } from "../utils/validators/company.validator";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -32,7 +32,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", companyController.getAllCompanies);
+router.get("/", authenticateToken, companyController.getAllCompanies);
 
 /**
  * @swagger
@@ -69,7 +69,12 @@ router.get("/", companyController.getAllCompanies);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createCompanyValidator, companyController.createCompany);
+router.post(
+  "/",
+  authenticateToken,
+  createCompanyValidator,
+  companyController.createCompany
+);
 
 /**
  * @swagger
@@ -111,7 +116,7 @@ router.post("/", createCompanyValidator, companyController.createCompany);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", companyController.getCompanyById);
+router.get("/:id", authenticateToken, companyController.getCompanyById);
 
 /**
  * @swagger
@@ -175,7 +180,12 @@ router.get("/:id", companyController.getCompanyById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateCompanyValidator, companyController.updateCompany);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateCompanyValidator,
+  companyController.updateCompany
+);
 
 /**
  * @swagger
@@ -217,6 +227,6 @@ router.put("/:id", updateCompanyValidator, companyController.updateCompany);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", companyController.deleteCompany);
+router.delete("/:id", authenticateToken, companyController.deleteCompany);
 
 export default router;

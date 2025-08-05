@@ -4,7 +4,7 @@ import {
   createShiftValidator,
   updateShiftValidator,
 } from "../utils/validators/shift.validator";
-
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 /**
@@ -32,7 +32,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", shiftController.getAllShifts);
+router.get("/", authenticateToken, shiftController.getAllShifts);
 
 /**
  * @swagger
@@ -86,7 +86,12 @@ router.get("/", shiftController.getAllShifts);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createShiftValidator, shiftController.createShift);
+router.post(
+  "/",
+  authenticateToken,
+  createShiftValidator,
+  shiftController.createShift
+);
 
 /**
  * @swagger
@@ -128,7 +133,7 @@ router.post("/", createShiftValidator, shiftController.createShift);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", shiftController.getShiftById);
+router.get("/:id", authenticateToken, shiftController.getShiftById);
 
 /**
  * @swagger
@@ -195,7 +200,12 @@ router.get("/:id", shiftController.getShiftById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateShiftValidator, shiftController.updateShift);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateShiftValidator,
+  shiftController.updateShift
+);
 
 /**
  * @swagger
@@ -237,6 +247,6 @@ router.put("/:id", updateShiftValidator, shiftController.updateShift);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", shiftController.deleteShift);
+router.delete("/:id", authenticateToken, shiftController.deleteShift);
 
 export default router;

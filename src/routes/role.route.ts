@@ -4,6 +4,7 @@ import {
   createRoleValidator,
   updateRoleValidator,
 } from "../utils/validators/role.validator";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -32,7 +33,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", roleController.getAllRoles);
+router.get("/", authenticateToken, roleController.getAllRoles);
 
 /**
  * @swagger
@@ -75,7 +76,12 @@ router.get("/", roleController.getAllRoles);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createRoleValidator, roleController.createRole);
+router.post(
+  "/",
+  authenticateToken,
+  createRoleValidator,
+  roleController.createRole
+);
 
 /**
  * @swagger
@@ -117,7 +123,7 @@ router.post("/", createRoleValidator, roleController.createRole);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", roleController.getRoleById);
+router.get("/:id", authenticateToken, roleController.getRoleById);
 
 /**
  * @swagger
@@ -175,7 +181,12 @@ router.get("/:id", roleController.getRoleById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateRoleValidator, roleController.updateRole);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateRoleValidator,
+  roleController.updateRole
+);
 
 /**
  * @swagger
@@ -217,6 +228,6 @@ router.put("/:id", updateRoleValidator, roleController.updateRole);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", roleController.deleteRole);
+router.delete("/:id", authenticateToken, roleController.deleteRole);
 
 export default router;

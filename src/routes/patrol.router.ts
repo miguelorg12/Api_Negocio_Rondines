@@ -19,10 +19,11 @@ import {
   createPatrolWithRoutePoints,
   updatePatrolWithRoutePoints,
 } from "@controllers/patrol.controller";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get("/branch/:id", getPatrolsByBranchId);
+router.get("/branch/:id", authenticateToken, getPatrolsByBranchId);
 
 /**
  * @swagger
@@ -56,7 +57,11 @@ router.get("/branch/:id", getPatrolsByBranchId);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/branch/:id/available", getAvailablePatrolsByBranchId);
+router.get(
+  "/branch/:id/available",
+  authenticateToken,
+  getAvailablePatrolsByBranchId
+);
 
 /**
  * @swagger
@@ -83,7 +88,7 @@ router.get("/branch/:id/available", getAvailablePatrolsByBranchId);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/", getAllPatrols);
+router.get("/", authenticateToken, getAllPatrols);
 
 /**
  * @swagger
@@ -117,7 +122,7 @@ router.get("/", getAllPatrols);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", getPatrolById);
+router.get("/:id", authenticateToken, getPatrolById);
 
 /**
  * @swagger
@@ -211,6 +216,7 @@ router.get("/:id", getPatrolById);
  */
 router.post(
   "/",
+  authenticateToken,
   createPatrolWithRoutePointsValidator,
   createPatrolWithRoutePoints
 );
@@ -275,6 +281,7 @@ router.post(
  */
 router.post(
   "/create-and-assign",
+  authenticateToken,
   createPatrolValidator,
   createPatrolAndAssigment
 );
@@ -366,6 +373,7 @@ router.post(
  */
 router.put(
   "/:id",
+  authenticateToken,
   updatePatrolWithRoutePointsValidator,
   updatePatrolWithRoutePoints
 );
@@ -410,6 +418,6 @@ router.put(
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", deletePatrol);
+router.delete("/:id", authenticateToken, deletePatrol);
 
 export default router;

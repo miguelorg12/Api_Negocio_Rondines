@@ -40,7 +40,11 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/branch/:branchId", guardController.getGuardsByBranch);
+router.get(
+  "/branch/:branchId",
+  authenticateToken,
+  guardController.getGuardsByBranch
+);
 
 /**
  * @swagger
@@ -84,7 +88,11 @@ router.get("/branch/:branchId", guardController.getGuardsByBranch);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/patrols/assigned/:id", guardController.patrolsAssignedToGuard);
+router.get(
+  "/patrols/assigned/:id",
+  authenticateToken,
+  guardController.patrolsAssignedToGuard
+);
 
 /**
  * @swagger
@@ -175,7 +183,7 @@ router.get("/", authenticateToken, guardController.getAllGuards);
  *       500:
  *         description: Error interno del servidor
  */
-router.get("/:id", guardController.getGuardById);
+router.get("/:id", authenticateToken, guardController.getGuardById);
 
 /**
  * @swagger
@@ -212,7 +220,12 @@ router.get("/:id", guardController.getGuardById);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createGuardsValidator, guardController.createGuard);
+router.post(
+  "/",
+  authenticateToken,
+  createGuardsValidator,
+  guardController.createGuard
+);
 
 /**
  * @swagger
@@ -294,7 +307,12 @@ router.post("/", createGuardsValidator, guardController.createGuard);
  *       500:
  *         description: Error interno del servidor
  */
-router.put("/:id", updateGuardValidator, guardController.updateGuard);
+router.put(
+  "/:id",
+  authenticateToken,
+  updateGuardValidator,
+  guardController.updateGuard
+);
 
 /**
  * @swagger
@@ -336,6 +354,6 @@ router.put("/:id", updateGuardValidator, guardController.updateGuard);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete("/:id", guardController.deleteGuard);
+router.delete("/:id", authenticateToken, guardController.deleteGuard);
 
 export default router;
