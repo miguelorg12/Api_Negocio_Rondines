@@ -283,65 +283,6 @@ router.post(
  * @swagger
  * /patrols/{id}:
  *   put:
- *     summary: Actualizar patrulla
- *     tags: [Patrullas]
- *     description: Actualiza una patrulla existente
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID de la patrulla a actualizar
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 enum: [ronda_matutina, ronda_vespertina, ronda_nocturna]
- *                 description: Tipo de ronda
- *               branch_id:
- *                 type: integer
- *                 description: ID de la sucursal
- *               active:
- *                 type: boolean
- *                 description: Estado activo de la patrulla
- *     responses:
- *       200:
- *         description: Patrulla actualizada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Ronda actualizada correctamente"
- *                 data:
- *                   $ref: '#/components/schemas/Patrol'
- *       400:
- *         description: Error de validación
- *       404:
- *         description: Patrulla no encontrada
- *       422:
- *         description: Error de validación
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ValidationErrorResponse'
- *       500:
- *         description: Error interno del servidor
- */
-router.put("/:id", updatePatrolValidator, updatePatrol);
-
-/**
- * @swagger
- * /patrols/{id}/with-route-points:
- *   put:
  *     summary: Actualizar patrulla con puntos de ruta
  *     tags: [Patrullas]
  *     description: Actualiza una patrulla existente incluyendo todos sus puntos de ruta
@@ -424,7 +365,7 @@ router.put("/:id", updatePatrolValidator, updatePatrol);
  *         description: Error interno del servidor
  */
 router.put(
-  "/:id/with-route-points",
+  "/:id",
   updatePatrolWithRoutePointsValidator,
   updatePatrolWithRoutePoints
 );

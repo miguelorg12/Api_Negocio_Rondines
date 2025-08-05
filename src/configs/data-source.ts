@@ -19,6 +19,7 @@ import { OauthClientsEntity } from "@entities/oauth_clients.entity";
 import { Code } from "@entities/code.entity";
 import { IncidentImage } from "@interfaces/entity/incident_image.entity";
 import { PatrolRoutePoint } from "@entities/patrol_route_point.entity";
+import { Session } from "@interfaces/entity/session.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -49,6 +50,7 @@ export const AppDataSource = new DataSource({
     Code,
     IncidentImage,
     PatrolRoutePoint,
+    Session,
   ],
   subscribers: [],
   migrations: [__dirname + "/../utils/migrations/*.{ts,js}"],
