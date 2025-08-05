@@ -3,6 +3,7 @@ import {
   createPatrolValidator,
   updatePatrolValidator,
 } from "@utils/validators/patrol.validator";
+import { createPatrolWithRoutePointsValidator } from "@utils/validators/patrol_route_point.validator";
 import {
   getAllPatrols,
   createPatrol,
@@ -12,6 +13,7 @@ import {
   createPatrolAndAssigment,
   getPatrolsByBranchId,
   getAvailablePatrolsByBranchId,
+  createPatrolWithRoutePoints,
 } from "@controllers/patrol.controller";
 
 const router = Router();
@@ -117,9 +119,9 @@ router.get("/:id", getPatrolById);
  * @swagger
  * /patrols:
  *   post:
- *     summary: Crear una nueva patrulla
+ *     summary: Crear patrulla con puntos de ruta
  *     tags: [Patrullas]
- *     description: Crea una nueva patrulla en el sistema
+ *     description: Crea una nueva patrulla con sus puntos de ruta asociados
  *     requestBody:
  *       required: true
  *       content:
@@ -129,6 +131,7 @@ router.get("/:id", getPatrolById);
  *             required:
  *               - name
  *               - branch_id
+ *               - route_points
  *             properties:
  *               name:
  *                 type: string
@@ -141,9 +144,46 @@ router.get("/:id", getPatrolById);
  *                 type: boolean
  *                 default: true
  *                 description: Estado activo de la patrulla
+ *               route_points:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - latitude
+ *                     - longitude
+ *                     - order
+ *                     - checkpoint_id
+ *                   properties:
+ *                     latitude:
+ *                       type: number
+ *                       minimum: -90
+ *                       maximum: 90
+ *                       description: Latitud del punto
+ *                     longitude:
+ *                       type: number
+ *                       minimum: -180
+ *                       maximum: 180
+ *                       description: Longitud del punto
+ *                     order:
+ *                       type: integer
+ *                       minimum: 1
+ *                       description: Orden del punto en la ruta
+ *                     checkpoint_id:
+ *                       type: integer
+ *                       description: ID del checkpoint asociado
+ *                     google_place_id:
+ *                       type: string
+ *                       description: ID del lugar en Google Maps (opcional)
+ *                     address:
+ *                       type: string
+ *                       description: Dirección del punto (opcional)
+ *                     formatted_address:
+ *                       type: string
+ *                       description: Dirección formateada por Google Maps (opcional)
  *     responses:
  *       201:
- *         description: Patrulla creada exitosamente
+ *         description: Patrulla creada con puntos de ruta exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -151,7 +191,7 @@ router.get("/:id", getPatrolById);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Ronda creada correctamente"
+ *                   example: "Ronda creada con puntos de ruta correctamente"
  *                 data:
  *                   $ref: '#/components/schemas/Patrol'
  *       400:
@@ -165,7 +205,11 @@ router.get("/:id", getPatrolById);
  *       500:
  *         description: Error interno del servidor
  */
-router.post("/", createPatrolValidator, createPatrol);
+router.post(
+  "/",
+  createPatrolWithRoutePointsValidator,
+  createPatrolWithRoutePoints
+);
 
 //this route is for creating a patrol and assigning it to a user
 //it uses the createPatrolAndAssigment function from the controller

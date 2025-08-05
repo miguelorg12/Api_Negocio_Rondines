@@ -6,6 +6,7 @@ import {
   PartialPatrolDto,
   PatrolAssigmentDto,
 } from "@interfaces/dto/patrol.dto";
+import { CreatePatrolWithRoutePointsDto } from "@interfaces/dto/patrol_route_point.dto";
 
 const patrolService = new PatrolService();
 
@@ -133,5 +134,26 @@ export const getAvailablePatrolsByBranchId = async (
   return res.status(200).json({
     message: "Rondas disponibles obtenidas correctamente",
     data: patrols,
+  });
+};
+
+export const createPatrolWithRoutePoints = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      message: "Error en la validación de datos",
+      errors: errors.array(),
+    });
+  }
+  
+  const patrolData: CreatePatrolWithRoutePointsDto = req.body;
+  const newPatrol = await patrolService.createPatrolWithRoutePoints(patrolData);
+  
+  return res.status(201).json({
+    message: "Ronda creada con puntos de ruta correctamente",
+    data: newPatrol,
   });
 };

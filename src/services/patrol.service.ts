@@ -136,13 +136,12 @@ export class PatrolService {
     createPatrolDto: CreatePatrolWithRoutePointsDto
   ): Promise<Patrol> {
     // 1. Crear el patrol primero
-    const patrolData = {
+
+    let patrol = this.patrolRepository.create({
       name: createPatrolDto.name,
       active: createPatrolDto.active,
-      branch_id: createPatrolDto.branch_id,
-    };
-
-    let patrol = this.patrolRepository.create(patrolData);
+      branch: { id: createPatrolDto.branch_id },
+    });
     patrol = await this.patrolRepository.save(patrol);
 
     // 2. Crear los puntos de ruta asociados al patrol creado
@@ -157,8 +156,8 @@ export class PatrolService {
         google_place_id: point.google_place_id,
         address: point.address,
         formatted_address: point.formatted_address,
-        patrol_id: patrol.id,
-        checkpoint_id: point.checkpoint_id,
+        patrol: { id: patrol.id },
+        checkpoint: { id: point.checkpoint_id },
       }));
 
       await this.patrolRoutePointRepository.save(routePointsToCreate);
