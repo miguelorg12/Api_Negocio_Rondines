@@ -36,7 +36,7 @@ export class PatrolService {
   async getById(id: number): Promise<Patrol | null> {
     const patrol = await this.patrolRepository.findOne({
       where: { id },
-      relations: ["branch"],
+      relations: ["branch", "routePoints", "routePoints.checkpoint"],
     });
 
     return patrol;
