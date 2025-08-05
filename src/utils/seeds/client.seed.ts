@@ -13,7 +13,7 @@ export async function seedClients() {
     {
       client_id: "ronditrack-mobile-android",
       client_secret: "super-secret-mobile-app-key-456", // Este será hasheado
-      redirect_uri: "http://TU_IP_LOCAL:3000/auth/callback",
+      redirect_uri: "https://nm5tc167-3002.usw3.devtunnels.ms/auth/callback",
       name: "ronditrack Mobile Android App",
       trusted_client: true,
     },
