@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Branch } from "@entities/branch.entity";
 import { Incident } from "@entities/incident.entity";
+import { PatrolRoutePoint } from "@entities/patrol_route_point.entity";
 
 @Entity("checkpoints")
 export class Checkpoint {
@@ -27,6 +28,9 @@ export class Checkpoint {
 
   @OneToMany(() => Incident, (incident) => incident.checkpoint)
   incidents: Incident[];
+
+  @OneToMany(() => PatrolRoutePoint, (routePoint) => routePoint.checkpoint)
+  routePoints: PatrolRoutePoint[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

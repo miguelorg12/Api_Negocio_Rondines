@@ -1,19 +1,24 @@
 import { AppDataSource } from "@configs/data-source";
 import { Patrol } from "@interfaces/entity/patrol.entity";
+import { PatrolRoutePoint } from "@interfaces/entity/patrol_route_point.entity";
 import {
   PatrolDto,
   PartialPatrolDto,
   PatrolAssigmentDto,
 } from "@interfaces/dto/patrol.dto";
+import { CreatePatrolWithRoutePointsDto } from "@interfaces/dto/patrol_route_point.dto";
 import { Repository } from "typeorm";
 import { PatrolRecordService } from "@services/patrol_record.service";
 
 export class PatrolService {
   private patrolRepository: Repository<Patrol>;
+  private patrolRoutePointRepository: Repository<PatrolRoutePoint>;
   private patrolRecordService: PatrolRecordService;
 
   constructor() {
     this.patrolRepository = AppDataSource.getRepository(Patrol);
+    this.patrolRoutePointRepository =
+      AppDataSource.getRepository(PatrolRoutePoint);
     this.patrolRecordService = new PatrolRecordService();
   }
 
@@ -32,6 +37,15 @@ export class PatrolService {
     const patrol = await this.patrolRepository.findOne({
       where: { id },
       relations: ["branch"],
+    });
+
+    return patrol;
+  }
+
+  async getByIdWithRoutePoints(id: number): Promise<Patrol | null> {
+    const patrol = await this.patrolRepository.findOne({
+      where: { id },
+      relations: ["branch", "routePoints", "routePoints.checkpoint"],
     });
 
     return patrol;
@@ -110,6 +124,47 @@ export class PatrolService {
     patrol = await this.patrolRepository.save(patrolDto);
 
     // Crear el registro de patrol (sin user_id y patrol_id ya que no existen en la entidad)
+    this.patrolRecordService.create({
+      date: new Date(),
+      status: "pendiente",
+    });
+
+    return patrol;
+  }
+
+  async createPatrolWithRoutePoints(
+    createPatrolDto: CreatePatrolWithRoutePointsDto
+  ): Promise<Patrol> {
+    // 1. Crear el patrol primero
+    const patrolData = {
+      name: createPatrolDto.name,
+      active: createPatrolDto.active,
+      branch_id: createPatrolDto.branch_id,
+    };
+
+    let patrol = this.patrolRepository.create(patrolData);
+    patrol = await this.patrolRepository.save(patrol);
+
+    // 2. Crear los puntos de ruta asociados al patrol creado
+    if (
+      createPatrolDto.route_points &&
+      createPatrolDto.route_points.length > 0
+    ) {
+      const routePointsToCreate = createPatrolDto.route_points.map((point) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        order: point.order,
+        google_place_id: point.google_place_id,
+        address: point.address,
+        formatted_address: point.formatted_address,
+        patrol_id: patrol.id,
+        checkpoint_id: point.checkpoint_id,
+      }));
+
+      await this.patrolRoutePointRepository.save(routePointsToCreate);
+    }
+
+    // 3. Crear el registro de patrol
     this.patrolRecordService.create({
       date: new Date(),
       status: "pendiente",

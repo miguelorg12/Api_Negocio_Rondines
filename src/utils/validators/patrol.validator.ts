@@ -8,11 +8,6 @@ export const createPatrolValidator = [
     .withMessage("El nombre de la ronda es obligatorio")
     .isIn(["ronda_matutina", "ronda_vespertina", "ronda_nocturna"])
     .withMessage("Nombre de ronda inválido"),
-  body("frequency")
-    .notEmpty()
-    .withMessage("La frecuencia es obligatoria")
-    .isIn(["diaria", "semanal", "mensual"])
-    .withMessage("Frecuencia inválida"),
   body("branch_id")
     .isInt()
     .withMessage("El ID de la sucursal debe ser un número")
@@ -37,12 +32,6 @@ export const updatePatrolValidator = [
     .withMessage("El nombre de la ronda es obligatorio")
     .isIn(["ronda_matutina", "ronda_vespertina", "ronda_nocturna"])
     .withMessage("Nombre de ronda inválido"),
-  body("frequency")
-    .optional()
-    .notEmpty()
-    .withMessage("La frecuencia es obligatoria")
-    .isIn(["diaria", "semanal", "mensual"])
-    .withMessage("Frecuencia inválida"),
   body("branch_id")
     .optional()
     .isInt()
