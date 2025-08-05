@@ -54,7 +54,14 @@ export class PatrolAssignmentService {
   async getById(id: number): Promise<PatrolAssignment | null> {
     return await this.patrolAssignmentRepository.findOne({
       where: { id },
-      relations: ["user", "patrol", "shift", "patrolRecords"],
+      relations: [
+        "user",
+        "patrol",
+        "shift",
+        "patrolRecords",
+        "patrol.routePoints",
+        "patrol.routePoints.checkpoint",
+      ],
     });
   }
 

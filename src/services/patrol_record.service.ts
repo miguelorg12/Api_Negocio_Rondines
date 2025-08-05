@@ -110,6 +110,8 @@ export class PatrolRecordService {
         "patrolAssignment",
         "patrolAssignment.patrol",
         "patrolAssignment.shift",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
       ],
       order: {
         date: "DESC",
@@ -134,6 +136,8 @@ export class PatrolRecordService {
         "patrolAssignment",
         "patrolAssignment.patrol",
         "patrolAssignment.shift",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
       ],
       order: {
         date: "ASC",
@@ -158,6 +162,8 @@ export class PatrolRecordService {
         "patrolAssignment",
         "patrolAssignment.patrol",
         "patrolAssignment.shift",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
       ],
       order: {
         date: "DESC",
@@ -187,7 +193,8 @@ export class PatrolRecordService {
       relations: [
         "patrolAssignment",
         "patrolAssignment.patrol",
-        "patrolAssignment.patrol.plans",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
         "patrolAssignment.shift",
         "patrolAssignment.user",
       ],
