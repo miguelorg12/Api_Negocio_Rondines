@@ -18,14 +18,17 @@ import shiftValidationBiometricRoutes from "./routes/shift_validation_biometric.
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
+
+// Configuración específica para CORS con soporte para SSE
 app.use(
   cors({
     origin: "*",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 app.use(express.json());
-
 app.get("/", (req, res) => {
   res.json("Hello World!");
 });
