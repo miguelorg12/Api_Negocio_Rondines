@@ -68,7 +68,7 @@ export const streamBiometricEvents = async (
   console.log("Sesión encontrada, configurando SSE...");
 
   // Configurar headers específicos para SSE y CORS
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.header("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
