@@ -24,6 +24,23 @@ export class PatrolAssignmentService {
   async create(
     patrolAssignmentDto: PatrolAssignmentDto
   ): Promise<PatrolAssignment> {
+    // Validar si el guardia ya tiene una asignación para el día específico
+    const existingAssignment = await this.patrolAssignmentRepository.findOne({
+      where: {
+        user: { id: patrolAssignmentDto.user_id },
+        date: patrolAssignmentDto.date,
+      },
+      relations: ["user", "patrol", "shift"],
+    });
+
+    if (existingAssignment) {
+      throw new Error(
+        `El guardia ya tiene una asignación para el día ${
+          patrolAssignmentDto.date.toISOString().split("T")[0]
+        }. No se puede crear otra asignación.`
+      );
+    }
+
     const patrolAssignment = this.patrolAssignmentRepository.create({
       user: { id: patrolAssignmentDto.user_id },
       patrol: { id: patrolAssignmentDto.patrol_id },

@@ -21,15 +21,35 @@ export const createPatrolAssignment = async (
     });
   }
 
-  const patrolAssignmentData: PatrolAssignmentDto = req.body;
-  const newPatrolAssignment = await patrolAssignmentService.create(
-    patrolAssignmentData
-  );
+  try {
+    const patrolAssignmentData: PatrolAssignmentDto = req.body;
+    const newPatrolAssignment = await patrolAssignmentService.create(
+      patrolAssignmentData
+    );
 
-  return res.status(201).json({
-    message: "Asignación de ronda creada correctamente",
-    data: newPatrolAssignment,
-  });
+    return res.status(201).json({
+      message: "Asignación de ronda creada correctamente",
+      data: newPatrolAssignment,
+    });
+  } catch (error) {
+    console.error("Error al crear asignación de ronda:", error);
+
+    // Manejar el error específico de asignación duplicada
+    if (
+      error instanceof Error &&
+      error.message.includes("ya tiene una asignación")
+    ) {
+      return res.status(409).json({
+        message: "No se puede crear la asignación",
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: "Error interno del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
+  }
 };
 
 export const getAllPatrolAssignments = async (
