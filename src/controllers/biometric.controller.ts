@@ -53,20 +53,40 @@ export const streamBiometricEvents = async (
 ): Promise<void> => {
   const { sessionId } = req.params;
 
+  console.log("=== SSE CONNECTION DEBUG ===");
+  console.log("Session ID:", sessionId);
+  console.log("Request headers:", req.headers);
+  console.log("===========================");
+
   const session = biometricService.getSession(sessionId);
   if (!session) {
+    console.log("Sesión no encontrada:", sessionId);
     res.status(404).json({ error: "Sesión no encontrada" });
     return;
   }
 
-  // Configurar SSE
-  res.writeHead(200, {
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    Connection: "keep-alive",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Cache-Control",
-  });
+  console.log("Sesión encontrada, configurando SSE...");
+
+  // Configurar headers específicos para SSE y CORS
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Cache-Control, Content-Type");
+  res.setHeader("Access-Control-Expose-Headers", "Cache-Control, Content-Type");
+  res.setHeader("X-Accel-Buffering", "no"); // Importante para nginx
+
+  // Deshabilitar timeouts
+  req.setTimeout(0);
+  res.setTimeout(0);
+
+  // Enviar heartbeat cada 30 segundos para mantener la conexión
+  const heartbeat = setInterval(() => {
+    if (!res.destroyed) {
+      res.write(": heartbeat\n\n");
+    }
+  }, 30000);
 
   // Agregar cliente a la sesión
   biometricService.addClientToSession(sessionId, res);
@@ -77,15 +97,28 @@ export const streamBiometricEvents = async (
       type: "connected",
       message: "Conectado al stream de eventos",
       status: "connected",
+      session_id: sessionId,
     })}\n\n`
   );
 
+  console.log("Cliente agregado a la sesión, conexión establecida");
+
   // Limpiar cuando se cierre la conexión
   req.on("close", () => {
+    console.log("Conexión SSE cerrada para sesión:", sessionId);
+    clearInterval(heartbeat);
     biometricService.removeClientFromSession(sessionId, res);
   });
 
-  req.on("error", () => {
+  req.on("error", (error) => {
+    console.error("Error en conexión SSE:", error);
+    clearInterval(heartbeat);
+    biometricService.removeClientFromSession(sessionId, res);
+  });
+
+  res.on("error", (error) => {
+    console.error("Error en respuesta SSE:", error);
+    clearInterval(heartbeat);
     biometricService.removeClientFromSession(sessionId, res);
   });
 };
