@@ -56,6 +56,11 @@ export const streamBiometricEvents = async (
   console.log("=== SSE CONNECTION DEBUG ===");
   console.log("Session ID:", sessionId);
   console.log("Request headers:", req.headers);
+  console.log(
+    "Active sessions count:",
+    biometricService.getActiveSessionsCount()
+  );
+  console.log("Available session IDs:", biometricService.getActiveSessionIds());
   console.log("===========================");
 
   const session = biometricService.getSession(sessionId);
@@ -66,6 +71,11 @@ export const streamBiometricEvents = async (
   }
 
   console.log("Sesión encontrada, configurando SSE...");
+  console.log("Session details:", {
+    user_id: session.user_id,
+    status: session.status,
+    clients_count: session.clients.length,
+  });
 
   // Configurar headers específicos para SSE y CORS
   res.header("Access-Control-Allow-Origin", "*");
@@ -247,6 +257,43 @@ export const testArduinoConnection = async (
     return res.status(500).json({
       error: "Error probando conexión Arduino",
       details: error.message,
+    });
+  }
+};
+
+export const debugActiveSessions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const activeSessions = biometricService.getActiveSessionIds();
+    const sessionCount = biometricService.getActiveSessionsCount();
+
+    console.log("=== DEBUG ACTIVE SESSIONS ===");
+    console.log("Total sessions:", sessionCount);
+    console.log("Session IDs:", activeSessions);
+    console.log("=============================");
+
+    return res.status(200).json({
+      message: "Sesiones activas obtenidas",
+      data: {
+        total_sessions: sessionCount,
+        session_ids: activeSessions,
+        sessions: activeSessions.map((id) => {
+          const session = biometricService.getSession(id);
+          return {
+            session_id: id,
+            user_id: session?.user_id,
+            status: session?.status,
+            clients_count: session?.clients.length || 0,
+          };
+        }),
+      },
+    });
+  } catch (error) {
+    console.error("Error obteniendo sesiones activas:", error);
+    return res.status(500).json({
+      error: "Error obteniendo sesiones activas",
     });
   }
 };

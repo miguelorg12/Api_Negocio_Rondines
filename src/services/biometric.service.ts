@@ -19,6 +19,13 @@ export class BiometricService {
   ): Promise<{ session_id: string }> {
     const sessionId = `session_${Date.now()}_${user_id}`;
 
+    console.log("=== START REGISTRATION DEBUG ===");
+    console.log("Creating session with ID:", sessionId);
+    console.log("User ID:", user_id);
+    console.log("Action:", action);
+    console.log("Active sessions before:", this.activeSessions.size);
+    console.log("=================================");
+
     try {
       // Crear conexión con Arduino
       const port = new SerialPort({
@@ -36,6 +43,10 @@ export class BiometricService {
         clients: [],
         status: "connecting",
       });
+
+      console.log("Session stored successfully");
+      console.log("Active sessions after:", this.activeSessions.size);
+      console.log("Session IDs:", Array.from(this.activeSessions.keys()));
 
       // Configurar listeners del Arduino
       this.setupArduinoListeners(sessionId, port, parser);
@@ -67,6 +78,11 @@ export class BiometricService {
           port.write(Buffer.from(user_id.toString() + "\n", "utf-8"));
         }, 1000);
       }, 3000);
+
+      console.log("=== SESSION READY ===");
+      console.log("Session ID ready for SSE:", sessionId);
+      console.log("Session exists:", this.activeSessions.has(sessionId));
+      console.log("=====================");
 
       return { session_id: sessionId };
     } catch (error) {
@@ -262,5 +278,13 @@ export class BiometricService {
       status: session.status,
       biometric_id: session.biometric_id,
     };
+  }
+
+  getActiveSessionsCount(): number {
+    return this.activeSessions.size;
+  }
+
+  getActiveSessionIds(): string[] {
+    return Array.from(this.activeSessions.keys());
   }
 }

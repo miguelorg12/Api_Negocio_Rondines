@@ -6,6 +6,7 @@ import {
   completeBiometricRegistration,
   cancelBiometricRegistration,
   testArduinoConnection,
+  debugActiveSessions,
 } from "../controllers/biometric.controller";
 
 const router = Router();
@@ -204,5 +205,52 @@ router.post("/complete/:sessionId", completeBiometricRegistration);
  *         description: Sesión no encontrada
  */
 router.post("/cancel/:sessionId", cancelBiometricRegistration);
+
+/**
+ * @swagger
+ * /biometric/debug/sessions:
+ *   get:
+ *     summary: Debug - Listar sesiones activas
+ *     tags: [Biométrico]
+ *     description: Endpoint de debug para listar todas las sesiones biométricas activas
+ *     responses:
+ *       200:
+ *         description: Lista de sesiones activas obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Sesiones activas obtenidas"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total_sessions:
+ *                       type: integer
+ *                       description: Número total de sesiones activas
+ *                     session_ids:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Lista de IDs de sesiones activas
+ *                     sessions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           session_id:
+ *                             type: string
+ *                           user_id:
+ *                             type: integer
+ *                           status:
+ *                             type: string
+ *                           clients_count:
+ *                             type: integer
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/debug/sessions", debugActiveSessions);
 
 export default router;
