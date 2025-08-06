@@ -9,6 +9,7 @@ export async function seedBranches() {
       address: "123 Main St, City, Country",
       company: { id: 1 },
       user: { id: 1 },
+      users: [{ id: 6 }],
     },
     {
       name: "Secondary Branch",

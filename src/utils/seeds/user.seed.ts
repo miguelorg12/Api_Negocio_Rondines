@@ -59,7 +59,6 @@ export async function seedUsers() {
       password: "vielmasex123",
       active: true,
       role: { id: 4 },
-      branches: [{ id: 1 }],
     },
     {
       name: "Carlos",
