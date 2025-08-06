@@ -22,7 +22,7 @@ const app = express();
 // Configuración específica para CORS con soporte para SSE
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:5173", "*"], // Agrega tu dominio frontend
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -39,6 +39,20 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/swagger.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
+});
+
+// Middleware específico para rutas SSE
+app.use("/api/v1/biometric/stream", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Cache-Control, Content-Type");
+  res.header("Access-Control-Expose-Headers", "Cache-Control, Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+  next();
 });
 
 apiRouter.use("/users", userRoutes);
