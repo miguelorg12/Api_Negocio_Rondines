@@ -22,7 +22,7 @@ const app = express();
 // Configuración específica para CORS con soporte para SSE
 app.use(
   cors({
-    origin: ["http://localhost:5173", "*"], // Agrega tu dominio frontend
+    origin: "*", // Agrega tu dominio frontend
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
