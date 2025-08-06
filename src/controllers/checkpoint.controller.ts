@@ -107,3 +107,71 @@ export const deleteCheckpoint = async (
     data: deletedCheckpoint,
   });
 };
+
+export const markCheckpointPatrol = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    // 1. Validar datos de entrada
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        message: "Error en la validación de datos",
+        errors: errors.array(),
+      });
+    }
+
+    // 2. Extraer datos del body
+    const { user_id, nfc_uid } = req.body;
+
+    // 3. Validar datos requeridos
+    if (!user_id || !nfc_uid) {
+      return res.status(400).json({
+        message: "user_id y nfc_uid son requeridos",
+      });
+    }
+
+    // 4. Validar tipos de datos
+    if (typeof user_id !== "number" || typeof nfc_uid !== "string") {
+      return res.status(400).json({
+        message: "user_id debe ser número y nfc_uid debe ser string",
+      });
+    }
+
+    // 5. Llamar al servicio
+    const result = await checkpointService.markChekpointPatrol(
+      user_id,
+      nfc_uid
+    );
+
+    // 6. Respuesta exitosa
+    return res.status(200).json({
+      message: "Checkpoint marcado correctamente",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error marcando checkpoint:", error);
+
+    if (error instanceof Error) {
+      if (error.message.includes("No se encontró el recorrido")) {
+        return res.status(404).json({
+          message: "No tienes un turno activo para hoy",
+          error: error.message,
+        });
+      }
+
+      if (error.message.includes("No se encontró el checkpoint")) {
+        return res.status(404).json({
+          message: "Checkpoint no encontrado",
+          error: error.message,
+        });
+      }
+    }
+
+    return res.status(500).json({
+      message: "Error interno del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
+  }
+};

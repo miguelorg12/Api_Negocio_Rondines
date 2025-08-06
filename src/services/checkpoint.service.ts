@@ -4,13 +4,20 @@ import {
   CheckpointDto,
   PartialCheckpointDto,
 } from "@interfaces/dto/checkpoint.dto";
+import { PatrolAssignment } from "@entities/patrol_assigment.entity";
+import { CheckpointRecord } from "@entities/checkpoint_record.entity";
 import { Repository } from "typeorm";
 
 export class CheckpointService {
   private checkpointRepository: Repository<Checkpoint>;
-
+  private patrolAssignmentRepository: Repository<PatrolAssignment>;
+  private checkpointRecordRepository: Repository<CheckpointRecord>;
   constructor() {
     this.checkpointRepository = AppDataSource.getRepository(Checkpoint);
+    this.patrolAssignmentRepository =
+      AppDataSource.getRepository(PatrolAssignment);
+    this.checkpointRecordRepository =
+      AppDataSource.getRepository(CheckpointRecord);
   }
 
   async create(checkpointDto: CheckpointDto): Promise<Checkpoint> {
@@ -65,6 +72,40 @@ export class CheckpointService {
       throw new Error("Checkpoint no encontrado");
     }
     await this.checkpointRepository.softDelete(id);
+    return checkpoint;
+  }
+
+  async markChekpointPatrol(user_id: number, nfc_uid: string) {
+    const currentPatrolForUser = await this.patrolAssignmentRepository.findOne({
+      where: {
+        user: { id: user_id },
+        patrolRecords: { status: "en_progreso" },
+      },
+      relations: [
+        "patrolRecords",
+        "patrol",
+        "patrol.routePoints",
+        "patrol.routePoints.checkpoint",
+      ],
+    });
+    console.log(currentPatrolForUser);
+    if (!currentPatrolForUser) {
+      throw new Error("No se encontró el recorrido para el usuario");
+    }
+    const checkpoint = currentPatrolForUser.patrol.routePoints.find(
+      (routePoint) => routePoint.checkpoint.nfc_uid === nfc_uid
+    );
+    if (!checkpoint) {
+      throw new Error("No se encontró el checkpoint");
+    }
+    const checkpointRecord = this.checkpointRecordRepository.create({
+      patrol_record_id: currentPatrolForUser.patrolRecords[0].id,
+      checkpoint_id: checkpoint.id,
+      read_time: new Date(),
+      correct: true,
+    });
+    await this.checkpointRecordRepository.save(checkpointRecord);
+
     return checkpoint;
   }
 }

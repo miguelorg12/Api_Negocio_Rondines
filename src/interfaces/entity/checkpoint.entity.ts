@@ -20,6 +20,9 @@ export class Checkpoint {
   @Column({ length: 255 })
   name: string;
 
+  @Column({ length: 255, nullable: true })
+  nfc_uid: string;
+
   @ManyToOne(() => Branch, (branch) => branch.checkpoints, {
     onDelete: "CASCADE",
   })

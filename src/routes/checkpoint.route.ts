@@ -6,6 +6,7 @@ import {
   createCheckpoint,
   updateCheckpoint,
   deleteCheckpoint,
+  markCheckpointPatrol,
 } from "@controllers/checkpoint.controller";
 import {
   CheckpointValidator,
@@ -41,6 +42,7 @@ const router = Router();
  */
 router.get("/", authenticateToken, getAllCheckpoints);
 
+router.post("/mark-checkpoint", markCheckpointPatrol);
 /**
  * @swagger
  * /checkpoints/{id}:
