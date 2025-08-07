@@ -203,20 +203,6 @@ export const markCheckpointPatrol = async (
           error: error.message,
         });
       }
-
-      if (error.message.includes("No puedes marcar el checkpoint después de 15 minutos")) {
-        return res.status(400).json({
-          message: "No puedes marcar el checkpoint después de 15 minutos de la hora programada",
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes("Este checkpoint ya fue marcado anteriormente")) {
-        return res.status(400).json({
-          message: "Este checkpoint ya fue marcado anteriormente",
-          error: error.message,
-        });
-      }
     }
 
     return res.status(500).json({

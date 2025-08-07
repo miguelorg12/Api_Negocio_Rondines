@@ -43,7 +43,7 @@ const router = Router();
  */
 router.get("/", authenticateToken, getAllCheckpoints);
 
-router.post("/mark-checkpoint", MarkCheckpointPatrolValidator, markCheckpointPatrol);
+router.post("/mark-checkpoint", markCheckpointPatrol);
 /**
  * @swagger
  * /checkpoints/{id}:

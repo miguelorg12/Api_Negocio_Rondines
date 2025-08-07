@@ -128,24 +128,7 @@ export class CheckpointService {
       throw new Error("El checkpoint no está en la ruta asignada al usuario");
     }
 
-    // 5. Buscar el checkpoint record
-    let checkpointRecord = await this.checkpointRecordRepository.findOne({
-      where: {
-        patrolAssignment: { id: currentPatrolForUser.id },
-        checkpoint: { id: checkpoint_id },
-      },
-    });
-
-    if (!checkpointRecord) {
-      throw new Error("No se encontró el registro de checkpoint para esta asignación");
-    }
-
-    // 5.1. Validar que el checkpoint no haya sido marcado previamente
-    if (checkpointRecord.real_check) {
-      throw new Error("Este checkpoint ya fue marcado anteriormente");
-    }
-
-    // 6. Validar la secuencia de checkpoints
+    // 5. Validar la secuencia de checkpoints
     const completedCheckpoints = await this.checkpointRecordRepository.find({
       where: {
         patrolAssignment: { id: currentPatrolForUser.id },
@@ -162,6 +145,18 @@ export class CheckpointService {
 
     if (nextExpectedCheckpoint && nextExpectedCheckpoint.checkpoint.id !== checkpoint_id) {
       throw new Error(`Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`);
+    }
+
+    // 6. Buscar o crear el checkpoint record
+    let checkpointRecord = await this.checkpointRecordRepository.findOne({
+      where: {
+        patrolAssignment: { id: currentPatrolForUser.id },
+        checkpoint: { id: checkpoint_id },
+      },
+    });
+
+    if (!checkpointRecord) {
+      throw new Error("No se encontró el registro de checkpoint para esta asignación");
     }
 
     // 7. Calcular el status basado en el tiempo
@@ -201,7 +196,9 @@ export class CheckpointService {
       real_check: currentTime,
       message: status === "completed" 
         ? "Checkpoint completado a tiempo" 
-        : "Checkpoint completado con retraso"
+        : status === "late" 
+        ? "Checkpoint completado con retraso" 
+        : "Checkpoint marcado como perdido"
     };
   }
 

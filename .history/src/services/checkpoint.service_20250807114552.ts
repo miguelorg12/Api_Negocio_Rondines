@@ -6,8 +6,7 @@ import {
 } from "@interfaces/dto/checkpoint.dto";
 import { PatrolAssignment } from "@entities/patrol_assigment.entity";
 import { CheckpointRecord } from "@entities/checkpoint_record.entity";
-import { Branch } from "@entities/branch.entity";
-import { Repository, In } from "typeorm";
+import { Repository } from "typeorm";
 
 export class CheckpointService {
   private checkpointRepository: Repository<Checkpoint>;
@@ -107,16 +106,9 @@ export class CheckpointService {
       throw new Error("El checkpoint especificado no existe");
     }
 
-    // 3. Validar que el checkpoint pertenece a una de las sucursales del usuario
-    const userBranches = await AppDataSource.getRepository(Branch)
-      .createQueryBuilder("branch")
-      .innerJoin("branch.guards", "user")
-      .where("user.id = :userId", { userId: user_id })
-      .getMany();
-
-    const userBranchIds = userBranches.map(branch => branch.id);
-    if (!userBranchIds.includes(targetCheckpoint.branch.id)) {
-      throw new Error("El checkpoint no pertenece a una sucursal asignada al usuario");
+    // 3. Validar que el checkpoint pertenece a la misma sucursal que el usuario
+    if (targetCheckpoint.branch.id !== currentPatrolForUser.user.branch?.id) {
+      throw new Error("El checkpoint no pertenece a la sucursal del usuario");
     }
 
     // 4. Validar que el checkpoint está en la ruta del patrol assignment
@@ -128,28 +120,11 @@ export class CheckpointService {
       throw new Error("El checkpoint no está en la ruta asignada al usuario");
     }
 
-    // 5. Buscar el checkpoint record
-    let checkpointRecord = await this.checkpointRecordRepository.findOne({
-      where: {
-        patrolAssignment: { id: currentPatrolForUser.id },
-        checkpoint: { id: checkpoint_id },
-      },
-    });
-
-    if (!checkpointRecord) {
-      throw new Error("No se encontró el registro de checkpoint para esta asignación");
-    }
-
-    // 5.1. Validar que el checkpoint no haya sido marcado previamente
-    if (checkpointRecord.real_check) {
-      throw new Error("Este checkpoint ya fue marcado anteriormente");
-    }
-
-    // 6. Validar la secuencia de checkpoints
+    // 5. Validar la secuencia de checkpoints
     const completedCheckpoints = await this.checkpointRecordRepository.find({
       where: {
         patrolAssignment: { id: currentPatrolForUser.id },
-        status: In(["completed", "late"]),
+        status: "completed",
       },
       relations: ["checkpoint"],
       order: { created_at: "ASC" },
@@ -164,29 +139,26 @@ export class CheckpointService {
       throw new Error(`Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`);
     }
 
+    // 6. Buscar o crear el checkpoint record
+    let checkpointRecord = await this.checkpointRecordRepository.findOne({
+      where: {
+        patrolAssignment: { id: currentPatrolForUser.id },
+        checkpoint: { id: checkpoint_id },
+      },
+    });
+
+    if (!checkpointRecord) {
+      throw new Error("No se encontró el registro de checkpoint para esta asignación");
+    }
+
     // 7. Calcular el status basado en el tiempo
     const currentTime = new Date();
     const scheduledTime = checkpointRecord.check_time;
-    const timeDifferenceMinutes = (currentTime.getTime() - scheduledTime.getTime()) / (1000 * 60); // diferencia en minutos (positiva = tarde, negativa = temprano)
+    const timeDifference = Math.abs(currentTime.getTime() - scheduledTime.getTime()) / (1000 * 60); // diferencia en minutos
 
     let status: "completed" | "late" = "completed";
-    
-    // Si llegaste más de 5 minutos ANTES de la hora programada
-    if (timeDifferenceMinutes < -5) {
-      throw new Error("No puedes marcar el checkpoint antes de la hora programada");
-    }
-    
-    // Si llegaste más de 15 minutos DESPUÉS de la hora programada
-    if (timeDifferenceMinutes > 15) {
-      throw new Error("No puedes marcar el checkpoint después de 15 minutos de la hora programada");
-    }
-    // Si llegaste entre 5 y 15 minutos DESPUÉS de la hora programada
-    else if (timeDifferenceMinutes > 5) {
+    if (timeDifference > 5) {
       status = "late";
-    }
-    // Si llegaste dentro de ±5 minutos de la hora programada (incluyendo antes)
-    else {
-      status = "completed";
     }
 
     // 8. Actualizar el checkpoint record
@@ -199,9 +171,7 @@ export class CheckpointService {
       checkpoint: targetCheckpoint,
       status: status,
       real_check: currentTime,
-      message: status === "completed" 
-        ? "Checkpoint completado a tiempo" 
-        : "Checkpoint completado con retraso"
+      message: status === "completed" ? "Checkpoint completado a tiempo" : "Checkpoint completado con retraso"
     };
   }
 
