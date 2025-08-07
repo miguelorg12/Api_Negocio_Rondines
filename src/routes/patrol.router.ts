@@ -23,6 +23,8 @@ import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
+router.get("/branch/:id", authenticateToken, getPatrolsByBranchId);
+
 /**
  * @swagger
  * /patrols/branch/{id}/available:
