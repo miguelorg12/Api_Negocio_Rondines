@@ -172,23 +172,16 @@ export class PatrolRecordService {
   }
 
   /**
-   * Obtener la ronda actual del usuario del día de hoy que esté en progreso
+   * Obtener el último registro de patrulla en progreso del usuario
    * @param userId - ID del usuario/guardia
-   * @returns PatrolRecord con estado "en_progreso" del día de hoy
+   * @returns PatrolRecord con estado "en_progreso" más reciente
    */
   async getCurrentPatrolRecord(userId: number): Promise<PatrolRecord | null> {
-    // Obtener la fecha actual sin hora para comparar solo la fecha
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     return await this.patrolRecordRepository.findOne({
       where: {
         status: "en_progreso",
         patrolAssignment: {
           user: { id: userId },
-          date: Between(today, tomorrow), // Buscar asignaciones del día de hoy usando rango
         },
       },
       relations: [
@@ -199,6 +192,9 @@ export class PatrolRecordService {
         "patrolAssignment.shift",
         "patrolAssignment.user",
       ],
+      order: {
+        created_at: "DESC", // Obtener el más reciente
+      },
     });
   }
 }
