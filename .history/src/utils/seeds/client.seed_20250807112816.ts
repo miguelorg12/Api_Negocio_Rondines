@@ -34,7 +34,7 @@ export async function seedClients() {
     {
       client_id: "ronditrack-web-qa",
       client_secret: "super-secret-web-app-key-123",
-      redirect_uri: "https://qa.ronditrack.online/auth/callback",
+      redirect_uri: "https://api-sec-qa.ronditrack.online/auth/callback",
       name: "ronditrack Web QA App",
       trusted_client: true,
     },

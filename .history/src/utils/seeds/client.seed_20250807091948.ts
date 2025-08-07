@@ -20,7 +20,7 @@ export async function seedClients() {
     {
       client_id: "ronditrack-desktop-electron",
       client_secret: "super-secret-desktop-app-key-789",
-      redirect_uri: "http://localhost:5173/auth/callback", // Generalmente Electron corre en 8080
+      redirect_uri: "http://localhost:8080/auth/callback", // Generalmente Electron corre en 8080
       name: "ronditrack Desktop Application",
       trusted_client: true,
     },
@@ -34,7 +34,7 @@ export async function seedClients() {
     {
       client_id: "ronditrack-web-qa",
       client_secret: "super-secret-web-app-key-123",
-      redirect_uri: "https://qa.ronditrack.online/auth/callback",
+      redirect_uri: "https://api-sec-qa.ronditrack.online/auth/callback",
       name: "ronditrack Web QA App",
       trusted_client: true,
     },
