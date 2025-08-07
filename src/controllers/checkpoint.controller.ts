@@ -133,9 +133,14 @@ export const markCheckpointPatrol = async (
     }
 
     // 4. Validar tipos de datos
-    if (typeof user_id !== "number" || typeof nfc_uid !== "string" || typeof checkpoint_id !== "number") {
+    if (
+      typeof user_id !== "number" ||
+      typeof nfc_uid !== "string" ||
+      typeof checkpoint_id !== "number"
+    ) {
       return res.status(400).json({
-        message: "user_id y checkpoint_id deben ser números, nfc_uid debe ser string",
+        message:
+          "user_id y checkpoint_id deben ser números, nfc_uid debe ser string",
       });
     }
 
@@ -169,7 +174,11 @@ export const markCheckpointPatrol = async (
         });
       }
 
-      if (error.message.includes("El checkpoint no pertenece a una sucursal asignada")) {
+      if (
+        error.message.includes(
+          "El checkpoint no pertenece a una sucursal asignada"
+        )
+      ) {
         return res.status(403).json({
           message: "No tienes permisos para este checkpoint",
           error: error.message,
@@ -192,26 +201,15 @@ export const markCheckpointPatrol = async (
 
       if (error.message.includes("No se encontró el registro de checkpoint")) {
         return res.status(404).json({
-          message: "No se encontró el registro de checkpoint para esta asignación",
+          message:
+            "No se encontró el registro de checkpoint para esta asignación",
           error: error.message,
         });
       }
 
-      if (error.message.includes("No puedes marcar el checkpoint antes de la hora programada")) {
-        return res.status(400).json({
-          message: "No puedes marcar el checkpoint antes de la hora programada",
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes("No puedes marcar el checkpoint después de 15 minutos")) {
-        return res.status(400).json({
-          message: "No puedes marcar el checkpoint después de 15 minutos de la hora programada",
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes("Este checkpoint ya fue marcado anteriormente")) {
+      if (
+        error.message.includes("Este checkpoint ya fue marcado anteriormente")
+      ) {
         return res.status(400).json({
           message: "Este checkpoint ya fue marcado anteriormente",
           error: error.message,

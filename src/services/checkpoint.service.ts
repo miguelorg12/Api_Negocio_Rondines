@@ -76,7 +76,11 @@ export class CheckpointService {
     return checkpoint;
   }
 
-  async markChekpointPatrol(user_id: number, nfc_uid: string, checkpoint_id: number) {
+  async markChekpointPatrol(
+    user_id: number,
+    nfc_uid: string,
+    checkpoint_id: number
+  ) {
     // 1. Validar que el usuario tenga un turno en progreso
     const currentPatrolForUser = await this.patrolAssignmentRepository.findOne({
       where: {
@@ -114,9 +118,11 @@ export class CheckpointService {
       .where("user.id = :userId", { userId: user_id })
       .getMany();
 
-    const userBranchIds = userBranches.map(branch => branch.id);
+    const userBranchIds = userBranches.map((branch) => branch.id);
     if (!userBranchIds.includes(targetCheckpoint.branch.id)) {
-      throw new Error("El checkpoint no pertenece a una sucursal asignada al usuario");
+      throw new Error(
+        "El checkpoint no pertenece a una sucursal asignada al usuario"
+      );
     }
 
     // 4. Validar que el checkpoint está en la ruta del patrol assignment
@@ -137,7 +143,9 @@ export class CheckpointService {
     });
 
     if (!checkpointRecord) {
-      throw new Error("No se encontró el registro de checkpoint para esta asignación");
+      throw new Error(
+        "No se encontró el registro de checkpoint para esta asignación"
+      );
     }
 
     // 5.1. Validar que el checkpoint no haya sido marcado previamente
@@ -160,48 +168,30 @@ export class CheckpointService {
       completedCheckpoints
     );
 
-    if (nextExpectedCheckpoint && nextExpectedCheckpoint.checkpoint.id !== checkpoint_id) {
-      throw new Error(`Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`);
+    if (
+      nextExpectedCheckpoint &&
+      nextExpectedCheckpoint.checkpoint.id !== checkpoint_id
+    ) {
+      throw new Error(
+        `Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`
+      );
     }
 
-    // 7. Calcular el status basado en el tiempo
+    // 7. Marcar el checkpoint como completado
     const currentTime = new Date();
-    const scheduledTime = checkpointRecord.check_time;
-    const timeDifferenceMinutes = (currentTime.getTime() - scheduledTime.getTime()) / (1000 * 60); // diferencia en minutos (positiva = tarde, negativa = temprano)
-
-    let status: "completed" | "late" = "completed";
-    
-    // Si llegaste más de 5 minutos ANTES de la hora programada
-    if (timeDifferenceMinutes < -5) {
-      throw new Error("No puedes marcar el checkpoint antes de la hora programada");
-    }
-    
-    // Si llegaste más de 15 minutos DESPUÉS de la hora programada
-    if (timeDifferenceMinutes > 15) {
-      throw new Error("No puedes marcar el checkpoint después de 15 minutos de la hora programada");
-    }
-    // Si llegaste entre 5 y 15 minutos DESPUÉS de la hora programada
-    else if (timeDifferenceMinutes > 5) {
-      status = "late";
-    }
-    // Si llegaste dentro de ±5 minutos de la hora programada (incluyendo antes)
-    else {
-      status = "completed";
-    }
+    const status: "completed" = "completed";
 
     // 8. Actualizar el checkpoint record
     checkpointRecord.real_check = currentTime;
     checkpointRecord.status = status;
-    
+
     await this.checkpointRecordRepository.save(checkpointRecord);
 
     return {
       checkpoint: targetCheckpoint,
       status: status,
       real_check: currentTime,
-      message: status === "completed" 
-        ? "Checkpoint completado a tiempo" 
-        : "Checkpoint completado con retraso"
+      message: "Checkpoint completado exitosamente",
     };
   }
 
@@ -210,7 +200,9 @@ export class CheckpointService {
     completedCheckpoints: any[]
   ): any | null {
     const sortedRoutePoints = routePoints.sort((a, b) => a.order - b.order);
-    const completedCheckpointIds = completedCheckpoints.map(cc => cc.checkpoint.id);
+    const completedCheckpointIds = completedCheckpoints.map(
+      (cc) => cc.checkpoint.id
+    );
 
     for (const routePoint of sortedRoutePoints) {
       if (!completedCheckpointIds.includes(routePoint.checkpoint.id)) {
