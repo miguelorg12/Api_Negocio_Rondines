@@ -32,7 +32,6 @@ export interface UpdateUserDto {
   confirm_password?: string;
   role_id?: number;
   active?: boolean;
-  biometric?: number;
 }
 
 export type PartialCreateUserDto = Partial<UserDataDto>;

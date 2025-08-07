@@ -7,17 +7,17 @@ export async function seedShifts() {
     {
       name: "matutino",
       start_time: new Date("2023-01-01T07:00:00Z"),
-      end_time: new Date("2023-01-01T15:00:00Z"),
+      end_time: new Date("2023-01-01T17:00:00Z"),
     },
     {
       name: "vespertino",
-      start_time: new Date("2023-01-01T15:00:00Z"),
+      start_time: new Date("2023-01-01T17:00:00Z"),
       end_time: new Date("2023-01-01T23:00:00Z"),
     },
     {
       name: "nocturno",
       start_time: new Date("2023-01-01T23:00:00Z"),
-      end_time: new Date("2023-01-02T07:00:00Z"),
+      end_time: new Date("2023-01-02T06:00:00Z"),
     },
   ];
 
