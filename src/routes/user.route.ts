@@ -282,10 +282,6 @@ router.post(
 );
 
 // Verificar ID biométrico
-router.post(
-  "/verify-biometric",
-  authenticateToken,
-  userController.verifyBiometric
-);
+router.post("/verify-biometric", userController.verifyBiometric);
 
 export default router;
