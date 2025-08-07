@@ -23,8 +23,6 @@ import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get("/branch/:id", authenticateToken, getPatrolsByBranchId);
-
 /**
  * @swagger
  * /patrols/branch/{id}/available:
@@ -57,11 +55,7 @@ router.get("/branch/:id", authenticateToken, getPatrolsByBranchId);
  *       500:
  *         description: Error interno del servidor
  */
-router.get(
-  "/branch/:id/available",
-  authenticateToken,
-  getAvailablePatrolsByBranchId
-);
+router.get("/branch/:id/available", authenticateToken, getPatrolsByBranchId);
 
 /**
  * @swagger
