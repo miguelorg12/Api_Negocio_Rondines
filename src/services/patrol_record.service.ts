@@ -179,14 +179,16 @@ export class PatrolRecordService {
   async getCurrentPatrolRecord(userId: number): Promise<PatrolRecord | null> {
     // Obtener la fecha actual sin hora para comparar solo la fecha
     const today = new Date();
-    const todayString = today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     return await this.patrolRecordRepository.findOne({
       where: {
         status: "en_progreso",
         patrolAssignment: {
           user: { id: userId },
-          date: today, // Buscar asignaciones del día de hoy
+          date: Between(today, tomorrow), // Buscar asignaciones del día de hoy usando rango
         },
       },
       relations: [
