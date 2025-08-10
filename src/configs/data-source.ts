@@ -20,6 +20,7 @@ import { Code } from "@entities/code.entity";
 import { IncidentImage } from "@interfaces/entity/incident_image.entity";
 import { PatrolRoutePoint } from "@entities/patrol_route_point.entity";
 import { Session } from "@interfaces/entity/session.entity";
+import { Network } from "@interfaces/entity/network.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -51,6 +52,7 @@ export const AppDataSource = new DataSource({
     IncidentImage,
     PatrolRoutePoint,
     Session,
+    Network,
   ],
   subscribers: [],
   migrations: [__dirname + "/../utils/migrations/*.{ts,js}"],

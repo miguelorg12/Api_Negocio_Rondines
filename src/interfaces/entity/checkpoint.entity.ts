@@ -12,6 +12,7 @@ import { Branch } from "@entities/branch.entity";
 import { Incident } from "@entities/incident.entity";
 import { PatrolRoutePoint } from "@entities/patrol_route_point.entity";
 import { CheckpointRecord } from "@entities/checkpoint_record.entity";
+import { Network } from "./network.entity";
 
 @Entity("checkpoints")
 export class Checkpoint {
@@ -30,13 +31,22 @@ export class Checkpoint {
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
 
+  @ManyToOne(() => Network, (network) => network.checkpoints, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "network_id" })
+  network: Network;
+
   @OneToMany(() => Incident, (incident) => incident.checkpoint)
   incidents: Incident[];
 
   @OneToMany(() => PatrolRoutePoint, (routePoint) => routePoint.checkpoint)
   routePoints: PatrolRoutePoint[];
 
-  @OneToMany(() => CheckpointRecord, (checkpointRecord) => checkpointRecord.checkpoint)
+  @OneToMany(
+    () => CheckpointRecord,
+    (checkpointRecord) => checkpointRecord.checkpoint
+  )
   checkpointRecords: CheckpointRecord[];
 
   @CreateDateColumn({ type: "timestamptz" })
