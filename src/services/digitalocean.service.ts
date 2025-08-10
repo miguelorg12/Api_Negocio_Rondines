@@ -59,17 +59,39 @@ export class DigitalOceanService {
         throw new Error("El archivo está vacío o no se pudo leer");
       }
 
-      // Convertir el stream a Buffer
+      // Usar el método nativo de AWS SDK para convertir a Buffer
       const chunks: Uint8Array[] = [];
-      const reader = response.Body.transformToWebStream().getReader();
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
+      // Verificar si es un stream legible
+      if (
+        response.Body &&
+        typeof response.Body === "object" &&
+        "on" in response.Body
+      ) {
+        // Es un stream de Node.js
+        return new Promise((resolve, reject) => {
+          const chunks: Buffer[] = [];
+          (response.Body as any).on("data", (chunk: Buffer) =>
+            chunks.push(chunk)
+          );
+          (response.Body as any).on("end", () =>
+            resolve(Buffer.concat(chunks))
+          );
+          (response.Body as any).on("error", reject);
+        });
+      } else {
+        // Intentar con transformToWebStream como fallback
+        const chunks: Uint8Array[] = [];
+        const reader = response.Body.transformToWebStream().getReader();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+
+        return Buffer.concat(chunks);
       }
-
-      return Buffer.concat(chunks);
     } catch (error) {
       console.error(
         "Error al obtener contenido del archivo de Digital Ocean:",
