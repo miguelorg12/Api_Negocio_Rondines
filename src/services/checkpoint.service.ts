@@ -25,27 +25,35 @@ export class CheckpointService {
     const checkpoint = this.checkpointRepository.create({
       name: checkpointDto.name,
       branch: { id: checkpointDto.branch_id },
+      network: { id: checkpointDto.network_id },
     });
     return await this.checkpointRepository.save(checkpoint);
   }
 
   async getAll(): Promise<Checkpoint[]> {
     return await this.checkpointRepository.find({
-      relations: ["branch"],
+      relations: ["branch", "network"],
     });
   }
 
   async getById(id: number): Promise<Checkpoint | null> {
     return await this.checkpointRepository.findOne({
       where: { id },
-      relations: ["branch"],
+      relations: ["branch", "network"],
     });
   }
 
   async getByBranchId(branchId: number): Promise<Checkpoint[]> {
     return await this.checkpointRepository.find({
       where: { branch: { id: branchId } },
-      relations: ["branch"],
+      relations: ["branch", "network"],
+    });
+  }
+
+  async getByNetworkId(networkId: number): Promise<Checkpoint[]> {
+    return await this.checkpointRepository.find({
+      where: { network: { id: networkId } },
+      relations: ["branch", "network"],
     });
   }
 
@@ -62,6 +70,8 @@ export class CheckpointService {
     if (checkpointDto.name) updateData.name = checkpointDto.name;
     if (checkpointDto.branch_id)
       updateData.branch = { id: checkpointDto.branch_id };
+    if (checkpointDto.network_id)
+      updateData.network = { id: checkpointDto.network_id };
 
     await this.checkpointRepository.update(id, updateData);
     return await this.getById(id);

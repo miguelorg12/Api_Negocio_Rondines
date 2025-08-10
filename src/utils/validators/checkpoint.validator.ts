@@ -1,6 +1,7 @@
 import { body } from "express-validator";
 import { AppDataSource } from "@configs/data-source";
 import { Branch } from "@entities/branch.entity";
+import { Network } from "@entities/network.entity";
 
 export const CheckpointValidator = [
   body("name")
@@ -23,6 +24,20 @@ export const CheckpointValidator = [
       }
       return true;
     }),
+  body("network_id")
+    .exists()
+    .withMessage("El ID de la red es requerido")
+    .bail()
+    .isInt()
+    .withMessage("El ID de la red debe ser un número entero")
+    .custom(async (value) => {
+      const networkRepository = AppDataSource.getRepository(Network);
+      const network = await networkRepository.findOne({ where: { id: value } });
+      if (!network) {
+        throw new Error("Red no encontrada");
+      }
+      return true;
+    }),
 ];
 
 export const CheckpointUpdateValidator = [
@@ -40,6 +55,22 @@ export const CheckpointUpdateValidator = [
         const branch = await branchRepository.findOne({ where: { id: value } });
         if (!branch) {
           throw new Error("Sucursal no encontrada");
+        }
+      }
+      return true;
+    }),
+  body("network_id")
+    .optional()
+    .isInt()
+    .withMessage("El ID de la red debe ser un número entero")
+    .custom(async (value) => {
+      if (value) {
+        const networkRepository = AppDataSource.getRepository(Network);
+        const network = await networkRepository.findOne({
+          where: { id: value },
+        });
+        if (!network) {
+          throw new Error("Red no encontrada");
         }
       }
       return true;
