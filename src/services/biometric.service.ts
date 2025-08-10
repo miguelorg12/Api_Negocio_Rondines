@@ -27,45 +27,28 @@ export class BiometricService {
     console.log("=================================");
 
     try {
-      // 🔧 NUEVA FUNCIONALIDAD: Detectar puertos COM disponibles dinámicamente
       console.log("=== DETECTANDO PUERTOS COM DISPONIBLES ===");
       const availablePorts = await SerialPort.list();
-      console.log("Puertos disponibles:", availablePorts.map(p => ({ path: p.path, manufacturer: p.manufacturer })));
-      
-      // Filtrar solo puertos COM (Windows) o tty (Linux/Mac)
-      const comPorts = availablePorts.filter(port => 
-        port.path.toLowerCase().includes('com') || 
-        port.path.toLowerCase().includes('tty')
+      console.log(
+        "Puertos disponibles:",
+        availablePorts.map((p) => ({
+          path: p.path,
+          manufacturer: p.manufacturer,
+          vendorId: p.vendorId,
+          productId: p.productId,
+          pnpId: p.pnpId,
+          friendlyName: (p as any).friendlyName,
+        }))
       );
-      
-      console.log("Puertos COM/TTY filtrados:", comPorts.map(p => p.path));
-      
-      if (comPorts.length === 0) {
-        throw new Error("No se encontraron puertos COM disponibles. Verifica que el Arduino esté conectado.");
-      }
-      
-      // Seleccionar el primer puerto disponible
-      // Si hay un puerto específico en las variables de entorno, usarlo
-      const preferredPort = process.env.ARDUINO_PORT;
-      let selectedPort = comPorts[0];
-      
-      if (preferredPort) {
-        const preferred = comPorts.find(p => p.path.toLowerCase() === preferredPort.toLowerCase());
-        if (preferred) {
-          selectedPort = preferred;
-          console.log("Usando puerto preferido de variables de entorno:", selectedPort.path);
-        } else {
-          console.log("Puerto preferido no disponible, usando primer puerto disponible:", selectedPort.path);
-        }
-      } else {
-        console.log("Usando primer puerto disponible:", selectedPort.path);
-      }
-      
+
+      // Elegir mejor puerto: preferir ARDUINO_PORT, luego CH340 (VID 1A86, PID 7523), evitar Bluetooth
+      const selectedPort = await this.findBestArduinoPort(availablePorts);
       console.log("Puerto seleccionado:", selectedPort.path);
       console.log("Información del puerto:", {
         manufacturer: selectedPort.manufacturer,
-        serialNumber: selectedPort.serialNumber,
-        pnpId: selectedPort.pnpId
+        vendorId: selectedPort.vendorId,
+        productId: selectedPort.productId,
+        pnpId: selectedPort.pnpId,
       });
       console.log("==========================================");
 
@@ -491,5 +474,81 @@ export class BiometricService {
       path: session.port.path,
       status: session.port.isOpen ? "open" : "closed"
     };
+  }
+
+  // Helpers para detección de puerto Arduino
+  private isBluetoothPort(port: any): boolean {
+    const text = `${port.manufacturer || ""} ${port.pnpId || ""} ${(port as any).friendlyName || ""}`.toLowerCase();
+    return text.includes("bluetooth") || text.includes("bthenum");
+  }
+
+  private extractComNumber(path: string | undefined): number {
+    if (!path) return -1;
+    const match = path.toUpperCase().match(/COM(\d+)/);
+    return match ? parseInt(match[1], 10) : -1;
+  }
+
+  private async findBestArduinoPort(ports: Array<any>): Promise<any> {
+    if (!ports || ports.length === 0) {
+      throw new Error("No se encontraron puertos en el sistema");
+    }
+
+    const preferredPath = process.env.ARDUINO_PORT;
+
+    // 1) Intentar puerto preferido si está configurado
+    if (preferredPath) {
+      const preferred = ports.find(
+        (p) => p.path && p.path.toLowerCase() === preferredPath.toLowerCase()
+      );
+      if (preferred) {
+        console.log("Usando puerto preferido por variable de entorno:", preferred.path);
+        return preferred;
+      }
+      console.log("Puerto preferido no encontrado entre puertos listados, continuando con autodetección...");
+    }
+
+    // 2) Filtrar puertos no Bluetooth
+    const nonBluetooth = ports.filter((p) => !this.isBluetoothPort(p));
+
+    // 3) Buscar por VID/PID de CH340 (VID=1A86, PID=7523)
+    const isCH340 = (p: any) =>
+      (p.vendorId || "").toUpperCase() === "1A86" && (p.productId || "").toUpperCase() === "7523";
+
+    const ch340Candidates = nonBluetooth.filter(isCH340);
+    if (ch340Candidates.length > 0) {
+      // Si hay varios, elegir el de mayor COM number
+      const best = ch340Candidates.sort(
+        (a, b) => this.extractComNumber(b.path) - this.extractComNumber(a.path)
+      )[0];
+      console.log("Detectado CH340 por VID/PID, seleccionando:", best.path);
+      return best;
+    }
+
+    // 4) Heurística: manufacturer típico de CH340
+    const ch340ByManufacturer = nonBluetooth.filter((p) =>
+      `${p.manufacturer || ""}`.toLowerCase().includes("wch") ||
+      `${(p as any).friendlyName || ""}`.toLowerCase().includes("ch340")
+    );
+    if (ch340ByManufacturer.length > 0) {
+      const best = ch340ByManufacturer.sort(
+        (a, b) => this.extractComNumber(b.path) - this.extractComNumber(a.path)
+      )[0];
+      console.log("Detectado CH340 por fabricante/nombre, seleccionando:", best.path);
+      return best;
+    }
+
+    // 5) Último recurso: elegir el COM más alto no Bluetooth
+    const comSorted = nonBluetooth
+      .filter((p) => /com/i.test(p.path || ""))
+      .sort((a, b) => this.extractComNumber(b.path) - this.extractComNumber(a.path));
+
+    if (comSorted.length > 0) {
+      console.log("Seleccionando mayor COM no Bluetooth (fallback):", comSorted[0].path);
+      return comSorted[0];
+    }
+
+    // 6) Si no hay, elegir cualquiera
+    console.log("No se pudo filtrar, seleccionando primer puerto listado:");
+    return ports[0];
   }
 }
