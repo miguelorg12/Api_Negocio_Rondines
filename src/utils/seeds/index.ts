@@ -22,7 +22,7 @@ async function main() {
   await seedCompanies();
   await seedBranches();
   // await seedCheckpoints();
-  await seedGuards();
+  // await seedGuards();
   await seedShifts();
   // await seedPatrols();
   // await seedPatrolAssignments();

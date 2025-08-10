@@ -7,9 +7,12 @@ import {
   CreateDateColumn,
   JoinColumn,
   OneToMany,
+  BeforeUpdate,
+  BeforeInsert,
 } from "typeorm";
 import { Branch } from "./branch.entity";
 import { Checkpoint } from "./checkpoint.entity";
+import * as bcrypt from "bcrypt";
 
 @Entity("networks")
 export class Network {
@@ -34,4 +37,18 @@ export class Network {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updatedAt: Date;
+
+  @BeforeInsert()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
+
+  @BeforeUpdate()
+  async hashPasswordOnUpdate() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
 }
