@@ -161,7 +161,6 @@ export const markCheckpointPatrol = async (
     // 5. Llamar al servicio
     const result = await checkpointService.markChekpointPatrol(
       user_id,
-      nfc_uid,
       checkpoint_id
     );
 

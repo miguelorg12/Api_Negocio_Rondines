@@ -84,12 +84,6 @@ export const MarkCheckpointPatrolValidator = [
     .bail()
     .isInt({ min: 1 })
     .withMessage("El ID del usuario debe ser un número entero positivo"),
-  body("nfc_uid")
-    .exists()
-    .withMessage("El NFC UID es requerido")
-    .bail()
-    .isString()
-    .withMessage("El NFC UID debe ser una cadena de texto"),
   body("checkpoint_id")
     .exists()
     .withMessage("El ID del checkpoint es requerido")
