@@ -49,6 +49,8 @@ export class DigitalOceanService {
 
   async getESP32ConfigFileContent(filePath: string): Promise<Buffer> {
     try {
+      console.log(`[DigitalOcean] Descargando archivo: ${filePath}`);
+
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
         Key: filePath,
@@ -59,38 +61,56 @@ export class DigitalOceanService {
         throw new Error("El archivo está vacío o no se pudo leer");
       }
 
-      // Usar el método nativo de AWS SDK para convertir a Buffer
-      const chunks: Uint8Array[] = [];
+      console.log(
+        `[DigitalOcean] Content-Length del S3: ${response.ContentLength} bytes`
+      );
+      console.log(
+        `[DigitalOcean] Content-Type del S3: ${response.ContentType}`
+      );
 
-      // Verificar si es un stream legible
+      // Usar el método nativo de AWS SDK para convertir a Buffer
       if (
         response.Body &&
         typeof response.Body === "object" &&
         "on" in response.Body
       ) {
         // Es un stream de Node.js
+        console.log(`[DigitalOcean] Usando stream de Node.js`);
         return new Promise((resolve, reject) => {
           const chunks: Buffer[] = [];
-          (response.Body as any).on("data", (chunk: Buffer) =>
-            chunks.push(chunk)
-          );
-          (response.Body as any).on("end", () =>
-            resolve(Buffer.concat(chunks))
-          );
+          (response.Body as any).on("data", (chunk: Buffer) => {
+            console.log(`[DigitalOcean] Chunk recibido: ${chunk.length} bytes`);
+            chunks.push(chunk);
+          });
+          (response.Body as any).on("end", () => {
+            const finalBuffer = Buffer.concat(chunks);
+            console.log(
+              `[DigitalOcean] Buffer final: ${finalBuffer.length} bytes`
+            );
+            resolve(finalBuffer);
+          });
           (response.Body as any).on("error", reject);
         });
       } else {
         // Intentar con transformToWebStream como fallback
+        console.log(`[DigitalOcean] Usando transformToWebStream`);
         const chunks: Uint8Array[] = [];
         const reader = response.Body.transformToWebStream().getReader();
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          console.log(
+            `[DigitalOcean] Chunk web recibido: ${value.length} bytes`
+          );
           chunks.push(value);
         }
 
-        return Buffer.concat(chunks);
+        const finalBuffer = Buffer.concat(chunks);
+        console.log(
+          `[DigitalOcean] Buffer final web: ${finalBuffer.length} bytes`
+        );
+        return finalBuffer;
       }
     } catch (error) {
       console.error(
