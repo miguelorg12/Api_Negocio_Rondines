@@ -86,11 +86,7 @@ export class CheckpointService {
     return checkpoint;
   }
 
-  async markChekpointPatrol(
-    user_id: number,
-    nfc_uid: string,
-    checkpoint_id: number
-  ) {
+  async markChekpointPatrol(user_id: number, checkpoint_id: number) {
     // 1. Validar que el usuario tenga un turno en progreso
     const currentPatrolForUser = await this.patrolAssignmentRepository.findOne({
       where: {
