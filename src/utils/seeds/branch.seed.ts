@@ -9,13 +9,7 @@ export async function seedBranches() {
       address: "123 Main St, City, Country",
       company: { id: 1 },
       user: { id: 1 },
-      guards: [{ id: 6 }],
-    },
-    {
-      name: "Secondary Branch",
-      address: "456 Secondary St, City, Country",
-      company: { id: 1 },
-      user: { id: 2 },
+      guards: [{ id: 2 }],
     },
     {
       name: "Tertiary Branch",
@@ -28,11 +22,6 @@ export async function seedBranches() {
       address: "101 Quaternary St, City, Country",
       company: { id: 2 },
       user: { id: 4 },
-    },
-    {
-      name: "Quinary Branch",
-      address: "101 Quinary St, City, Country",
-      company: { id: 2 },
     },
   ];
 

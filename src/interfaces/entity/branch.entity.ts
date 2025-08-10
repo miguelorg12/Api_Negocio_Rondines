@@ -15,6 +15,7 @@ import { Incident } from "@entities/incident.entity";
 import { Patrol } from "@entities/patrol.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 import { User } from "./user.entity";
+import { Network } from "./network.entity";
 
 @Entity("branches")
 export class Branch {
@@ -51,6 +52,9 @@ export class Branch {
 
   @ManyToMany(() => User, (user) => user.branches)
   guards: User[];
+
+  @OneToMany(() => Network, (network) => network.branch)
+  networks: Network[];
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

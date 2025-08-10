@@ -16,6 +16,7 @@ import biometricRoutes from "./routes/biometric.route";
 import shiftValidationRoutes from "./routes/shift_validation.route";
 import shiftValidationBiometricRoutes from "./routes/shift_validation_biometric.route";
 import checkpointRecordRoutes from "./routes/checkpoint_record.route";
+import networkRoutes from "./routes/network.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
 
 const app = express();
@@ -71,5 +72,6 @@ apiRouter.use("/biometric", biometricRoutes);
 apiRouter.use("/shift-validation", shiftValidationRoutes);
 apiRouter.use("/shift-validation/biometric", shiftValidationBiometricRoutes);
 apiRouter.use("/checkpoint-records", checkpointRecordRoutes);
+apiRouter.use("/networks", networkRoutes);
 
 export default app;
