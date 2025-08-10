@@ -27,9 +27,51 @@ export class BiometricService {
     console.log("=================================");
 
     try {
-      // Crear conexión con Arduino
+      // 🔧 NUEVA FUNCIONALIDAD: Detectar puertos COM disponibles dinámicamente
+      console.log("=== DETECTANDO PUERTOS COM DISPONIBLES ===");
+      const availablePorts = await SerialPort.list();
+      console.log("Puertos disponibles:", availablePorts.map(p => ({ path: p.path, manufacturer: p.manufacturer })));
+      
+      // Filtrar solo puertos COM (Windows) o tty (Linux/Mac)
+      const comPorts = availablePorts.filter(port => 
+        port.path.toLowerCase().includes('com') || 
+        port.path.toLowerCase().includes('tty')
+      );
+      
+      console.log("Puertos COM/TTY filtrados:", comPorts.map(p => p.path));
+      
+      if (comPorts.length === 0) {
+        throw new Error("No se encontraron puertos COM disponibles. Verifica que el Arduino esté conectado.");
+      }
+      
+      // Seleccionar el primer puerto disponible
+      // Si hay un puerto específico en las variables de entorno, usarlo
+      const preferredPort = process.env.ARDUINO_PORT;
+      let selectedPort = comPorts[0];
+      
+      if (preferredPort) {
+        const preferred = comPorts.find(p => p.path.toLowerCase() === preferredPort.toLowerCase());
+        if (preferred) {
+          selectedPort = preferred;
+          console.log("Usando puerto preferido de variables de entorno:", selectedPort.path);
+        } else {
+          console.log("Puerto preferido no disponible, usando primer puerto disponible:", selectedPort.path);
+        }
+      } else {
+        console.log("Usando primer puerto disponible:", selectedPort.path);
+      }
+      
+      console.log("Puerto seleccionado:", selectedPort.path);
+      console.log("Información del puerto:", {
+        manufacturer: selectedPort.manufacturer,
+        serialNumber: selectedPort.serialNumber,
+        pnpId: selectedPort.pnpId
+      });
+      console.log("==========================================");
+
+      // Crear conexión con Arduino usando el puerto detectado
       const port = new SerialPort({
-        path: process.env.ARDUINO_PORT || "COM5",
+        path: selectedPort.path,
         baudRate: parseInt(process.env.ARDUINO_BAUDRATE || "9600"),
       });
 
@@ -64,6 +106,7 @@ export class BiometricService {
       console.log("Action recibida:", action);
       console.log("Action mapeada a número:", actionNumber);
       console.log("User ID:", user_id);
+      console.log("Puerto usado:", selectedPort.path);
       console.log("Enviando al Arduino:", `${actionNumber}\\n`);
       console.log("Luego enviando:", `${user_id}\\n`);
       console.log("========================");
@@ -87,7 +130,7 @@ export class BiometricService {
       return { session_id: sessionId };
     } catch (error) {
       console.error("Error en startRegistration:", error);
-      throw new Error("Error iniciando comunicación con Arduino");
+      throw new Error(`Error iniciando comunicación con Arduino: ${error.message}`);
     }
   }
 
@@ -195,6 +238,13 @@ export class BiometricService {
           status: "completed",
         };
         session.status = "completed";
+        // 🔧 CORRECCIÓN: Limpiar sesión automáticamente después de 3 segundos
+        setTimeout(() => {
+          console.log("=== AUTO CLEANUP ===");
+          console.log("Limpiando sesión automáticamente:", sessionId);
+          console.log("=====================");
+          this.cleanupSession(sessionId);
+        }, 3000);
       } else if (message.includes("Huella encontrada con ID:")) {
         // 🎯 NUEVO: Para validación
         const biometricId = parseInt(message.match(/(\d+)/)?.[1] || "0");
@@ -206,6 +256,13 @@ export class BiometricService {
           status: "completed",
         };
         session.status = "completed";
+        // 🔧 CORRECCIÓN: Limpiar sesión automáticamente después de 3 segundos
+        setTimeout(() => {
+          console.log("=== AUTO CLEANUP ===");
+          console.log("Limpiando sesión automáticamente:", sessionId);
+          console.log("=====================");
+          this.cleanupSession(sessionId);
+        }, 3000);
       } else if (message.includes("Huella no encontrada")) {
         // 🎯 NUEVO: Para validación
         eventData = {
@@ -214,6 +271,13 @@ export class BiometricService {
           status: "error",
         };
         session.status = "error";
+        // 🔧 CORRECCIÓN: Limpiar sesión automáticamente después de 3 segundos en caso de error
+        setTimeout(() => {
+          console.log("=== AUTO CLEANUP ERROR ===");
+          console.log("Limpiando sesión automáticamente por error:", sessionId);
+          console.log("==========================");
+          this.cleanupSession(sessionId);
+        }, 3000);
       } else if (message.includes("Error")) {
         eventData = {
           type: "error",
@@ -221,6 +285,27 @@ export class BiometricService {
           status: "error",
         };
         session.status = "error";
+        // 🔧 CORRECCIÓN: Limpiar sesión automáticamente después de 3 segundos en caso de error
+        setTimeout(() => {
+          console.log("=== AUTO CLEANUP ERROR ===");
+          console.log("Limpiando sesión automáticamente por error:", sessionId);
+          console.log("==========================");
+          this.cleanupSession(sessionId);
+        }, 3000);
+      } else if (message.includes("Proceso completado") || message.includes("Listo para el siguiente comando")) {
+        // 🔧 CORRECCIÓN: Manejar mensaje final del Arduino
+        eventData = {
+          type: "ready",
+          message: "Dispositivo listo para nueva operación",
+          status: "ready",
+        };
+        // Limpiar sesión inmediatamente cuando Arduino indica que está listo
+        setTimeout(() => {
+          console.log("=== AUTO CLEANUP READY ===");
+          console.log("Limpiando sesión automáticamente (Arduino listo):", sessionId);
+          console.log("==========================");
+          this.cleanupSession(sessionId);
+        }, 1000);
       }
 
       // Enviar a todos los clientes de esta sesión
@@ -250,20 +335,68 @@ export class BiometricService {
           client.write(`data: ${JSON.stringify(errorEvent)}\n\n`);
         }
       });
+
+      // 🔧 CORRECCIÓN CRÍTICA: Limpiar sesión automáticamente en caso de error de puerto
+      setTimeout(() => {
+        console.log("=== AUTO CLEANUP PORT ERROR ===");
+        console.log("Limpiando sesión automáticamente por error de puerto:", sessionId);
+        console.log("=================================");
+        this.cleanupSession(sessionId);
+      }, 2000);
     });
   }
 
   cleanupSession(sessionId: string): void {
+    console.log("=== CLEANUP SESSION ===");
+    console.log("Session ID:", sessionId);
+    console.log("Active sessions before cleanup:", this.activeSessions.size);
+
     const session = this.activeSessions.get(sessionId);
     if (session) {
-      session.port.close();
-      session.clients.forEach((client) => {
-        if (client.end) {
-          client.end();
+      try {
+        // Cerrar puerto serial de forma segura
+        if (session.port && session.port.isOpen) {
+          session.port.close((err) => {
+            if (err) {
+              console.error("Error cerrando puerto serial:", err);
+            } else {
+              console.log("Puerto serial cerrado correctamente");
+            }
+          });
         }
-      });
-      this.activeSessions.delete(sessionId);
+
+        // Cerrar todas las conexiones SSE
+        session.clients.forEach((client) => {
+          try {
+            if (client.write) {
+              client.write(`data: ${JSON.stringify({
+                type: "session_closed",
+                message: "Sesión cerrada",
+                status: "closed"
+              })}\n\n`);
+            }
+            if (client.end) {
+              client.end();
+            }
+          } catch (error) {
+            console.error("Error cerrando cliente SSE:", error);
+          }
+        });
+
+        // Eliminar sesión del mapa
+        this.activeSessions.delete(sessionId);
+        console.log("Sesión eliminada del mapa");
+        console.log("Active sessions after cleanup:", this.activeSessions.size);
+
+      } catch (error) {
+        console.error("Error durante cleanup de sesión:", error);
+        // Forzar eliminación de la sesión incluso si hay errores
+        this.activeSessions.delete(sessionId);
+      }
+    } else {
+      console.log("Sesión no encontrada para cleanup");
     }
+    console.log("=======================");
   }
 
   getSessionStatus(
@@ -286,5 +419,77 @@ export class BiometricService {
 
   getActiveSessionIds(): string[] {
     return Array.from(this.activeSessions.keys());
+  }
+
+  // 🔧 MÉTODO: Forzar limpieza de todas las sesiones
+  forceCleanupAllSessions(): void {
+    console.log("=== FORCE CLEANUP ALL SESSIONS ===");
+    console.log("Sesiones activas antes de limpieza forzada:", this.activeSessions.size);
+
+    const sessionIds = Array.from(this.activeSessions.keys());
+    sessionIds.forEach(sessionId => {
+      console.log("Forzando limpieza de sesión:", sessionId);
+      this.cleanupSession(sessionId);
+    });
+
+    console.log("Sesiones activas después de limpieza forzada:", this.activeSessions.size);
+    console.log("=============================================");
+  }
+
+  // 🔧 NUEVO MÉTODO: Listar todos los puertos COM disponibles
+  async listAvailablePorts(): Promise<Array<{
+    path: string;
+    manufacturer?: string;
+    serialNumber?: string;
+    pnpId?: string;
+    locationId?: string;
+    productId?: string;
+    vendorId?: string;
+  }>> {
+    try {
+      console.log("=== LISTANDO PUERTOS DISPONIBLES ===");
+      const availablePorts = await SerialPort.list();
+      
+      // Filtrar solo puertos COM (Windows) o tty (Linux/Mac)
+      const comPorts = availablePorts.filter(port => 
+        port.path.toLowerCase().includes('com') || 
+        port.path.toLowerCase().includes('tty')
+      );
+      
+      console.log("Total de puertos encontrados:", availablePorts.length);
+      console.log("Puertos COM/TTY filtrados:", comPorts.length);
+      
+      // Mapear solo la información relevante
+      const portInfo = comPorts.map(port => ({
+        path: port.path,
+        manufacturer: port.manufacturer,
+        serialNumber: port.serialNumber,
+        pnpId: port.pnpId,
+        locationId: port.locationId,
+        productId: port.productId,
+        vendorId: port.vendorId
+      }));
+      
+      console.log("Información de puertos COM:", portInfo);
+      console.log("=====================================");
+      
+      return portInfo;
+    } catch (error) {
+      console.error("Error listando puertos disponibles:", error);
+      throw new Error(`Error listando puertos: ${error.message}`);
+    }
+  }
+
+  // 🔧 NUEVO MÉTODO: Obtener información del puerto actual en uso
+  getCurrentPortInfo(sessionId: string): { path: string; status: string } | null {
+    const session = this.activeSessions.get(sessionId);
+    if (!session || !session.port) {
+      return null;
+    }
+    
+    return {
+      path: session.port.path,
+      status: session.port.isOpen ? "open" : "closed"
+    };
   }
 }

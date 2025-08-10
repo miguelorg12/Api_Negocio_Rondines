@@ -297,3 +297,96 @@ export const debugActiveSessions = async (
     });
   }
 };
+
+// 🔧 CONTROLADOR: Forzar limpieza de todas las sesiones
+export const forceCleanupAllSessions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    console.log("=== FORCE CLEANUP ENDPOINT ===");
+    console.log("Solicitud de limpieza forzada recibida");
+
+    biometricService.forceCleanupAllSessions();
+
+    return res.status(200).json({
+      message: "Limpieza forzada de todas las sesiones completada",
+      data: {
+        active_sessions_after: biometricService.getActiveSessionsCount(),
+      },
+    });
+  } catch (error) {
+    console.error("Error en limpieza forzada:", error);
+    return res.status(500).json({
+      error: "Error durante limpieza forzada",
+    });
+  }
+};
+
+// 🔧 NUEVO CONTROLADOR: Listar todos los puertos COM disponibles
+export const listAvailablePorts = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    console.log("=== LISTANDO PUERTOS DISPONIBLES ===");
+    const ports = await biometricService.listAvailablePorts();
+    
+    return res.status(200).json({
+      message: "Puertos COM disponibles obtenidos",
+      data: {
+        total_ports: ports.length,
+        ports: ports,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error("Error listando puertos disponibles:", error);
+    return res.status(500).json({
+      error: "Error listando puertos disponibles",
+      details: error.message
+    });
+  }
+};
+
+// 🔧 NUEVO CONTROLADOR: Obtener información del puerto actual de una sesión
+export const getCurrentPortInfo = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { sessionId } = req.params;
+    
+    if (!sessionId) {
+      return res.status(400).json({
+        error: "sessionId es requerido"
+      });
+    }
+    
+    console.log("=== OBTENIENDO INFO DEL PUERTO ACTUAL ===");
+    console.log("Session ID:", sessionId);
+    
+    const portInfo = biometricService.getCurrentPortInfo(sessionId);
+    
+    if (!portInfo) {
+      return res.status(404).json({
+        error: "Sesión no encontrada o sin puerto activo"
+      });
+    }
+    
+    return res.status(200).json({
+      message: "Información del puerto obtenida",
+      data: {
+        session_id: sessionId,
+        port_info: portInfo,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error("Error obteniendo información del puerto:", error);
+    return res.status(500).json({
+      error: "Error obteniendo información del puerto",
+      details: error.message
+    });
+  }
+};
