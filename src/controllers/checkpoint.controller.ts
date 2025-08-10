@@ -46,6 +46,20 @@ export const getCheckpointsByBranchId = async (
   });
 };
 
+export const getCheckpointsByNetworkId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { networkId } = req.params;
+  const checkpoints = await checkpointService.getByNetworkId(
+    parseInt(networkId)
+  );
+  return res.status(200).json({
+    message: "Checkpoints obtenidos correctamente",
+    data: checkpoints,
+  });
+};
+
 export const createCheckpoint = async (
   req: Request,
   res: Response

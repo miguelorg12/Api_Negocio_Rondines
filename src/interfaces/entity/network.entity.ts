@@ -37,18 +37,4 @@ export class Network {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updatedAt: Date;
-
-  @BeforeInsert()
-  async hashPassword() {
-    if (this.password) {
-      this.password = await bcrypt.hash(this.password, 10);
-    }
-  }
-
-  @BeforeUpdate()
-  async hashPasswordOnUpdate() {
-    if (this.password) {
-      this.password = await bcrypt.hash(this.password, 10);
-    }
-  }
 }

@@ -3,6 +3,7 @@ import {
   getAllCheckpoints,
   getCheckpointById,
   getCheckpointsByBranchId,
+  getCheckpointsByNetworkId,
   createCheckpoint,
   updateCheckpoint,
   deleteCheckpoint,
@@ -43,7 +44,11 @@ const router = Router();
  */
 router.get("/", authenticateToken, getAllCheckpoints);
 
-router.post("/mark-checkpoint", MarkCheckpointPatrolValidator, markCheckpointPatrol);
+router.post(
+  "/mark-checkpoint",
+  MarkCheckpointPatrolValidator,
+  markCheckpointPatrol
+);
 /**
  * @swagger
  * /checkpoints/{id}:
@@ -114,6 +119,40 @@ router.get("/branch/:branchId", authenticateToken, getCheckpointsByBranchId);
 
 /**
  * @swagger
+ * /checkpoints/network/{networkId}:
+ *   get:
+ *     summary: Obtener checkpoints por red
+ *     tags: [Checkpoints]
+ *     description: Retorna todos los checkpoints de una red específica
+ *     parameters:
+ *       - in: path
+ *         name: networkId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la red
+ *     responses:
+ *       200:
+ *         description: Checkpoints obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Checkpoints obtenidos correctamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Checkpoint'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/network/:networkId", authenticateToken, getCheckpointsByNetworkId);
+
+/**
+ * @swagger
  * /checkpoints:
  *   post:
  *     summary: Crear un nuevo checkpoint
@@ -128,6 +167,7 @@ router.get("/branch/:branchId", authenticateToken, getCheckpointsByBranchId);
  *             required:
  *               - name
  *               - branch_id
+ *               - network_id
  *             properties:
  *               name:
  *                 type: string
@@ -135,6 +175,9 @@ router.get("/branch/:branchId", authenticateToken, getCheckpointsByBranchId);
  *               branch_id:
  *                 type: integer
  *                 description: ID de la sucursal
+ *               network_id:
+ *                 type: integer
+ *                 description: ID de la red
  *     responses:
  *       201:
  *         description: Checkpoint creado exitosamente
@@ -188,6 +231,9 @@ router.post("/", authenticateToken, CheckpointValidator, createCheckpoint);
  *               branch_id:
  *                 type: integer
  *                 description: ID de la sucursal
+ *               network_id:
+ *                 type: integer
+ *                 description: ID de la red
  *     responses:
  *       200:
  *         description: Checkpoint actualizado exitosamente
