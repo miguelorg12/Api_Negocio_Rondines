@@ -16,12 +16,16 @@ export class CheckpointRecordService {
   private checkpointRepository: Repository<Checkpoint>;
 
   constructor() {
-    this.checkpointRecordRepository = AppDataSource.getRepository(CheckpointRecord);
-    this.patrolAssignmentRepository = AppDataSource.getRepository(PatrolAssignment);
+    this.checkpointRecordRepository =
+      AppDataSource.getRepository(CheckpointRecord);
+    this.patrolAssignmentRepository =
+      AppDataSource.getRepository(PatrolAssignment);
     this.checkpointRepository = AppDataSource.getRepository(Checkpoint);
   }
 
-  async create(data: CheckpointRecordCreateRequest): Promise<CheckpointRecordResponse> {
+  async create(
+    data: CheckpointRecordCreateRequest
+  ): Promise<CheckpointRecordResponse> {
     // Verificar que la patrol assignment existe
     const patrolAssignment = await this.patrolAssignmentRepository.findOne({
       where: { id: data.patrol_assignment_id },
@@ -50,7 +54,9 @@ export class CheckpointRecordService {
     });
 
     if (existingRecord) {
-      throw new Error("Ya existe un registro para esta asignación y checkpoint");
+      throw new Error(
+        "Ya existe un registro para esta asignación y checkpoint"
+      );
     }
 
     const checkpointRecord = this.checkpointRecordRepository.create({
@@ -60,15 +66,28 @@ export class CheckpointRecordService {
       status: "pending",
     });
 
-    const savedRecord = await this.checkpointRecordRepository.save(checkpointRecord);
+    const savedRecord = await this.checkpointRecordRepository.save(
+      checkpointRecord
+    );
 
     return this.formatResponse(savedRecord);
   }
 
-  async update(id: number, data: CheckpointRecordUpdateRequest): Promise<CheckpointRecordResponse> {
+  async update(
+    id: number,
+    data: CheckpointRecordUpdateRequest
+  ): Promise<CheckpointRecordResponse> {
     const checkpointRecord = await this.checkpointRecordRepository.findOne({
       where: { id },
-      relations: ["patrolAssignment", "patrolAssignment.user", "patrolAssignment.patrol", "patrolAssignment.patrol.routePoints", "patrolAssignment.patrol.routePoints.checkpoint", "patrolAssignment.shift", "checkpoint"],
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.user",
+        "patrolAssignment.patrol",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
+        "patrolAssignment.shift",
+        "checkpoint",
+      ],
     });
 
     if (!checkpointRecord) {
@@ -83,7 +102,9 @@ export class CheckpointRecordService {
       checkpointRecord.real_check = new Date(data.real_check);
     }
 
-    const updatedRecord = await this.checkpointRecordRepository.save(checkpointRecord);
+    const updatedRecord = await this.checkpointRecordRepository.save(
+      checkpointRecord
+    );
 
     return this.formatResponse(updatedRecord);
   }
@@ -91,7 +112,15 @@ export class CheckpointRecordService {
   async findById(id: number): Promise<CheckpointRecordResponse> {
     const checkpointRecord = await this.checkpointRecordRepository.findOne({
       where: { id },
-      relations: ["patrolAssignment", "patrolAssignment.user", "patrolAssignment.patrol", "patrolAssignment.patrol.routePoints", "patrolAssignment.patrol.routePoints.checkpoint", "patrolAssignment.shift", "checkpoint"],
+      relations: [
+        "patrolAssignment",
+        "patrolAssignment.user",
+        "patrolAssignment.patrol",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
+        "patrolAssignment.shift",
+        "checkpoint",
+      ],
     });
 
     if (!checkpointRecord) {
@@ -101,10 +130,15 @@ export class CheckpointRecordService {
     return this.formatResponse(checkpointRecord);
   }
 
-  async findAll(filters: CheckpointRecordFilterRequest = {}): Promise<CheckpointRecordResponse[]> {
+  async findAll(
+    filters: CheckpointRecordFilterRequest = {}
+  ): Promise<CheckpointRecordResponse[]> {
     const queryBuilder = this.checkpointRecordRepository
       .createQueryBuilder("checkpointRecord")
-      .leftJoinAndSelect("checkpointRecord.patrolAssignment", "patrolAssignment")
+      .leftJoinAndSelect(
+        "checkpointRecord.patrolAssignment",
+        "patrolAssignment"
+      )
       .leftJoinAndSelect("patrolAssignment.user", "user")
       .leftJoinAndSelect("patrolAssignment.patrol", "patrol")
       .leftJoinAndSelect("patrolAssignment.shift", "shift")
@@ -152,7 +186,10 @@ export class CheckpointRecordService {
   async findAllByBranchId(branchId: number): Promise<any[]> {
     const queryBuilder = this.checkpointRecordRepository
       .createQueryBuilder("checkpointRecord")
-      .leftJoinAndSelect("checkpointRecord.patrolAssignment", "patrolAssignment")
+      .leftJoinAndSelect(
+        "checkpointRecord.patrolAssignment",
+        "patrolAssignment"
+      )
       .leftJoinAndSelect("patrolAssignment.user", "user")
       .leftJoinAndSelect("patrolAssignment.patrol", "patrol")
       .leftJoinAndSelect("patrolAssignment.shift", "shift")
@@ -160,44 +197,22 @@ export class CheckpointRecordService {
       .leftJoinAndSelect("checkpoint.branch", "branch")
       .leftJoinAndSelect("patrol.routePoints", "routePoints")
       .leftJoinAndSelect("routePoints.checkpoint", "routeCheckpoint")
-      .where("branch.id = :branchId", { branchId })
+      .where("checkpoint.branch.id = :branchId", { branchId })
       .orderBy("checkpointRecord.created_at", "DESC");
 
     const records = await queryBuilder.getMany();
-    
+
     // Agrupar por patrol assignment para evitar duplicados
-    const groupedRecords = new Map();
-    
+    const groupedByAssignment = new Map();
+
     records.forEach((record) => {
       const assignmentId = record.patrolAssignment.id;
-      
-      if (!groupedRecords.has(assignmentId)) {
-        // Buscar las coordenadas en patrol_route_points
-        const routePoints = record.patrolAssignment.patrol.routePoints?.map(routePoint => {
-          const checkpointRecord = records.find(cr => 
-            cr.checkpoint.id === routePoint.checkpoint.id && 
-            cr.patrolAssignment.id === assignmentId
-          );
-          
-          return {
-            id: routePoint.id,
-            order: routePoint.order,
-            latitude: routePoint.latitude,
-            longitude: routePoint.longitude,
-            checkpoint: {
-              id: routePoint.checkpoint.id,
-              name: routePoint.checkpoint.name,
-              nfc_uid: routePoint.checkpoint.nfc_uid,
-              status: checkpointRecord?.status || "pending",
-              check_time: checkpointRecord?.check_time?.toISOString(),
-              real_check: checkpointRecord?.real_check?.toISOString(),
-            },
-          };
-        }) || [];
 
-        groupedRecords.set(assignmentId, {
-          id: record.patrolAssignment.id,
-          date: record.patrolAssignment.date.toISOString(),
+      if (!groupedByAssignment.has(assignmentId)) {
+        // Crear nueva entrada para esta asignación
+        groupedByAssignment.set(assignmentId, {
+          id: assignmentId,
+          date: record.patrolAssignment.date,
           user: {
             id: record.patrolAssignment.user.id,
             name: record.patrolAssignment.user.name,
@@ -211,30 +226,49 @@ export class CheckpointRecordService {
             id: record.patrolAssignment.shift.id,
             name: record.patrolAssignment.shift.name,
           },
-          branch: {
-            id: record.checkpoint.branch.id,
-            name: record.checkpoint.branch.name,
-          },
-          routePoints: routePoints,
+          checkpoints: [], // Solo checkpoints que tienen CheckpointRecord
         });
       }
+
+      // Buscar el routePoint correspondiente para obtener order, lat, lng
+      const routePoint = record.patrolAssignment.patrol.routePoints?.find(
+        (rp) => rp.checkpoint.id === record.checkpoint.id
+      );
+
+      // Agregar este checkpoint (que SÍ tiene CheckpointRecord)
+      const assignment = groupedByAssignment.get(assignmentId);
+      assignment.checkpoints.push({
+        id: record.checkpoint.id,
+        name: record.checkpoint.name,
+        nfc_uid: record.checkpoint.nfc_uid,
+        order: routePoint?.order || 0,
+        latitude: routePoint?.latitude || null,
+        longitude: routePoint?.longitude || null,
+        status: record.status,
+        check_time: record.check_time,
+        real_check: record.real_check,
+        created_at: record.created_at,
+      });
     });
 
-    return Array.from(groupedRecords.values());
+    // Convertir el Map a array y ordenar por fecha
+    return Array.from(groupedByAssignment.values()).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
   }
 
   async findByIdWithFullInfo(id: number): Promise<CheckpointRecordResponse> {
     const checkpointRecord = await this.checkpointRecordRepository.findOne({
       where: { id },
       relations: [
-        "patrolAssignment", 
-        "patrolAssignment.user", 
-        "patrolAssignment.patrol", 
-        "patrolAssignment.patrol.routePoints", 
-        "patrolAssignment.patrol.routePoints.checkpoint", 
-        "patrolAssignment.shift", 
+        "patrolAssignment",
+        "patrolAssignment.user",
+        "patrolAssignment.patrol",
+        "patrolAssignment.patrol.routePoints",
+        "patrolAssignment.patrol.routePoints.checkpoint",
+        "patrolAssignment.shift",
         "checkpoint",
-        "checkpoint.branch"
+        "checkpoint.branch",
       ],
     });
 
@@ -245,17 +279,24 @@ export class CheckpointRecordService {
     return this.formatResponse(checkpointRecord);
   }
 
-  async findAllByPatrolAssignmentId(patrolAssignmentId: number): Promise<CheckpointRecordResponse[]> {
+  async findAllByPatrolAssignmentId(
+    patrolAssignmentId: number
+  ): Promise<CheckpointRecordResponse[]> {
     const queryBuilder = this.checkpointRecordRepository
       .createQueryBuilder("checkpointRecord")
-      .leftJoinAndSelect("checkpointRecord.patrolAssignment", "patrolAssignment")
+      .leftJoinAndSelect(
+        "checkpointRecord.patrolAssignment",
+        "patrolAssignment"
+      )
       .leftJoinAndSelect("patrolAssignment.user", "user")
       .leftJoinAndSelect("patrolAssignment.patrol", "patrol")
       .leftJoinAndSelect("patrolAssignment.shift", "shift")
       .leftJoinAndSelect("checkpointRecord.checkpoint", "checkpoint")
       .leftJoinAndSelect("patrol.routePoints", "routePoints")
       .leftJoinAndSelect("routePoints.checkpoint", "routeCheckpoint")
-      .where("patrolAssignment.id = :patrolAssignmentId", { patrolAssignmentId })
+      .where("patrolAssignment.id = :patrolAssignmentId", {
+        patrolAssignmentId,
+      })
       .orderBy("checkpointRecord.created_at", "DESC");
 
     const records = await queryBuilder.getMany();
@@ -274,11 +315,14 @@ export class CheckpointRecordService {
     await this.checkpointRecordRepository.softDelete(id);
   }
 
-  private formatResponse(checkpointRecord: CheckpointRecord): CheckpointRecordResponse {
+  private formatResponse(
+    checkpointRecord: CheckpointRecord
+  ): CheckpointRecordResponse {
     // Buscar las coordenadas en patrol_route_points
-    const routePoint = checkpointRecord.patrolAssignment.patrol.routePoints?.find(
-      (rp) => rp.checkpoint.id === checkpointRecord.checkpoint.id
-    );
+    const routePoint =
+      checkpointRecord.patrolAssignment.patrol.routePoints?.find(
+        (rp) => rp.checkpoint.id === checkpointRecord.checkpoint.id
+      );
 
     return {
       id: checkpointRecord.id,
