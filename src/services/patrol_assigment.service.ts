@@ -23,18 +23,21 @@ export class PatrolAssignmentService {
       AppDataSource.getRepository(PatrolAssignment);
     this.patrolRecordService = new PatrolRecordService();
     this.patrolRepository = AppDataSource.getRepository(Patrol);
-    this.checkpointRecordRepository = AppDataSource.getRepository(CheckpointRecord);
-    this.patrolRoutePointRepository = AppDataSource.getRepository(PatrolRoutePoint);
+    this.checkpointRecordRepository =
+      AppDataSource.getRepository(CheckpointRecord);
+    this.patrolRoutePointRepository =
+      AppDataSource.getRepository(PatrolRoutePoint);
   }
 
   async create(
     patrolAssignmentDto: PatrolAssignmentDto
   ): Promise<PatrolAssignment> {
     // Validar si el guardia ya tiene una asignación para el día específico
-    const assignmentDate = patrolAssignmentDto.date instanceof Date 
-      ? patrolAssignmentDto.date 
-      : new Date(patrolAssignmentDto.date);
-      
+    const assignmentDate =
+      patrolAssignmentDto.date instanceof Date
+        ? patrolAssignmentDto.date
+        : new Date(patrolAssignmentDto.date);
+
     const existingAssignment = await this.patrolAssignmentRepository.findOne({
       where: {
         user: { id: patrolAssignmentDto.user_id },
@@ -45,7 +48,7 @@ export class PatrolAssignmentService {
 
     if (existingAssignment) {
       const dateString = assignmentDate.toISOString().split("T")[0];
-      
+
       throw new Error(
         `El guardia ya tiene una asignación para el día ${dateString}. No se puede crear otra asignación.`
       );
@@ -68,9 +71,6 @@ export class PatrolAssignmentService {
       status: "pendiente",
       patrol_assignment_id: savedAssignment.id,
     });
-
-    // Crear los checkpoint records automáticamente
-    await this.createCheckpointRecordsForAssignment(savedAssignment.id);
 
     return savedAssignment;
   }
@@ -115,10 +115,12 @@ export class PatrolAssignmentService {
     if (!patrolAssigment) {
       throw new Error("Ruta asignada no encontrada");
     }
-    
+
     // Eliminar los checkpoint records asociados
-    await this.checkpointRecordRepository.softDelete({ patrolAssignment: { id } });
-    
+    await this.checkpointRecordRepository.softDelete({
+      patrolAssignment: { id },
+    });
+
     await this.patrolRecordService.delete(id);
     await this.patrolAssignmentRepository.softDelete(id);
     return patrolAssigment;
@@ -200,99 +202,13 @@ export class PatrolAssignmentService {
     }
 
     // Eliminar los checkpoint records asociados
-    await this.checkpointRecordRepository.softDelete({ patrolAssignment: { id } });
+    await this.checkpointRecordRepository.softDelete({
+      patrolAssignment: { id },
+    });
 
     // Soft delete de la asignación
     await this.patrolAssignmentRepository.softDelete(id);
 
     return existingAssignment;
-  }
-
-  /**
-   * Crear checkpoint records automáticamente para una asignación de patrulla
-   */
-  private async createCheckpointRecordsForAssignment(assignmentId: number): Promise<void> {
-    // Obtener la asignación con todas las relaciones necesarias
-    const assignment = await this.patrolAssignmentRepository.findOne({
-      where: { id: assignmentId },
-      relations: ["patrol", "patrol.routePoints", "patrol.routePoints.checkpoint", "shift"],
-    });
-
-    if (!assignment) {
-      throw new Error("Asignación de patrulla no encontrada");
-    }
-
-    // Obtener los route points ordenados por el campo 'order'
-    const routePoints = await this.patrolRoutePointRepository.find({
-      where: { patrol: { id: assignment.patrol.id } },
-      relations: ["checkpoint"],
-      order: { order: "ASC" },
-    });
-
-    if (routePoints.length === 0) {
-      console.log(`No hay checkpoints configurados para la patrulla ${assignment.patrol.id}`);
-      return;
-    }
-
-    // Calcular las horas de verificación basadas en el turno
-    const shiftStart = new Date(assignment.shift.start_time);
-    const shiftEnd = new Date(assignment.shift.end_time);
-    const assignmentDate = new Date(assignment.date);
-
-    // Calcular la duración total del turno en minutos
-    let shiftDurationMinutes = (shiftEnd.getTime() - shiftStart.getTime()) / (1000 * 60);
-    
-    // Manejar el caso del turno nocturno que cruza la medianoche
-    if (shiftEnd.getTime() < shiftStart.getTime()) {
-      // El turno nocturno cruza la medianoche, sumar 24 horas al final
-      const nextDay = new Date(shiftEnd);
-      nextDay.setDate(nextDay.getDate() + 1);
-      shiftDurationMinutes = (nextDay.getTime() - shiftStart.getTime()) / (1000 * 60);
-    }
-    
-    // Distribuir los checkpoints uniformemente durante el turno
-    const timeIntervalMinutes = shiftDurationMinutes / (routePoints.length + 1); // +1 para evitar que el último checkpoint sea al final del turno
-
-    const checkpointRecords = [];
-
-    for (let i = 0; i < routePoints.length; i++) {
-      const routePoint = routePoints[i];
-      
-      // Calcular la hora de verificación para este checkpoint
-      const checkTime = new Date(assignmentDate);
-      const minutesFromStart = (i + 1) * timeIntervalMinutes; // +1 para que el primer checkpoint no sea al inicio del turno
-      
-      // Calcular la hora exacta
-      const totalMinutes = shiftStart.getMinutes() + minutesFromStart;
-      const additionalHours = Math.floor(totalMinutes / 60);
-      const finalMinutes = totalMinutes % 60;
-      
-      checkTime.setHours(
-        shiftStart.getHours() + additionalHours,
-        finalMinutes,
-        0,
-        0
-      );
-      
-      // Manejar el caso del turno nocturno que cruza la medianoche
-      if (shiftEnd.getTime() < shiftStart.getTime() && checkTime.getHours() < shiftStart.getHours()) {
-        checkTime.setDate(checkTime.getDate() + 1);
-      }
-
-      const checkpointRecord = this.checkpointRecordRepository.create({
-        patrolAssignment: assignment,
-        checkpoint: routePoint.checkpoint,
-        check_time: checkTime,
-        status: "pending",
-      });
-
-      checkpointRecords.push(checkpointRecord);
-    }
-
-    // Guardar todos los checkpoint records
-    if (checkpointRecords.length > 0) {
-      await this.checkpointRecordRepository.save(checkpointRecords);
-      console.log(`✅ Se crearon ${checkpointRecords.length} checkpoint records para la asignación ${assignmentId}`);
-    }
   }
 }
