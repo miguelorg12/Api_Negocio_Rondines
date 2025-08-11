@@ -226,24 +226,39 @@ export class CheckpointRecordService {
             id: record.patrolAssignment.shift.id,
             name: record.patrolAssignment.shift.name,
           },
-          checkpoints: [], // Solo checkpoints que tienen CheckpointRecord
+          // TODOS los checkpoints de la ruta (para dibujar el mapa)
+          routeCheckpoints:
+            record.patrolAssignment.patrol.routePoints?.map((routePoint) => ({
+              id: routePoint.checkpoint.id,
+              name: routePoint.checkpoint.name,
+              nfc_uid: routePoint.checkpoint.nfc_uid,
+              order: routePoint.order,
+              latitude: routePoint.latitude,
+              longitude: routePoint.longitude,
+            })) || [],
+          // Solo los checkpoint records marcados
+          checkpointRecords: [],
         });
       }
 
-      // Buscar el routePoint correspondiente para obtener order, lat, lng
-      const routePoint = record.patrolAssignment.patrol.routePoints?.find(
-        (rp) => rp.checkpoint.id === record.checkpoint.id
-      );
-
-      // Agregar este checkpoint (que SÍ tiene CheckpointRecord)
+      // Agregar este checkpoint record (que SÍ existe)
       const assignment = groupedByAssignment.get(assignmentId);
-      assignment.checkpoints.push({
+      assignment.checkpointRecords.push({
         id: record.checkpoint.id,
         name: record.checkpoint.name,
         nfc_uid: record.checkpoint.nfc_uid,
-        order: routePoint?.order || 0,
-        latitude: routePoint?.latitude || null,
-        longitude: routePoint?.longitude || null,
+        order:
+          record.patrolAssignment.patrol.routePoints?.find(
+            (rp) => rp.checkpoint.id === record.checkpoint.id
+          )?.order || 0,
+        latitude:
+          record.patrolAssignment.patrol.routePoints?.find(
+            (rp) => rp.checkpoint.id === record.checkpoint.id
+          )?.latitude || null,
+        longitude:
+          record.patrolAssignment.patrol.routePoints?.find(
+            (rp) => rp.checkpoint.id === record.checkpoint.id
+          )?.longitude || null,
         status: record.status,
         check_time: record.check_time,
         real_check: record.real_check,
