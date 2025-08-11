@@ -137,24 +137,19 @@ export const markCheckpointPatrol = async (
     }
 
     // 2. Extraer datos del body
-    const { user_id, nfc_uid, checkpoint_id } = req.body;
+    const { user_id, checkpoint_id } = req.body;
 
     // 3. Validar datos requeridos
-    if (!user_id || !nfc_uid || !checkpoint_id) {
+    if (!user_id || !checkpoint_id) {
       return res.status(400).json({
-        message: "user_id, nfc_uid y checkpoint_id son requeridos",
+        message: "user_id y checkpoint_id son requeridos",
       });
     }
 
     // 4. Validar tipos de datos
-    if (
-      typeof user_id !== "number" ||
-      typeof nfc_uid !== "string" ||
-      typeof checkpoint_id !== "number"
-    ) {
+    if (typeof user_id !== "number" || typeof checkpoint_id !== "number") {
       return res.status(400).json({
-        message:
-          "user_id y checkpoint_id deben ser números, nfc_uid debe ser string",
+        message: "user_id y checkpoint_id deben ser números",
       });
     }
 
