@@ -140,7 +140,7 @@ export class CheckpointService {
       throw new Error("El checkpoint no está en la ruta asignada al usuario");
     }
 
-    // 5. Buscar el checkpoint record existente o crear uno nuevo
+    // 5. Buscar el checkpoint record existente
     let checkpointRecord = await this.checkpointRecordRepository.findOne({
       where: {
         patrolAssignment: { id: currentPatrolForUser.id },
@@ -148,70 +148,9 @@ export class CheckpointService {
       },
     });
 
-    // Si no existe el checkpoint record, lo creamos
-    if (!checkpointRecord) {
-      // Obtener todos los checkpoint records existentes para esta asignación
-      const existingCheckpointRecords =
-        await this.checkpointRecordRepository.find({
-          where: {
-            patrolAssignment: { id: currentPatrolForUser.id },
-          },
-          relations: ["checkpoint"],
-          order: { created_at: "ASC" },
-        });
-
-      // Si no hay ningún checkpoint record, este es el primero
-      if (existingCheckpointRecords.length === 0) {
-        checkpointRecord = this.checkpointRecordRepository.create({
-          patrolAssignment: currentPatrolForUser,
-          checkpoint: targetCheckpoint,
-          status: "pending",
-        });
-      } else {
-        // Verificar si ya completamos todos los checkpoints y podemos reiniciar
-        const allCheckpointsCompleted = existingCheckpointRecords.every(
-          (cr) => cr.status === "completed" || cr.status === "late"
-        );
-
-        if (allCheckpointsCompleted) {
-          // Reiniciar el ciclo - crear nuevo checkpoint record
-          checkpointRecord = this.checkpointRecordRepository.create({
-            patrolAssignment: currentPatrolForUser,
-            checkpoint: targetCheckpoint,
-            status: "pending",
-          });
-        } else {
-          // Verificar el orden de los checkpoints
-          const nextExpectedCheckpoint = this.getNextExpectedCheckpoint(
-            currentPatrolForUser.patrol.routePoints,
-            existingCheckpointRecords
-          );
-
-          if (
-            nextExpectedCheckpoint &&
-            nextExpectedCheckpoint.checkpoint.id !== checkpoint_id
-          ) {
-            throw new Error(
-              `Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`
-            );
-          }
-
-          // Crear el checkpoint record para el checkpoint actual
-          checkpointRecord = this.checkpointRecordRepository.create({
-            patrolAssignment: currentPatrolForUser,
-            checkpoint: targetCheckpoint,
-            status: "pending",
-          });
-        }
-      }
-    } else {
-      // El checkpoint record ya existe, verificar que no haya sido marcado previamente
-      if (checkpointRecord.real_check) {
-        throw new Error("Este checkpoint ya fue marcado anteriormente");
-      }
-
-      // Verificar el orden de los checkpoints
-      const completedCheckpoints = await this.checkpointRecordRepository.find({
+    // 6. Validar el orden de los checkpoints antes de continuar
+    const existingCheckpointRecords =
+      await this.checkpointRecordRepository.find({
         where: {
           patrolAssignment: { id: currentPatrolForUser.id },
           status: In(["completed", "late"]),
@@ -220,54 +159,81 @@ export class CheckpointService {
         order: { created_at: "ASC" },
       });
 
-      const nextExpectedCheckpoint = this.getNextExpectedCheckpoint(
-        currentPatrolForUser.patrol.routePoints,
-        completedCheckpoints
+    // Obtener el orden del checkpoint actual en la ruta
+    const currentCheckpointOrder = routePoint.order;
+
+    // Verificar si todos los checkpoints de la ruta están completados
+    const allRouteCheckpoints = currentPatrolForUser.patrol.routePoints.map(
+      (rp) => rp.checkpoint.id
+    );
+    const completedCheckpoints = existingCheckpointRecords.map(
+      (cr) => cr.checkpoint.id
+    );
+
+    const allCheckpointsCompleted = allRouteCheckpoints.every((checkpointId) =>
+      completedCheckpoints.includes(checkpointId)
+    );
+
+    // Si todos los checkpoints están completados, permitir reiniciar desde cualquier punto
+    if (allCheckpointsCompleted) {
+      // Reiniciar el ciclo - permitir marcar cualquier checkpoint de nuevo
+      // No borrar registros anteriores, solo crear uno nuevo para el actual
+      checkpointRecord = this.checkpointRecordRepository.create({
+        patrolAssignment: currentPatrolForUser,
+        checkpoint: targetCheckpoint,
+        status: "completed",
+        real_check: new Date(),
+      });
+    } else {
+      // Verificar que todos los checkpoints anteriores estén completados
+      const previousCheckpoints = currentPatrolForUser.patrol.routePoints
+        .filter((rp) => rp.order < currentCheckpointOrder)
+        .map((rp) => rp.checkpoint.id);
+
+      const missingPreviousCheckpoints = previousCheckpoints.filter(
+        (checkpointId) => !completedCheckpoints.includes(checkpointId)
       );
 
-      if (
-        nextExpectedCheckpoint &&
-        nextExpectedCheckpoint.checkpoint.id !== checkpoint_id
-      ) {
+      if (missingPreviousCheckpoints.length > 0) {
+        // Buscar el nombre del primer checkpoint faltante
+        const firstMissingCheckpoint =
+          currentPatrolForUser.patrol.routePoints.find(
+            (rp) => rp.checkpoint.id === missingPreviousCheckpoints[0]
+          );
+
         throw new Error(
-          `Debe completar el checkpoint ${nextExpectedCheckpoint.checkpoint.name} antes de continuar`
+          `Debe completar el checkpoint "${firstMissingCheckpoint?.checkpoint.name}" (orden ${firstMissingCheckpoint?.order}) antes de continuar`
         );
+      }
+
+      // 7. Si no existe, crear uno nuevo en estado "completed"
+      if (!checkpointRecord) {
+        checkpointRecord = this.checkpointRecordRepository.create({
+          patrolAssignment: currentPatrolForUser,
+          checkpoint: targetCheckpoint,
+          status: "completed",
+          real_check: new Date(),
+        });
+      } else {
+        // 8. Si ya existe, verificar que no haya sido marcado previamente
+        if (checkpointRecord.real_check) {
+          throw new Error("Este checkpoint ya fue marcado anteriormente");
+        }
+
+        // 9. Actualizar el existente
+        checkpointRecord.status = "completed";
+        checkpointRecord.real_check = new Date();
       }
     }
 
-    // 6. Marcar el checkpoint como completado
-    const currentTime = new Date();
-    const status: "completed" = "completed";
-
-    // 7. Actualizar o guardar el checkpoint record
-    checkpointRecord.real_check = currentTime;
-    checkpointRecord.status = status;
-
+    // 10. Guardar el checkpoint record
     await this.checkpointRecordRepository.save(checkpointRecord);
 
     return {
       checkpoint: targetCheckpoint,
-      status: status,
-      real_check: currentTime,
+      status: "completed",
+      real_check: checkpointRecord.real_check,
       message: "Checkpoint completado exitosamente",
     };
-  }
-
-  private getNextExpectedCheckpoint(
-    routePoints: any[],
-    completedCheckpoints: any[]
-  ): any | null {
-    const sortedRoutePoints = routePoints.sort((a, b) => a.order - b.order);
-    const completedCheckpointIds = completedCheckpoints.map(
-      (cc) => cc.checkpoint.id
-    );
-
-    for (const routePoint of sortedRoutePoints) {
-      if (!completedCheckpointIds.includes(routePoint.checkpoint.id)) {
-        return routePoint;
-      }
-    }
-
-    return null; // Todos los checkpoints están completados
   }
 }
