@@ -184,51 +184,51 @@ export class CheckpointRecordService {
   }
 
   async findAllByBranchId(branchId: number): Promise<any[]> {
-    const queryBuilder = this.checkpointRecordRepository
-      .createQueryBuilder("checkpointRecord")
-      .leftJoinAndSelect(
-        "checkpointRecord.patrolAssignment",
-        "patrolAssignment"
-      )
+    // Consultar desde PatrolAssignment para obtener TODAS las asignaciones de la branch
+    const queryBuilder = this.patrolAssignmentRepository
+      .createQueryBuilder("patrolAssignment")
       .leftJoinAndSelect("patrolAssignment.user", "user")
       .leftJoinAndSelect("patrolAssignment.patrol", "patrol")
       .leftJoinAndSelect("patrolAssignment.shift", "shift")
-      .leftJoinAndSelect("checkpointRecord.checkpoint", "checkpoint")
-      .leftJoinAndSelect("checkpoint.branch", "branch")
       .leftJoinAndSelect("patrol.routePoints", "routePoints")
-      .leftJoinAndSelect("routePoints.checkpoint", "routeCheckpoint")
+      .leftJoinAndSelect("routePoints.checkpoint", "checkpoint")
+      .leftJoinAndSelect("checkpoint.branch", "branch")
       .where("checkpoint.branch.id = :branchId", { branchId })
-      .orderBy("checkpointRecord.created_at", "DESC");
+      .orderBy("patrolAssignment.date", "DESC");
 
-    const records = await queryBuilder.getMany();
+    const assignments = await queryBuilder.getMany();
 
-    // Agrupar por patrol assignment para evitar duplicados
-    const groupedByAssignment = new Map();
+    // Para cada asignación, obtener sus checkpoint records existentes
+    const result = await Promise.all(
+      assignments.map(async (assignment) => {
+        // Obtener los checkpoint records existentes para esta asignación
+        const checkpointRecords = await this.checkpointRecordRepository.find({
+          where: {
+            patrolAssignment: { id: assignment.id },
+          },
+          relations: ["checkpoint"],
+          order: { created_at: "ASC" },
+        });
 
-    records.forEach((record) => {
-      const assignmentId = record.patrolAssignment.id;
-
-      if (!groupedByAssignment.has(assignmentId)) {
-        // Crear nueva entrada para esta asignación
-        groupedByAssignment.set(assignmentId, {
-          id: assignmentId,
-          date: record.patrolAssignment.date,
+        return {
+          id: assignment.id,
+          date: assignment.date,
           user: {
-            id: record.patrolAssignment.user.id,
-            name: record.patrolAssignment.user.name,
-            last_name: record.patrolAssignment.user.last_name,
+            id: assignment.user.id,
+            name: assignment.user.name,
+            last_name: assignment.user.last_name,
           },
           patrol: {
-            id: record.patrolAssignment.patrol.id,
-            name: record.patrolAssignment.patrol.name,
+            id: assignment.patrol.id,
+            name: assignment.patrol.name,
           },
           shift: {
-            id: record.patrolAssignment.shift.id,
-            name: record.patrolAssignment.shift.name,
+            id: assignment.shift.id,
+            name: assignment.shift.name,
           },
           // TODOS los checkpoints de la ruta (para dibujar el mapa)
           routeCheckpoints:
-            record.patrolAssignment.patrol.routePoints?.map((routePoint) => ({
+            assignment.patrol.routePoints?.map((routePoint) => ({
               id: routePoint.checkpoint.id,
               name: routePoint.checkpoint.name,
               nfc_uid: routePoint.checkpoint.nfc_uid,
@@ -236,40 +236,33 @@ export class CheckpointRecordService {
               latitude: routePoint.latitude,
               longitude: routePoint.longitude,
             })) || [],
-          // Solo los checkpoint records marcados
-          checkpointRecords: [],
-        });
-      }
-
-      // Agregar este checkpoint record (que SÍ existe)
-      const assignment = groupedByAssignment.get(assignmentId);
-      assignment.checkpointRecords.push({
-        id: record.checkpoint.id,
-        name: record.checkpoint.name,
-        nfc_uid: record.checkpoint.nfc_uid,
-        order:
-          record.patrolAssignment.patrol.routePoints?.find(
-            (rp) => rp.checkpoint.id === record.checkpoint.id
-          )?.order || 0,
-        latitude:
-          record.patrolAssignment.patrol.routePoints?.find(
-            (rp) => rp.checkpoint.id === record.checkpoint.id
-          )?.latitude || null,
-        longitude:
-          record.patrolAssignment.patrol.routePoints?.find(
-            (rp) => rp.checkpoint.id === record.checkpoint.id
-          )?.longitude || null,
-        status: record.status,
-        check_time: record.check_time,
-        real_check: record.real_check,
-        created_at: record.created_at,
-      });
-    });
-
-    // Convertir el Map a array y ordenar por fecha
-    return Array.from(groupedByAssignment.values()).sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          // Solo los checkpoint records que realmente existen
+          checkpointRecords: checkpointRecords.map((record) => ({
+            id: record.checkpoint.id,
+            name: record.checkpoint.name,
+            nfc_uid: record.checkpoint.nfc_uid,
+            order:
+              assignment.patrol.routePoints?.find(
+                (rp) => rp.checkpoint.id === record.checkpoint.id
+              )?.order || 0,
+            latitude:
+              assignment.patrol.routePoints?.find(
+                (rp) => rp.checkpoint.id === record.checkpoint.id
+              )?.latitude || null,
+            longitude:
+              assignment.patrol.routePoints?.find(
+                (rp) => rp.checkpoint.id === record.checkpoint.id
+              )?.longitude || null,
+            status: record.status,
+            check_time: record.check_time,
+            real_check: record.real_check,
+            created_at: record.created_at,
+          })),
+        };
+      })
     );
+
+    return result;
   }
 
   async findByIdWithFullInfo(id: number): Promise<CheckpointRecordResponse> {
