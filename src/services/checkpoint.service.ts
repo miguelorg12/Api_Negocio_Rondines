@@ -257,11 +257,15 @@ export class CheckpointService {
           );
         }
 
-        // 9. Actualizar el existente
-        checkpointRecord.status = "completed";
-        checkpointRecord.check_time = new Date();
-        checkpointRecord.real_check = new Date();
-        checkpointRecord.round_number = currentRound;
+        // 9. Crear un nuevo registro para este checkpoint en la ronda actual
+        checkpointRecord = this.checkpointRecordRepository.create({
+          patrolAssignment: currentPatrolForUser,
+          checkpoint: targetCheckpoint,
+          status: "completed",
+          check_time: new Date(),
+          real_check: new Date(),
+          round_number: currentRound,
+        });
       }
     }
 
