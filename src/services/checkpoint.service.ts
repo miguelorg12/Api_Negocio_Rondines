@@ -148,7 +148,7 @@ export class CheckpointService {
       },
     });
 
-    // 6. Validar el orden de los checkpoints antes de continuar
+    // 6. Determinar el número de ronda actual
     const existingCheckpointRecords =
       await this.checkpointRecordRepository.find({
         where: {
@@ -162,46 +162,66 @@ export class CheckpointService {
     // Obtener el orden del checkpoint actual en la ruta
     const currentCheckpointOrder = routePoint.order;
 
-    // Verificar si todos los checkpoints de la ruta están completados
+    // Calcular la ronda actual basándose en los registros existentes
+    let currentRound = 1;
+    if (existingCheckpointRecords.length > 0) {
+      // Obtener la ronda más alta de los registros existentes
+      currentRound = Math.max(
+        ...existingCheckpointRecords.map((cr) => cr.round_number || 1)
+      );
+    }
+
+    // Verificar si todos los checkpoints de la ruta actual están completados
+    const currentRoundRecords = existingCheckpointRecords.filter(
+      (cr) => cr.round_number === currentRound
+    );
+
     const allRouteCheckpoints = currentPatrolForUser.patrol.routePoints.map(
       (rp) => rp.checkpoint.id
     );
-    const completedCheckpoints = existingCheckpointRecords.map(
+    const completedCheckpointsInCurrentRound = currentRoundRecords.map(
       (cr) => cr.checkpoint.id
     );
 
-    const allCheckpointsCompleted = allRouteCheckpoints.every((checkpointId) =>
-      completedCheckpoints.includes(checkpointId)
+    const allCheckpointsCompletedInCurrentRound = allRouteCheckpoints.every(
+      (checkpointId) =>
+        completedCheckpointsInCurrentRound.includes(checkpointId)
     );
 
-    // Si todos los checkpoints están completados, permitir reiniciar pero solo desde el primer checkpoint
-    if (allCheckpointsCompleted) {
+    // Si todos los checkpoints de la ronda actual están completados, iniciar nueva ronda
+    if (allCheckpointsCompletedInCurrentRound) {
       // Verificar que se esté marcando el primer checkpoint de la ruta
       if (currentCheckpointOrder !== 1) {
         const firstCheckpoint = currentPatrolForUser.patrol.routePoints.find(
           (rp) => rp.order === 1
         );
         throw new Error(
-          `Para reiniciar la ronda, debe comenzar desde el primer checkpoint "${firstCheckpoint?.checkpoint.name}" (orden 1)`
+          `Para iniciar la ronda ${
+            currentRound + 1
+          }, debe comenzar desde el primer checkpoint "${
+            firstCheckpoint?.checkpoint.name
+          }" (orden 1)`
         );
       }
 
-      // Reiniciar el ciclo - crear un nuevo registro para el primer checkpoint
+      // Iniciar nueva ronda - crear un nuevo registro para el primer checkpoint
       checkpointRecord = this.checkpointRecordRepository.create({
         patrolAssignment: currentPatrolForUser,
         checkpoint: targetCheckpoint,
         status: "completed",
         check_time: new Date(),
         real_check: new Date(),
+        round_number: currentRound + 1,
       });
     } else {
-      // Verificar que todos los checkpoints anteriores estén completados
+      // Verificar que todos los checkpoints anteriores estén completados en la ronda actual
       const previousCheckpoints = currentPatrolForUser.patrol.routePoints
         .filter((rp) => rp.order < currentCheckpointOrder)
         .map((rp) => rp.checkpoint.id);
 
       const missingPreviousCheckpoints = previousCheckpoints.filter(
-        (checkpointId) => !completedCheckpoints.includes(checkpointId)
+        (checkpointId) =>
+          !completedCheckpointsInCurrentRound.includes(checkpointId)
       );
 
       if (missingPreviousCheckpoints.length > 0) {
@@ -224,17 +244,24 @@ export class CheckpointService {
           status: "completed",
           check_time: new Date(),
           real_check: new Date(),
+          round_number: currentRound,
         });
       } else {
-        // 8. Si ya existe, verificar que no haya sido marcado previamente
-        if (checkpointRecord.real_check) {
-          throw new Error("Este checkpoint ya fue marcado anteriormente");
+        // 8. Si ya existe, verificar que no haya sido marcado previamente en la ronda actual
+        if (
+          checkpointRecord.real_check &&
+          checkpointRecord.round_number === currentRound
+        ) {
+          throw new Error(
+            `Este checkpoint ya fue marcado en la ronda ${currentRound}`
+          );
         }
 
         // 9. Actualizar el existente
         checkpointRecord.status = "completed";
         checkpointRecord.check_time = new Date();
         checkpointRecord.real_check = new Date();
+        checkpointRecord.round_number = currentRound;
       }
     }
 

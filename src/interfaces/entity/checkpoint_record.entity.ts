@@ -27,7 +27,7 @@ export class CheckpointRecord {
   @Column({
     type: "enum",
     enum: ["pending", "completed", "missed", "late"],
-    default: "pending"
+    default: "pending",
   })
   status: "pending" | "completed" | "missed" | "late";
 
@@ -36,6 +36,9 @@ export class CheckpointRecord {
 
   @Column({ type: "timestamptz", nullable: true })
   real_check: Date; // Hora real cuando pasó por el checkpoint
+
+  @Column({ type: "int", default: 1, nullable: true })
+  round_number: number; // Número de ronda para identificar el ciclo
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;
