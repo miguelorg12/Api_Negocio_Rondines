@@ -182,6 +182,7 @@ export class CheckpointService {
         patrolAssignment: currentPatrolForUser,
         checkpoint: targetCheckpoint,
         status: "completed",
+        check_time: new Date(),
         real_check: new Date(),
       });
     } else {
@@ -212,6 +213,7 @@ export class CheckpointService {
           patrolAssignment: currentPatrolForUser,
           checkpoint: targetCheckpoint,
           status: "completed",
+          check_time: new Date(),
           real_check: new Date(),
         });
       } else {
@@ -222,6 +224,7 @@ export class CheckpointService {
 
         // 9. Actualizar el existente
         checkpointRecord.status = "completed";
+        checkpointRecord.check_time = new Date();
         checkpointRecord.real_check = new Date();
       }
     }
