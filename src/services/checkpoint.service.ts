@@ -174,10 +174,19 @@ export class CheckpointService {
       completedCheckpoints.includes(checkpointId)
     );
 
-    // Si todos los checkpoints están completados, permitir reiniciar desde cualquier punto
+    // Si todos los checkpoints están completados, permitir reiniciar pero solo desde el primer checkpoint
     if (allCheckpointsCompleted) {
-      // Reiniciar el ciclo - permitir marcar cualquier checkpoint de nuevo
-      // No borrar registros anteriores, solo crear uno nuevo para el actual
+      // Verificar que se esté marcando el primer checkpoint de la ruta
+      if (currentCheckpointOrder !== 1) {
+        const firstCheckpoint = currentPatrolForUser.patrol.routePoints.find(
+          (rp) => rp.order === 1
+        );
+        throw new Error(
+          `Para reiniciar la ronda, debe comenzar desde el primer checkpoint "${firstCheckpoint?.checkpoint.name}" (orden 1)`
+        );
+      }
+
+      // Reiniciar el ciclo - crear un nuevo registro para el primer checkpoint
       checkpointRecord = this.checkpointRecordRepository.create({
         patrolAssignment: currentPatrolForUser,
         checkpoint: targetCheckpoint,
