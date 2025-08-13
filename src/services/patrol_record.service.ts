@@ -193,6 +193,7 @@ export class PatrolRecordService {
         "patrolAssignment.shift",
         "patrolAssignment.user",
         "patrolAssignment.patrol.routePoints.checkpoint.branch",
+        "patrolAssignment.checkpointRecords",
       ],
       order: {
         created_at: "DESC", // Obtener el más reciente
@@ -204,7 +205,9 @@ export class PatrolRecordService {
     }
 
     // Agregar información de checkpoint records si existen
-    const checkpointRecords = await AppDataSource.getRepository(CheckpointRecord).find({
+    const checkpointRecords = await AppDataSource.getRepository(
+      CheckpointRecord
+    ).find({
       where: {
         patrolAssignment: { id: patrolRecord.patrolAssignment.id },
       },
@@ -238,26 +241,28 @@ export class PatrolRecordService {
           name: patrolRecord.patrolAssignment.shift.name,
         },
       },
-      routePoints: patrolRecord.patrolAssignment.patrol.routePoints.map(routePoint => {
-        const checkpointRecord = checkpointRecords.find(cr => 
-          cr.checkpoint.id === routePoint.checkpoint.id
-        );
-        
-        return {
-          id: routePoint.id,
-          order: routePoint.order,
-          latitude: routePoint.latitude,
-          longitude: routePoint.longitude,
-          checkpoint: {
-            id: routePoint.checkpoint.id,
-            name: routePoint.checkpoint.name,
-            nfc_uid: routePoint.checkpoint.nfc_uid,
-            status: checkpointRecord?.status || "pending",
-            check_time: checkpointRecord?.check_time?.toISOString(),
-            real_check: checkpointRecord?.real_check?.toISOString(),
-          },
-        };
-      }),
+      routePoints: patrolRecord.patrolAssignment.patrol.routePoints.map(
+        (routePoint) => {
+          const checkpointRecord = checkpointRecords.find(
+            (cr) => cr.checkpoint.id === routePoint.checkpoint.id
+          );
+
+          return {
+            id: routePoint.id,
+            order: routePoint.order,
+            latitude: routePoint.latitude,
+            longitude: routePoint.longitude,
+            checkpoint: {
+              id: routePoint.checkpoint.id,
+              name: routePoint.checkpoint.name,
+              nfc_uid: routePoint.checkpoint.nfc_uid,
+              status: checkpointRecord?.status || "pending",
+              check_time: checkpointRecord?.check_time?.toISOString(),
+              real_check: checkpointRecord?.real_check?.toISOString(),
+            },
+          };
+        }
+      ),
     };
 
     return enhancedPatrolRecord;
