@@ -53,14 +53,23 @@ export class UserService {
     if (userData.curp !== undefined) user.curp = userData.curp;
     if (userData.email !== undefined) user.email = userData.email;
     if (userData.active !== undefined) user.active = userData.active;
-    if (userData.password) user.password = userData.password;
+    if (
+      userData.password !== undefined &&
+      typeof userData.password === "string" &&
+      userData.password.trim().length > 0
+    ) {
+      user.password = userData.password;
+    }
     if (userData.role_id) user.role = { id: userData.role_id } as any;
 
     // Guardar el usuario (el hash se hará automáticamente en la entidad)
     return await this.userRepository.save(user);
   }
 
-  async updateDeviceToken(id: number, deviceToken: string): Promise<User | null> {
+  async updateDeviceToken(
+    id: number,
+    deviceToken: string
+  ): Promise<User | null> {
     const user = await this.findById(id);
     if (!user) {
       throw new Error("Usuario no encontrado");
