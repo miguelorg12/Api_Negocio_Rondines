@@ -100,7 +100,6 @@ export class PatrolAssignmentService {
       }
     } catch (error) {
       console.error("Error al enviar la notificación:", error);
-      // Opcional: manejar el error, pero no detener el flujo principal
     }
 
     // Crear el registro de patrol asociado al PatrolAssignment

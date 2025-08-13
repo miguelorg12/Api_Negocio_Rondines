@@ -5,8 +5,24 @@ import {
   CheckpointDto,
   PartialCheckpointDto,
 } from "@interfaces/dto/checkpoint.dto";
+import { instanceToPlain } from "class-transformer";
+import { firebaseService } from "@services/firebase.service";
+import { AppDataSource } from "@configs/data-source";
+import { User } from "@entities/user.entity";
 
 const checkpointService = new CheckpointService();
+const userRepository = AppDataSource.getRepository(User);
+
+const sendNotificationToUser = async (userId: number, title: string, body: string) => {
+  try {
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (user && user.device_token) {
+      await firebaseService.sendNotification(user.device_token, title, body);
+    }
+  } catch (error) {
+    console.error(`Error sending notification to user ${userId}:`, error);
+  }
+};
 
 export const getAllCheckpoints = async (
   _req: Request,
@@ -126,6 +142,8 @@ export const markCheckpointPatrol = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const { user_id, checkpoint_id } = req.body;
+
   try {
     // 1. Validar datos de entrada
     const errors = validationResult(req);
@@ -136,8 +154,7 @@ export const markCheckpointPatrol = async (
       });
     }
 
-    // 2. Extraer datos del body
-    const { user_id, checkpoint_id } = req.body;
+    // 2. Extraer datos del body (movido arriba)
 
     // 3. Validar datos requeridos
     if (!user_id || !checkpoint_id) {
@@ -148,8 +165,12 @@ export const markCheckpointPatrol = async (
 
     // 4. Validar tipos de datos
     if (typeof user_id !== "number" || typeof checkpoint_id !== "number") {
+      const message = "user_id y checkpoint_id deben ser números";
+      if (user_id) {
+        await sendNotificationToUser(user_id, "Error de Validación", message);
+      }
       return res.status(400).json({
-        message: "user_id y checkpoint_id deben ser números",
+        message,
       });
     }
 
@@ -160,6 +181,7 @@ export const markCheckpointPatrol = async (
     );
 
     // 6. Respuesta exitosa
+    await sendNotificationToUser(user_id, "Checkpoint Marcado", result.message);
     return res.status(200).json({
       message: result.message,
       data: result,
@@ -169,15 +191,19 @@ export const markCheckpointPatrol = async (
 
     if (error instanceof Error) {
       if (error.message.includes("El usuario no tiene un turno en progreso")) {
+        const message = "No tienes un turno activo para hoy";
+        await sendNotificationToUser(user_id, "Error de Turno", message);
         return res.status(404).json({
-          message: "No tienes un turno activo para hoy",
+          message,
           error: error.message,
         });
       }
 
       if (error.message.includes("El checkpoint especificado no existe")) {
+        const message = "Checkpoint no encontrado";
+        await sendNotificationToUser(user_id, "Error de Checkpoint", message);
         return res.status(404).json({
-          message: "Checkpoint no encontrado",
+          message,
           error: error.message,
         });
       }
@@ -187,30 +213,38 @@ export const markCheckpointPatrol = async (
           "El checkpoint no pertenece a una sucursal asignada"
         )
       ) {
+        const message = "No tienes permisos para este checkpoint";
+        await sendNotificationToUser(user_id, "Error de Permisos", message);
         return res.status(403).json({
-          message: "No tienes permisos para este checkpoint",
+          message,
           error: error.message,
         });
       }
 
       if (error.message.includes("El checkpoint no está en la ruta asignada")) {
+        const message = "Este checkpoint no está en tu ruta asignada";
+        await sendNotificationToUser(user_id, "Error de Ruta", message);
         return res.status(400).json({
-          message: "Este checkpoint no está en tu ruta asignada",
+          message,
           error: error.message,
         });
       }
 
       if (error.message.includes("Debe completar el checkpoint")) {
+        const message = "Debe completar los checkpoints en orden";
+        await sendNotificationToUser(user_id, "Error de Orden", message);
         return res.status(400).json({
-          message: "Debe completar los checkpoints en orden",
+          message,
           error: error.message,
         });
       }
 
       if (error.message.includes("No se encontró el registro de checkpoint")) {
+        const message =
+          "No se encontró el registro de checkpoint para esta asignación";
+        await sendNotificationToUser(user_id, "Error de Registro", message);
         return res.status(404).json({
-          message:
-            "No se encontró el registro de checkpoint para esta asignación",
+          message,
           error: error.message,
         });
       }
@@ -218,15 +252,21 @@ export const markCheckpointPatrol = async (
       if (
         error.message.includes("Este checkpoint ya fue marcado anteriormente")
       ) {
+        const message = "Este checkpoint ya fue marcado anteriormente";
+        await sendNotificationToUser(user_id, "Error de Marcación", message);
         return res.status(400).json({
-          message: "Este checkpoint ya fue marcado anteriormente",
+          message,
           error: error.message,
         });
       }
     }
 
+    const finalMessage = "Error interno del servidor";
+    if (user_id) {
+      await sendNotificationToUser(user_id, "Error de Marcación", error instanceof Error ? error.message : "Error desconocido",);
+    }
     return res.status(500).json({
-      message: "Error interno del servidor",
+      message: finalMessage,
       error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
