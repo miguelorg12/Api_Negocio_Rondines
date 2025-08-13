@@ -274,6 +274,45 @@ router.put(
  *         description: Error interno del servidor
  */
 router.delete("/:id", authenticateToken, userController.deleteUser);
+
+/**
+ * @swagger
+ * /users/{id}/device-token:
+ *   put:
+ *     summary: Actualizar el token del dispositivo de un usuario
+ *     tags: [Usuarios]
+ *     description: Actualiza el token del dispositivo para notificaciones push de un usuario específico.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               device_token:
+ *                 type: string
+ *                 description: El token del dispositivo de Firebase Cloud Messaging.
+ *     responses:
+ *       200:
+ *         description: Token de dispositivo actualizado correctamente
+ *       404:
+ *         description: Usuario no encontrado
+ *       422:
+ *         description: El device_token es requerido
+ */
+router.put(
+  "/:id/device-token",
+  authenticateToken,
+  userController.updateDeviceToken
+);
+
 // Guardar ID biométrico
 router.post(
   "/:id/biometric",

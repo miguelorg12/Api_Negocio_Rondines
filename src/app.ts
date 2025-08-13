@@ -19,6 +19,7 @@ import checkpointRecordRoutes from "./routes/checkpoint_record.route";
 import networkRoutes from "./routes/network.route";
 import digitalOceanRoutes from "./routes/digitalocean.route";
 import { swaggerSpec, swaggerUi } from "./configs/swagger";
+import { firebaseService } from "@services/firebase.service";
 
 const app = express();
 

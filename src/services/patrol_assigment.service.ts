@@ -10,6 +10,9 @@ import {
   UpdateRouteWithCheckpointsDto,
 } from "@interfaces/dto/patrol_assigment.dto";
 import { Repository } from "typeorm";
+import { firebaseService } from "./firebase.service";
+import { User } from "@entities/user.entity";
+import { Shift } from "@entities/shift.entity";
 
 export class PatrolAssignmentService {
   private patrolAssignmentRepository: Repository<PatrolAssignment>;
@@ -17,6 +20,8 @@ export class PatrolAssignmentService {
   private patrolRepository: Repository<Patrol>;
   private checkpointRecordRepository: Repository<CheckpointRecord>;
   private patrolRoutePointRepository: Repository<PatrolRoutePoint>;
+  private userRepository: Repository<User>;
+  private shiftRepository: Repository<Shift>;
 
   constructor() {
     this.patrolAssignmentRepository =
@@ -27,6 +32,8 @@ export class PatrolAssignmentService {
       AppDataSource.getRepository(CheckpointRecord);
     this.patrolRoutePointRepository =
       AppDataSource.getRepository(PatrolRoutePoint);
+    this.userRepository = AppDataSource.getRepository(User);
+    this.shiftRepository = AppDataSource.getRepository(Shift);
   }
 
   async create(
@@ -64,6 +71,37 @@ export class PatrolAssignmentService {
     const savedAssignment = await this.patrolAssignmentRepository.save(
       patrolAssignment
     );
+
+    // Enviar notificación al guardia
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: patrolAssignmentDto.user_id },
+      });
+      if (user && user.device_token) {
+        const patrol = await this.patrolRepository.findOne({
+          where: { id: patrolAssignmentDto.patrol_id },
+        });
+        const shift = await this.shiftRepository.findOne({
+          where: { id: patrolAssignmentDto.shift_id },
+        });
+
+        const patrolName = patrol ? patrol.name : "un nuevo rondín";
+        const shiftName = shift ? shift.name : "un turno no especificado";
+        const guardName = user.name;
+
+        const notificationTitle = "Nuevo Rondín Asignado";
+        const notificationBody = `Hola ${guardName}, se te ha asignado el rondín "${patrolName}" para el turno ${shiftName}.`;
+
+        await firebaseService.sendNotification(
+          user.device_token,
+          notificationTitle,
+          notificationBody
+        );
+      }
+    } catch (error) {
+      console.error("Error al enviar la notificación:", error);
+      // Opcional: manejar el error, pero no detener el flujo principal
+    }
 
     // Crear el registro de patrol asociado al PatrolAssignment
     await this.patrolRecordService.create({

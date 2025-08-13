@@ -60,6 +60,15 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
+  async updateDeviceToken(id: number, deviceToken: string): Promise<User | null> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+    user.device_token = deviceToken;
+    return await this.userRepository.save(user);
+  }
+
   async delete(id: number): Promise<User | null> {
     const user = await this.findById(id);
     if (!user) {

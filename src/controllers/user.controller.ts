@@ -164,3 +164,33 @@ export const getUsersBySpecificRoles = async (
     });
   }
 };
+
+export const updateDeviceToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = parseInt(req.params.id);
+  const { device_token } = req.body;
+
+  if (!device_token) {
+    return res.status(422).json({
+      message: "El device_token es requerido",
+    });
+  }
+
+  try {
+    const updatedUser = await userService.updateDeviceToken(userId, device_token);
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    return res.status(200).json({
+      message: "Token de dispositivo actualizado correctamente",
+      data: instanceToPlain(updatedUser),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al actualizar el token del dispositivo",
+      error: error.message,
+    });
+  }
+};

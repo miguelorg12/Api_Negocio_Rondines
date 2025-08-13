@@ -52,6 +52,9 @@ export class User {
   @Column({ nullable: true })
   biometric: number;
 
+  @Column({ nullable: true, type: "varchar" })
+  device_token: string;
+
   @OneToMany(() => Code, (code) => code.user)
   codes: Code[];
 
