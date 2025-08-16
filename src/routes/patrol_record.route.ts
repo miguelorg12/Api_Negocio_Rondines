@@ -9,6 +9,7 @@ import {
   getPendingPatrolRecords,
   getInProgressPatrolRecords,
   getCurrentPatrolRecord,
+  getUserAssignmentsForToday,
 } from "@controllers/patrol_record.controller";
 import { validationResult } from "express-validator";
 import { authenticateToken } from "../middleware/auth.middleware";
@@ -452,5 +453,128 @@ router.get(
  *         description: Error interno del servidor
  */
 router.get("/current/:user_id", authenticateToken, getCurrentPatrolRecord);
+
+/**
+ * @swagger
+ * /api/v1/patrol-records/assignments/{user_id}:
+ *   get:
+ *     summary: Obtener todas las asignaciones del usuario para el día de hoy
+ *     tags: [PatrolRecords]
+ *     description: Obtiene todas las asignaciones del usuario para el día actual, incluyendo su estado y detalles completos
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario/guardia
+ *     responses:
+ *       200:
+ *         description: Asignaciones del usuario obtenidas correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Asignaciones del usuario obtenidas correctamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: ID del patrol record
+ *                       date:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Fecha del patrol record
+ *                       status:
+ *                         type: string
+ *                         enum: [pendiente, en_progreso, completado, cancelado]
+ *                         description: Estado del patrol record
+ *                       actual_start:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Hora de inicio real
+ *                       actual_end:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Hora de fin real
+ *                       patrolAssignment:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             description: ID de la asignación
+ *                           date:
+ *                             type: string
+ *                             format: date-time
+ *                             description: Fecha de la asignación
+ *                           patrol:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 description: ID del patrol
+ *                               name:
+ *                                 type: string
+ *                                 description: Nombre del patrol
+ *                               frequency:
+ *                                 type: string
+ *                                 description: Frecuencia del patrol
+ *                               plans:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
+ *                                   properties:
+ *                                     id:
+ *                                       type: integer
+ *                                       description: ID del plan
+ *                                     name:
+ *                                       type: string
+ *                                       description: Nombre del plan
+ *                                     image_url:
+ *                                       type: string
+ *                                       description: URL de la imagen del plan
+ *                           shift:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 description: ID del turno
+ *                               name:
+ *                                 type: string
+ *                                 description: Nombre del turno
+ *                               start_time:
+ *                                 type: string
+ *                                 description: Hora de inicio del turno
+ *                               end_time:
+ *                                 type: string
+ *                                 description: Hora de fin del turno
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 description: ID del usuario
+ *                               name:
+ *                                 type: string
+ *                                 description: Nombre del usuario
+ *                               last_name:
+ *                                 type: string
+ *                                 description: Apellido del usuario
+ *       400:
+ *         description: user_id debe ser un número válido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/assignments/:user_id",
+  authenticateToken,
+  getUserAssignmentsForToday
+);
 
 export default router;

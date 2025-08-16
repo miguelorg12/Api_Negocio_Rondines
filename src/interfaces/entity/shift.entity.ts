@@ -5,14 +5,17 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
+import { Branch } from "./branch.entity";
 
 @Entity("shifts")
 export class Shift {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ enum: ["matutino", "vespertino", "nocturno"] })
+  @Column({ type: "varchar" })
   name: string;
 
   @Column({ type: "timestamptz" })
@@ -20,6 +23,13 @@ export class Shift {
 
   @Column({ type: "timestamptz" })
   end_time: Date;
+
+  @Column()
+  branch_id: number;
+
+  @ManyToOne(() => Branch, { onDelete: "CASCADE", nullable: true })
+  @JoinColumn({ name: "branch_id" })
+  branch: Branch;
 
   @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;

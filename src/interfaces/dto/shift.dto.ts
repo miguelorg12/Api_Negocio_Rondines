@@ -1,7 +1,8 @@
 export interface ShiftDto {
-  name: "matutino" | "vespertino" | "nocturno";
-  start_time: Date;
-  end_time: Date;
+  name: string;
+  start_time: string; // Formato: "HH:MM" (ej: "07:00", "15:30")
+  end_time: string; // Formato: "HH:MM" (ej: "07:00", "15:30")
+  branch_id: number;
   deleted_at?: Date;
 }
 

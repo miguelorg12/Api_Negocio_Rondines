@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { ShiftService } from "@services/shift.service";
-import { ShiftDto } from "@interfaces/dto/shift.dto";
+import { ShiftDto, PartialShiftDto } from "@interfaces/dto/shift.dto";
 
 const shiftService = new ShiftService();
 
@@ -12,6 +12,22 @@ export const getAllShifts = async (
   const shifts = await shiftService.getAll();
   return res.status(200).json({
     message: "Turnos obtenidos correctamente",
+    data: shifts,
+  });
+};
+
+export const getShiftsByBranchId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const branchId = parseInt(req.params.branchId);
+  if (isNaN(branchId)) {
+    return res.status(400).json({ message: "ID de sucursal inválido" });
+  }
+
+  const shifts = await shiftService.getByBranchId(branchId);
+  return res.status(200).json({
+    message: "Turnos de la sucursal obtenidos correctamente",
     data: shifts,
   });
 };
@@ -58,7 +74,7 @@ export const updateShift = async (
     });
   }
   const shiftId = parseInt(req.params.id);
-  const shiftData: ShiftDto = req.body;
+  const shiftData: PartialShiftDto = req.body;
   const shift = await shiftService.getById(shiftId);
   if (!shift) {
     return res.status(404).json({ message: "Turno no encontrado" });

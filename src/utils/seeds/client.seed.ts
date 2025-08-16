@@ -6,7 +6,7 @@ export async function seedClients() {
     {
       client_id: "ronditrack-web-app",
       client_secret: "super-secret-web-app-key-123", // Este será hasheado por @BeforeInsert
-      redirect_uri: "http://localhost:5173/auth/callback", // Generalmente React dev server corre en 3000
+      redirect_uri: "https://qa.ronditrack.online/auth/callback", // Generalmente React dev server corre en 3000
       name: "ronditrack Web Application",
       trusted_client: true,
     },

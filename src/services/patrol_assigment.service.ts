@@ -39,26 +39,58 @@ export class PatrolAssignmentService {
   async create(
     patrolAssignmentDto: PatrolAssignmentDto
   ): Promise<PatrolAssignment> {
-    // Validar si el guardia ya tiene una asignación para el día específico
+    // Validar si el guardia ya tiene una asignación que se solape en horarios
     const assignmentDate =
       patrolAssignmentDto.date instanceof Date
         ? patrolAssignmentDto.date
         : new Date(patrolAssignmentDto.date);
 
-    const existingAssignment = await this.patrolAssignmentRepository.findOne({
+    // Obtener el shift para verificar horarios
+    const shift = await this.shiftRepository.findOne({
+      where: { id: patrolAssignmentDto.shift_id },
+    });
+
+    if (!shift) {
+      throw new Error("Turno no encontrado");
+    }
+
+    // Buscar asignaciones existentes del usuario para la misma fecha
+    const existingAssignments = await this.patrolAssignmentRepository.find({
       where: {
         user: { id: patrolAssignmentDto.user_id },
         date: assignmentDate,
       },
-      relations: ["user", "patrol", "shift"],
+      relations: ["shift"],
     });
 
-    if (existingAssignment) {
-      const dateString = assignmentDate.toISOString().split("T")[0];
+    // Verificar si hay solapamiento de horarios
+    for (const existingAssignment of existingAssignments) {
+      const existingShift = existingAssignment.shift;
 
-      throw new Error(
-        `El guardia ya tiene una asignación para el día ${dateString}. No se puede crear otra asignación.`
-      );
+      // Convertir horarios a minutos para comparación
+      const newStartMinutes = this.timeToMinutes(shift.start_time);
+      const newEndMinutes = this.timeToMinutes(shift.end_time);
+      const existingStartMinutes = this.timeToMinutes(existingShift.start_time);
+      const existingEndMinutes = this.timeToMinutes(existingShift.end_time);
+
+      // Verificar si hay solapamiento
+      if (
+        this.hasTimeOverlap(
+          newStartMinutes,
+          newEndMinutes,
+          existingStartMinutes,
+          existingEndMinutes
+        )
+      ) {
+        const dateString = assignmentDate.toISOString().split("T")[0];
+        throw new Error(
+          `El guardia ya tiene una asignación para el día ${dateString} que se solapa con el horario del turno "${
+            shift.name
+          }" (${this.formatTime(shift.start_time)} - ${this.formatTime(
+            shift.end_time
+          )}). No se puede crear otra asignación con horarios solapados.`
+        );
+      }
     }
 
     const patrolAssignment = this.patrolAssignmentRepository.create({
@@ -80,9 +112,6 @@ export class PatrolAssignmentService {
       if (user && user.device_token) {
         const patrol = await this.patrolRepository.findOne({
           where: { id: patrolAssignmentDto.patrol_id },
-        });
-        const shift = await this.shiftRepository.findOne({
-          where: { id: patrolAssignmentDto.shift_id },
         });
 
         const patrolName = patrol ? patrol.name : "un nuevo rondín";
@@ -110,6 +139,36 @@ export class PatrolAssignmentService {
     });
 
     return savedAssignment;
+  }
+
+  // Método auxiliar para convertir hora a minutos
+  private timeToMinutes(date: Date): number {
+    return date.getHours() * 60 + date.getMinutes();
+  }
+
+  // Método auxiliar para formatear hora
+  private formatTime(date: Date): string {
+    return date.toTimeString().slice(0, 5);
+  }
+
+  // Método auxiliar para verificar solapamiento de horarios
+  private hasTimeOverlap(
+    start1: number,
+    end1: number,
+    start2: number,
+    end2: number
+  ): boolean {
+    // Manejar turnos nocturnos que cruzan la medianoche
+    if (end1 < start1) {
+      // El primer turno cruza la medianoche
+      return !(end2 < start1 && start2 > end1);
+    } else if (end2 < start2) {
+      // El segundo turno cruza la medianoche
+      return !(end1 < start2 && start1 > end2);
+    } else {
+      // Ambos turnos en el mismo día
+      return !(end1 <= start2 || end2 <= start1);
+    }
   }
 
   async getAll(): Promise<PatrolAssignment[]> {
@@ -194,6 +253,63 @@ export class PatrolAssignmentService {
       }
     }
 
+    // Si se va a actualizar el shift_id, verificar que no haya solapamiento
+    if (
+      updateData.shift_id &&
+      updateData.shift_id !== existingAssignment.shift.id
+    ) {
+      const newShift = await this.shiftRepository.findOne({
+        where: { id: updateData.shift_id },
+      });
+
+      if (!newShift) {
+        throw new Error("Turno no encontrado");
+      }
+
+      // Buscar otras asignaciones del usuario para la misma fecha (excluyendo la actual)
+      const otherAssignments = await this.patrolAssignmentRepository.find({
+        where: {
+          user: { id: existingAssignment.user.id },
+          date: updateData.date || existingAssignment.date,
+        },
+        relations: ["shift"],
+      });
+
+      // Verificar si hay solapamiento con el nuevo turno
+      for (const otherAssignment of otherAssignments) {
+        if (otherAssignment.id === id) continue; // Excluir la asignación actual
+
+        const otherShift = otherAssignment.shift;
+
+        // Convertir horarios a minutos para comparación
+        const newStartMinutes = this.timeToMinutes(newShift.start_time);
+        const newEndMinutes = this.timeToMinutes(newShift.end_time);
+        const otherStartMinutes = this.timeToMinutes(otherShift.start_time);
+        const otherEndMinutes = this.timeToMinutes(otherShift.end_time);
+
+        // Verificar si hay solapamiento
+        if (
+          this.hasTimeOverlap(
+            newStartMinutes,
+            newEndMinutes,
+            otherStartMinutes,
+            otherEndMinutes
+          )
+        ) {
+          const dateString = (updateData.date || existingAssignment.date)
+            .toISOString()
+            .split("T")[0];
+          throw new Error(
+            `No se puede actualizar el turno porque se solaparía con otra asignación del día ${dateString} para el turno "${
+              otherShift.name
+            }" (${this.formatTime(otherShift.start_time)} - ${this.formatTime(
+              otherShift.end_time
+            )}).`
+          );
+        }
+      }
+    }
+
     // Actualizar la asignación de patrol
     const updateFields: any = {};
     if (updateData.user_id) updateFields.user = { id: updateData.user_id };
@@ -247,5 +363,31 @@ export class PatrolAssignmentService {
     await this.patrolAssignmentRepository.softDelete(id);
 
     return existingAssignment;
+  }
+
+  async getByBranchId(branchId: number): Promise<PatrolAssignment[]> {
+    return await this.patrolAssignmentRepository.find({
+      where: { user: { branch: { id: branchId } } },
+      relations: ["user", "patrol", "shift"],
+      order: { date: "ASC" },
+    });
+  }
+
+  async getByUserIdAndDate(
+    userId: number,
+    date: Date
+  ): Promise<PatrolAssignment[]> {
+    const targetDate = date instanceof Date ? date : new Date(date);
+
+    return await this.patrolAssignmentRepository.find({
+      where: {
+        user: { id: userId },
+        date: targetDate,
+      },
+      relations: ["user", "patrol", "shift"],
+      order: {
+        shift: { start_time: "ASC" },
+      },
+    });
   }
 }

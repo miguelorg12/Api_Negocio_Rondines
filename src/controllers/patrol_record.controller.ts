@@ -227,3 +227,34 @@ export const getCurrentPatrolRecord = async (
     });
   }
 };
+
+/**
+ * Obtener todas las asignaciones del usuario para el día de hoy
+ */
+export const getUserAssignmentsForToday = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = parseInt(req.params.user_id);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({
+      message: "user_id debe ser un número válido",
+    });
+  }
+
+  try {
+    const userAssignments =
+      await patroRecordlService.getUserAssignmentsForToday(userId);
+
+    return res.status(200).json({
+      message: "Asignaciones del usuario obtenidas correctamente",
+      data: userAssignments,
+    });
+  } catch (error) {
+    console.error("Error al obtener asignaciones del usuario:", error);
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};

@@ -5,7 +5,6 @@ import { seedCompanies } from "@utils/seeds/company.seed";
 import { seedBranches } from "@utils/seeds/branch.seed";
 import { seedClients } from "@utils/seeds/client.seed";
 import { seedGuards } from "@utils/seeds/guard.seed";
-import { seedShifts } from "@utils/seeds/shift.seed";
 // import { seedPatrols } from "@utils/seeds/patrol.seed";
 // import { seedPatrolAssignments } from "@utils/seeds/patrol_assigment.seed";
 // import { seedShiftValidationRealData } from "./shift_validation_real_data.seed";
@@ -23,7 +22,7 @@ async function main() {
   await seedBranches();
   // await seedCheckpoints();
   // await seedGuards();
-  await seedShifts();
+  // await seedShifts();
   // await seedPatrols();
   // await seedPatrolAssignments();
   // await seedShiftValidationRealData();

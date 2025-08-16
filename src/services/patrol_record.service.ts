@@ -267,4 +267,41 @@ export class PatrolRecordService {
 
     return enhancedPatrolRecord;
   }
+
+  /**
+   * Obtener todas las asignaciones del usuario para el día de hoy
+   * @param userId - ID del usuario/guardia
+   * @returns Array de PatrolRecord con todas las asignaciones del día
+   */
+  async getUserAssignmentsForToday(userId: number): Promise<PatrolRecord[]> {
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59
+    );
+
+    return await this.patrolRecordRepository
+      .createQueryBuilder("record")
+      .leftJoinAndSelect("record.patrolAssignment", "patrolAssignment")
+      .leftJoinAndSelect("patrolAssignment.patrol", "patrol")
+      .leftJoinAndSelect("patrolAssignment.shift", "shift")
+      .leftJoinAndSelect("patrolAssignment.user", "user")
+      .leftJoinAndSelect("patrol.plans", "plans")
+      .where("user.id = :userId", { userId })
+      .andWhere("record.date BETWEEN :startOfDay AND :endOfDay", {
+        startOfDay,
+        endOfDay,
+      })
+      .orderBy("patrolAssignment.shift.start_time", "ASC")
+      .getMany();
+  }
 }
