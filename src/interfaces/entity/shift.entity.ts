@@ -18,10 +18,10 @@ export class Shift {
   @Column({ type: "varchar" })
   name: string;
 
-  @Column({ type: "timestamptz" })
+  @Column({ type: "time" })
   start_time: Date;
 
-  @Column({ type: "timestamptz" })
+  @Column({ type: "time" })
   end_time: Date;
 
   @Column()
