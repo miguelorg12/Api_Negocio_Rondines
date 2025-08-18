@@ -301,7 +301,7 @@ export class PatrolRecordService {
         startOfDay,
         endOfDay,
       })
-      .orderBy("patrolAssignment.shift.start_time", "ASC")
+      .orderBy("shift.start_time", "ASC")
       .getMany();
   }
 }

@@ -121,7 +121,7 @@ export class ShiftValidationService {
       .leftJoinAndSelect("assignment.shift", "shift")
       .where("assignment.user.id = :userId", { userId })
       .andWhere("DATE(assignment.date) = DATE(:date)", { date })
-      .orderBy("assignment.shift.start_time", "ASC")
+      .orderBy("shift.start_time", "ASC")
       .getMany();
   }
 
