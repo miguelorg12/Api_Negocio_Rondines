@@ -142,13 +142,19 @@ export class PatrolAssignmentService {
   }
 
   // Método auxiliar para convertir hora a minutos
-  private timeToMinutes(date: Date): number {
-    return date.getHours() * 60 + date.getMinutes();
+  // Ahora que usamos columnas 'time', necesitamos extraer solo la hora
+  private timeToMinutes(timeValue: Date): number {
+    // timeValue ahora es solo la hora (de columna 'time')
+    return timeValue.getHours() * 60 + timeValue.getMinutes();
   }
 
   // Método auxiliar para formatear hora
-  private formatTime(date: Date): string {
-    return date.toTimeString().slice(0, 5);
+  private formatTime(timeValue: Date): string {
+    // timeValue ahora es solo la hora (de columna 'time')
+    return `${timeValue.getHours().toString().padStart(2, "0")}:${timeValue
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   // Método auxiliar para verificar solapamiento de horarios

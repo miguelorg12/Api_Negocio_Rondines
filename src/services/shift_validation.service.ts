@@ -35,6 +35,25 @@ export class ShiftValidationService {
     return hour * 60 + minute;
   }
 
+  // Función para crear una fecha base con la hora del turno
+  // Ahora que usamos columnas 'time', necesitamos crear fechas base para comparaciones
+  private createBaseDateWithTime(timeValue: Date, baseDate: Date): Date {
+    // timeValue ahora es solo la hora (de columna 'time')
+    // Creamos una fecha completa usando la fecha base y la hora del turno
+    const hours = timeValue.getHours();
+    const minutes = timeValue.getMinutes();
+
+    return new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
+      baseDate.getDate(),
+      hours,
+      minutes,
+      0,
+      0
+    );
+  }
+
   // Función para verificar si un turno cruza la medianoche
   private isOvernightShift(startTime: Date, endTime: Date): boolean {
     const startHour = startTime.getHours();
@@ -119,8 +138,16 @@ export class ShiftValidationService {
     );
 
     for (const assignment of assignments) {
-      const shiftStartTime = new Date(assignment.shift.start_time);
-      const shiftEndTime = new Date(assignment.shift.end_time);
+      // Ahora que usamos columnas 'time', necesitamos crear fechas base
+      const baseDate = new Date(); // Usar fecha actual como base
+      const shiftStartTime = this.createBaseDateWithTime(
+        assignment.shift.start_time,
+        baseDate
+      );
+      const shiftEndTime = this.createBaseDateWithTime(
+        assignment.shift.end_time,
+        baseDate
+      );
 
       const shiftStartInMinutes = this.timeToMinutes(
         shiftStartTime.getHours(),
@@ -170,7 +197,12 @@ export class ShiftValidationService {
     );
 
     for (const assignment of assignments) {
-      const shiftStartTime = new Date(assignment.shift.start_time);
+      // Crear fecha base para la comparación
+      const baseDate = new Date();
+      const shiftStartTime = this.createBaseDateWithTime(
+        assignment.shift.start_time,
+        baseDate
+      );
       const shiftStartInMinutes = this.timeToMinutes(
         shiftStartTime.getHours(),
         shiftStartTime.getMinutes()
@@ -240,8 +272,11 @@ export class ShiftValidationService {
         );
 
         if (nextUpcomingAssignment) {
-          const shiftStartTime = new Date(
-            nextUpcomingAssignment.shift.start_time
+          // Crear fecha base para formatear la hora
+          const baseDate = new Date();
+          const shiftStartTime = this.createBaseDateWithTime(
+            nextUpcomingAssignment.shift.start_time,
+            baseDate
           );
           const startTimeFormatted = this.formatTimeTimestamp(
             shiftStartTime.getHours(),
@@ -267,8 +302,16 @@ export class ShiftValidationService {
       });
 
       // 7. Obtener horarios del turno activo
-      const shiftStartTime = new Date(activeAssignment.shift.start_time);
-      const shiftEndTime = new Date(activeAssignment.shift.end_time);
+      // Crear fechas base para las comparaciones
+      const baseDate = new Date();
+      const shiftStartTime = this.createBaseDateWithTime(
+        activeAssignment.shift.start_time,
+        baseDate
+      );
+      const shiftEndTime = this.createBaseDateWithTime(
+        activeAssignment.shift.end_time,
+        baseDate
+      );
 
       const shiftStartInMinutes = this.timeToMinutes(
         shiftStartTime.getHours(),

@@ -4,8 +4,10 @@ import { PatrolAssignment } from "@entities/patrol_assigment.entity";
 import { Checkpoint } from "@entities/checkpoint.entity";
 
 export const seedCheckpointRecords = async () => {
-  const checkpointRecordRepository = AppDataSource.getRepository(CheckpointRecord);
-  const patrolAssignmentRepository = AppDataSource.getRepository(PatrolAssignment);
+  const checkpointRecordRepository =
+    AppDataSource.getRepository(CheckpointRecord);
+  const patrolAssignmentRepository =
+    AppDataSource.getRepository(PatrolAssignment);
   const checkpointRepository = AppDataSource.getRepository(Checkpoint);
 
   try {
@@ -21,12 +23,16 @@ export const seedCheckpointRecords = async () => {
     });
 
     if (patrolAssignments.length === 0) {
-      console.log("No hay patrol assignments disponibles para crear checkpoint records");
+      console.log(
+        "No hay patrol assignments disponibles para crear checkpoint records"
+      );
       return;
     }
 
     if (checkpoints.length === 0) {
-      console.log("No hay checkpoints disponibles para crear checkpoint records");
+      console.log(
+        "No hay checkpoints disponibles para crear checkpoint records"
+      );
       return;
     }
 
@@ -35,18 +41,43 @@ export const seedCheckpointRecords = async () => {
     // Crear checkpoint records para cada patrol assignment
     for (const patrolAssignment of patrolAssignments) {
       // Seleccionar algunos checkpoints aleatorios para esta patrol assignment
-      const selectedCheckpoints = checkpoints.slice(0, Math.floor(Math.random() * 3) + 1);
+      const selectedCheckpoints = checkpoints.slice(
+        0,
+        Math.floor(Math.random() * 3) + 1
+      );
 
       for (const checkpoint of selectedCheckpoints) {
         // Calcular la hora de verificación basada en el turno
         const assignmentDate = new Date(patrolAssignment.date);
-        const shiftStart = new Date(patrolAssignment.shift.start_time);
-        const shiftEnd = new Date(patrolAssignment.shift.end_time);
+
+        // Ahora que usamos columnas 'time', necesitamos crear fechas base
+        const baseDate = new Date();
+        const shiftStart = new Date(
+          baseDate.getFullYear(),
+          baseDate.getMonth(),
+          baseDate.getDate(),
+          patrolAssignment.shift.start_time.getHours(),
+          patrolAssignment.shift.start_time.getMinutes(),
+          0,
+          0
+        );
+        const shiftEnd = new Date(
+          baseDate.getFullYear(),
+          baseDate.getMonth(),
+          baseDate.getDate(),
+          patrolAssignment.shift.end_time.getHours(),
+          patrolAssignment.shift.end_time.getMinutes(),
+          0,
+          0
+        );
 
         // Crear una hora de verificación aleatoria dentro del turno
         const checkTime = new Date(assignmentDate);
         checkTime.setHours(
-          shiftStart.getHours() + Math.floor(Math.random() * (shiftEnd.getHours() - shiftStart.getHours())),
+          shiftStart.getHours() +
+            Math.floor(
+              Math.random() * (shiftEnd.getHours() - shiftStart.getHours())
+            ),
           Math.floor(Math.random() * 60),
           0,
           0
@@ -63,7 +94,10 @@ export const seedCheckpointRecords = async () => {
             status = "completed";
             // Crear una hora real de verificación (puede ser antes o después de la hora programada)
             realCheck = new Date(checkTime);
-            realCheck.setMinutes(realCheck.getMinutes() + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 30));
+            realCheck.setMinutes(
+              realCheck.getMinutes() +
+                (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 30)
+            );
           } else {
             status = "missed";
           }
