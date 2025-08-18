@@ -143,18 +143,41 @@ export class PatrolAssignmentService {
 
   // Método auxiliar para convertir hora a minutos
   // Ahora que usamos columnas 'time', necesitamos extraer solo la hora
-  private timeToMinutes(timeValue: Date): number {
-    // timeValue ahora es solo la hora (de columna 'time')
-    return timeValue.getHours() * 60 + timeValue.getMinutes();
+  private timeToMinutes(timeValue: any): number {
+    // TypeORM devuelve columnas 'time' como string en formato "HH:MM:SS"
+    if (typeof timeValue === "string") {
+      const timeParts = timeValue.split(":");
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
+
+      if (isNaN(hours) || isNaN(minutes)) {
+        throw new Error(`Formato de hora inválido: ${timeValue}`);
+      }
+
+      return hours * 60 + minutes;
+    } else if (timeValue instanceof Date) {
+      // Fallback para Date
+      return timeValue.getHours() * 60 + timeValue.getMinutes();
+    } else {
+      throw new Error(`Tipo de dato no válido para hora: ${typeof timeValue}`);
+    }
   }
 
   // Método auxiliar para formatear hora
-  private formatTime(timeValue: Date): string {
-    // timeValue ahora es solo la hora (de columna 'time')
-    return `${timeValue.getHours().toString().padStart(2, "0")}:${timeValue
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+  private formatTime(timeValue: any): string {
+    // TypeORM devuelve columnas 'time' como string en formato "HH:MM:SS"
+    if (typeof timeValue === "string") {
+      // Si ya es string, devolver solo HH:MM
+      return timeValue.substring(0, 5);
+    } else if (timeValue instanceof Date) {
+      // Fallback para Date
+      return `${timeValue.getHours().toString().padStart(2, "0")}:${timeValue
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    } else {
+      throw new Error(`Tipo de dato no válido para hora: ${typeof timeValue}`);
+    }
   }
 
   // Método auxiliar para verificar solapamiento de horarios

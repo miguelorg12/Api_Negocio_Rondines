@@ -52,12 +52,45 @@ export const seedCheckpointRecords = async () => {
 
         // Ahora que usamos columnas 'time', necesitamos crear fechas base
         const baseDate = new Date();
+
+        // TypeORM devuelve columnas 'time' como string, necesitamos parsearlas
+        let shiftStartHours: number, shiftStartMinutes: number;
+        let shiftEndHours: number, shiftEndMinutes: number;
+
+        if (typeof patrolAssignment.shift.start_time === "string") {
+          const startTimeParts = patrolAssignment.shift.start_time.split(":");
+          shiftStartHours = parseInt(startTimeParts[0], 10);
+          shiftStartMinutes = parseInt(startTimeParts[1], 10);
+        } else if (patrolAssignment.shift.start_time instanceof Date) {
+          shiftStartHours = patrolAssignment.shift.start_time.getHours();
+          shiftStartMinutes = patrolAssignment.shift.start_time.getMinutes();
+        } else {
+          throw new Error(
+            `Tipo de dato no válido para start_time: ${typeof patrolAssignment
+              .shift.start_time}`
+          );
+        }
+
+        if (typeof patrolAssignment.shift.end_time === "string") {
+          const endTimeParts = patrolAssignment.shift.end_time.split(":");
+          shiftEndHours = parseInt(endTimeParts[0], 10);
+          shiftEndMinutes = parseInt(endTimeParts[1], 10);
+        } else if (patrolAssignment.shift.end_time instanceof Date) {
+          shiftEndHours = patrolAssignment.shift.end_time.getHours();
+          shiftEndMinutes = patrolAssignment.shift.end_time.getMinutes();
+        } else {
+          throw new Error(
+            `Tipo de dato no válido para end_time: ${typeof patrolAssignment
+              .shift.end_time}`
+          );
+        }
+
         const shiftStart = new Date(
           baseDate.getFullYear(),
           baseDate.getMonth(),
           baseDate.getDate(),
-          patrolAssignment.shift.start_time.getHours(),
-          patrolAssignment.shift.start_time.getMinutes(),
+          shiftStartHours,
+          shiftStartMinutes,
           0,
           0
         );
@@ -65,8 +98,8 @@ export const seedCheckpointRecords = async () => {
           baseDate.getFullYear(),
           baseDate.getMonth(),
           baseDate.getDate(),
-          patrolAssignment.shift.end_time.getHours(),
-          patrolAssignment.shift.end_time.getMinutes(),
+          shiftEndHours,
+          shiftEndMinutes,
           0,
           0
         );

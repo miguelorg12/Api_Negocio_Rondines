@@ -37,21 +37,49 @@ export class ShiftValidationService {
 
   // Función para crear una fecha base con la hora del turno
   // Ahora que usamos columnas 'time', necesitamos crear fechas base para comparaciones
-  private createBaseDateWithTime(timeValue: Date, baseDate: Date): Date {
-    // timeValue ahora es solo la hora (de columna 'time')
-    // Creamos una fecha completa usando la fecha base y la hora del turno
-    const hours = timeValue.getHours();
-    const minutes = timeValue.getMinutes();
+  private createBaseDateWithTime(timeValue: any, baseDate: Date): Date {
+    // TypeORM devuelve columnas 'time' como string en formato "HH:MM:SS"
+    if (typeof timeValue === "string") {
+      // Parsear string "HH:MM:SS" o "HH:MM"
+      const timeParts = timeValue.split(":");
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
 
-    return new Date(
-      baseDate.getFullYear(),
-      baseDate.getMonth(),
-      baseDate.getDate(),
-      hours,
-      minutes,
-      0,
-      0
-    );
+      if (isNaN(hours) || isNaN(minutes)) {
+        throw new Error(`Formato de hora inválido: ${timeValue}`);
+      }
+
+      return new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      );
+    } else if (timeValue instanceof Date) {
+      // Si por alguna razón es un Date (fallback)
+      const hours = timeValue.getHours();
+      const minutes = timeValue.getMinutes();
+
+      return new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      );
+    } else {
+      // Debug: ver qué tipo de dato está llegando
+      console.log("Tipo de timeValue:", typeof timeValue);
+      console.log("Valor de timeValue:", timeValue);
+      throw new Error(
+        `Tipo de dato no válido para hora: ${typeof timeValue}, valor: ${timeValue}`
+      );
+    }
   }
 
   // Función para verificar si un turno cruza la medianoche
