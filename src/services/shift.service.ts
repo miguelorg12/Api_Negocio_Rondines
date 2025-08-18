@@ -14,12 +14,12 @@ export class ShiftService {
   // Ahora que usamos columnas de tipo 'time', solo necesitamos la hora
   private parseTimeString(timeString: string): Date {
     const [hours, minutes] = timeString.split(":").map(Number);
-    
+
     // Validar que las horas y minutos sean válidos
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
       throw new Error(`Hora inválida: ${timeString}`);
     }
-    
+
     // Para columnas de tipo 'time', usamos una fecha base (1970-01-01)
     // PostgreSQL extraerá solo la parte de tiempo
     const date = new Date(1970, 0, 1, hours, minutes, 0, 0);
@@ -31,7 +31,7 @@ export class ShiftService {
   private validateShiftTimes(startTime: string, endTime: string): void {
     const start = this.parseTimeString(startTime);
     const end = this.parseTimeString(endTime);
-    
+
     // Para turnos que cruzan medianoche, la hora de fin será menor que la de inicio
     // Esto es válido y se maneja correctamente en la lógica de negocio
     // No necesitamos ajustar fechas aquí porque solo almacenamos la hora
@@ -40,7 +40,7 @@ export class ShiftService {
   async create(shiftDto: ShiftDto): Promise<Shift> {
     // Validar que los horarios sean lógicos
     this.validateShiftTimes(shiftDto.start_time, shiftDto.end_time);
-    
+
     const shift = this.shiftRepository.create({
       name: shiftDto.name,
       start_time: this.parseTimeString(shiftDto.start_time),
@@ -79,7 +79,7 @@ export class ShiftService {
 
     const updateData: any = {};
     if (shiftDto.name) updateData.name = shiftDto.name;
-    
+
     // Si se actualizan ambas horas, validar que sean lógicas
     if (shiftDto.start_time && shiftDto.end_time) {
       this.validateShiftTimes(shiftDto.start_time, shiftDto.end_time);
@@ -94,7 +94,7 @@ export class ShiftService {
         updateData.end_time = this.parseTimeString(shiftDto.end_time);
       }
     }
-    
+
     if (shiftDto.branch_id) updateData.branch = { id: shiftDto.branch_id };
 
     await this.shiftRepository.update(id, updateData);
