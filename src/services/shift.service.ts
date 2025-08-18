@@ -11,7 +11,7 @@ export class ShiftService {
   }
 
   // Método privado para convertir string de hora a Date
-  // Usa una fecha base (1970-01-01) para almacenar solo la hora
+  // Ahora que usamos columnas de tipo 'time', solo necesitamos la hora
   private parseTimeString(timeString: string): Date {
     const [hours, minutes] = timeString.split(":").map(Number);
     
@@ -20,33 +20,31 @@ export class ShiftService {
       throw new Error(`Hora inválida: ${timeString}`);
     }
     
-    // Usar fecha base 1970-01-01 para almacenar solo la hora
+    // Para columnas de tipo 'time', usamos una fecha base (1970-01-01)
+    // PostgreSQL extraerá solo la parte de tiempo
     const date = new Date(1970, 0, 1, hours, minutes, 0, 0);
     return date;
   }
 
   // Método para manejar turnos que cruzan medianoche
-  private adjustTimeForMidnightCrossing(startTime: string, endTime: string): { start: Date, end: Date } {
+  // Ahora que usamos columnas 'time', este método es principalmente para validación
+  private validateShiftTimes(startTime: string, endTime: string): void {
     const start = this.parseTimeString(startTime);
     const end = this.parseTimeString(endTime);
     
-    // Si la hora de fin es menor que la de inicio, significa que cruza medianoche
-    if (end < start) {
-      // Agregar un día a la hora de fin
-      end.setDate(end.getDate() + 1);
-    }
-    
-    return { start, end };
+    // Para turnos que cruzan medianoche, la hora de fin será menor que la de inicio
+    // Esto es válido y se maneja correctamente en la lógica de negocio
+    // No necesitamos ajustar fechas aquí porque solo almacenamos la hora
   }
 
   async create(shiftDto: ShiftDto): Promise<Shift> {
-    // Usar el método que maneja medianoche
-    const { start, end } = this.adjustTimeForMidnightCrossing(shiftDto.start_time, shiftDto.end_time);
+    // Validar que los horarios sean lógicos
+    this.validateShiftTimes(shiftDto.start_time, shiftDto.end_time);
     
     const shift = this.shiftRepository.create({
       name: shiftDto.name,
-      start_time: start,
-      end_time: end,
+      start_time: this.parseTimeString(shiftDto.start_time),
+      end_time: this.parseTimeString(shiftDto.end_time),
       branch: { id: shiftDto.branch_id },
     });
     return await this.shiftRepository.save(shift);
@@ -82,11 +80,11 @@ export class ShiftService {
     const updateData: any = {};
     if (shiftDto.name) updateData.name = shiftDto.name;
     
-    // Si se actualizan ambas horas, usar el método de medianoche
+    // Si se actualizan ambas horas, validar que sean lógicas
     if (shiftDto.start_time && shiftDto.end_time) {
-      const { start, end } = this.adjustTimeForMidnightCrossing(shiftDto.start_time, shiftDto.end_time);
-      updateData.start_time = start;
-      updateData.end_time = end;
+      this.validateShiftTimes(shiftDto.start_time, shiftDto.end_time);
+      updateData.start_time = this.parseTimeString(shiftDto.start_time);
+      updateData.end_time = this.parseTimeString(shiftDto.end_time);
     } else {
       // Si solo se actualiza una hora, usar parseTimeString normal
       if (shiftDto.start_time) {
